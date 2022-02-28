@@ -4,7 +4,7 @@ import {isArray, isAsyncIterable, isIterable} from "./is";
 import {union} from "@virtualstate/union";
 import {anAsyncThing} from "@virtualstate/promise/the-thing";
 
-export const ThrowAtEnd = Symbol.for("@virtualstate/fringe/access/throwAtEnd")
+export const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd")
 
 export interface ChildrenOptions {
     [ThrowAtEnd]?: boolean
@@ -49,16 +49,28 @@ export function childrenSettled(node: unknown) {
     return anAsyncThing(childrenSettledGenerator(node));
 }
 
-export async function *childrenSettledGenerator(node: unknown) {
-    if (!isUnknownJSXNode(node)) return;
+export async function *childrenSettledGenerator(node: unknown): AsyncIterable<PromiseSettledResult<unknown>[]> {
+    let knownLength = 0;
+    try {
+        for await (const snapshot of childrenSettledGeneratorInner()) {
+            knownLength = snapshot.length;
+            yield snapshot;
+        }
+    } catch (reason) {
+        const rejected = { reason, status: "rejected" } as const;
+        yield knownLength ? Array.from({ length: knownLength }, () => rejected) : [rejected];
+    }
 
-    const input = getChildren(node);
+    async function *childrenSettledGeneratorInner() {
+        if (!isUnknownJSXNode(node)) return;
 
-    if (isIterable(input)) {
-        yield * yieldSnapshot(input);
-    } else if (isAsyncIterable(input)) {
-        for await (const next of input) {
-            yield * yieldSnapshot(next);
+        const input = getChildren(node);
+        if (isIterable(input)) {
+            yield * yieldSnapshot(input);
+        } else if (isAsyncIterable(input)) {
+            for await (const next of input) {
+                yield * yieldSnapshot(next);
+            }
         }
     }
 
@@ -135,44 +147,58 @@ export async function * descendantsGenerator(node: unknown, options?: Descendant
 }
 
 export async function * descendantsSettledGenerator(node: unknown): AsyncIterable<PromiseSettledResult<unknown>[]> {
-    if (!isUnknownJSXNode(node)) return;
-    const descendantCache = new WeakMap<UnknownJSXNode, PromiseSettledResult<unknown>[]>();
 
-    for await (const snapshot of childrenSettledGenerator(node)) {
-
-        yield snapshot;
-
-        const nodes = Object.entries(
-            snapshot
-        )
-            .filter(([, child]) => isFulfilled(child) && isUnknownJSXNode(child.value));
-
-        const workingSet: (PromiseSettledResult<unknown> | PromiseSettledResult<unknown>[])[] = [...snapshot];
-        for await (const childUpdates of union(
-            nodes.map(
-                async function *([index, child]): AsyncIterable<[string, PromiseSettledResult<unknown>[]]> {
-                    if (!isFulfilled(child)) return;
-                    const node = child.value;
-                    if (!isUnknownJSXNode(node)) return;
-                    const cached = descendantCache.get(node);
-                    if (cached) {
-                        return yield [index, cached];
-                    }
-                    for await (const snapshot of descendantsSettledGenerator(node)) {
-                        yield [index, snapshot];
-                        descendantCache.set(node, snapshot);
-                    }
-                }
-            )
-        )) {
-            for (const [index, nodeSnapshot] of childUpdates.filter(Boolean)) {
-                workingSet[+index] = [
-                    snapshot[+index],
-                    ...nodeSnapshot
-                ];
-            }
-            yield workingSet.flatMap(value => value);
+    let knownLength = 0;
+    try {
+        for await (const snapshot of descendantsSettledGeneratorInner()) {
+            knownLength = snapshot.length;
+            yield snapshot;
         }
+    } catch (reason) {
+        const rejected = { reason, status: "rejected"} as const;
+        yield knownLength ? Array.from({ length: knownLength }, () => rejected) : [rejected];
+    }
 
+    async function * descendantsSettledGeneratorInner() {
+        if (!isUnknownJSXNode(node)) return;
+        const descendantCache = new WeakMap<UnknownJSXNode, PromiseSettledResult<unknown>[]>();
+
+        for await (const snapshot of childrenSettledGenerator(node)) {
+
+            yield snapshot;
+
+            const nodes = Object.entries(
+                snapshot
+            )
+                .filter(([, child]) => isFulfilled(child) && isUnknownJSXNode(child.value));
+
+            const workingSet: (PromiseSettledResult<unknown> | PromiseSettledResult<unknown>[])[] = [...snapshot];
+            for await (const childUpdates of union(
+                nodes.map(
+                    async function *([index, child]): AsyncIterable<[string, PromiseSettledResult<unknown>[]]> {
+                        if (!isFulfilled(child)) return;
+                        const node = child.value;
+                        if (!isUnknownJSXNode(node)) return;
+                        const cached = descendantCache.get(node);
+                        if (cached) {
+                            return yield [index, cached];
+                        }
+                        for await (const snapshot of descendantsSettledGenerator(node)) {
+                            yield [index, snapshot];
+                            descendantCache.set(node, snapshot);
+                        }
+                    }
+                )
+            )) {
+                for (const [index, nodeSnapshot] of childUpdates.filter(Boolean)) {
+                    workingSet[+index] = [
+                        snapshot[+index],
+                        ...nodeSnapshot
+                    ];
+                }
+                yield workingSet.flatMap(value => value);
+            }
+
+        }
     }
 }

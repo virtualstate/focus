@@ -1,6 +1,5 @@
 import { isAsyncIterable, isIterable } from "./is";
 import { ok } from "./like";
-import {Static} from "@virtualstate/examples";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;

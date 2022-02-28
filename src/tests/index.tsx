@@ -75,6 +75,22 @@ console.log(await descendantsSettled({
         }
       }
     },
-    2
+    2,
+    {
+      name: "fragment",
+      children: {
+        async *[Symbol.asyncIterator]() {
+          yield 3;
+          yield {
+            name: "main",
+            children: {
+              async *[Symbol.asyncIterator]() {
+                throw new Error("3");
+              }
+            }
+          }
+        }
+      }
+    },
   ]
 }))
