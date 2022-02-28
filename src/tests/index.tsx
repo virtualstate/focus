@@ -47,6 +47,9 @@ console.log(await stack(multiTree));
 
 console.log(await children(multiTree));
 
+const [child] = await children(multiTree);
+console.log({ child });
+
 console.log(await descendants(multiTree));
 console.log(await descendantsSettled(multiTree));
 
