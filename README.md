@@ -1,5 +1,9 @@
 # `@virtualstate/focus`
 
+WIP implementation of [@virtualstate/fringe](https://github.com/virtualstate/x/blob/main/packages/fringe)
+
+This project is in semver alpha stage
+
 [//]: # (badges)
 
 ### Support
