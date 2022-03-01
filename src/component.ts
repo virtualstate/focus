@@ -1,6 +1,6 @@
 import {createFragment} from "./static-h";
 import {isAsyncIterable, isIterable} from "./is";
-import {getChildren, getName, getNameKey, getProperties} from "./access";
+import {getChildren, getNameKey, getProperties, raw} from "./access";
 import {UnknownJSXNode} from "./node";
 import {isLike} from "./like";
 
@@ -8,9 +8,14 @@ interface ComponentFn {
     (options: Record<string | symbol, unknown>, input?: UnknownJSXNode): void;
 }
 
-export function component(node: UnknownJSXNode): AsyncIterable<unknown> {
-    const name = node[getNameKey(node)];
-    if (!isLike<ComponentFn>(name, typeof name === "function")) return undefined;
+export function isComponentFn(node: unknown): node is ComponentFn {
+    return isLike(node, typeof node === "function");
+}
+
+export function component(input: UnknownJSXNode): AsyncIterable<unknown> {
+    const node = raw(input);
+    const name = isComponentFn(node) ? node : node[getNameKey(node)];
+    if (!isComponentFn(name)) return undefined;
     const children = getChildren(node);
     return {
         async *[Symbol.asyncIterator]() {

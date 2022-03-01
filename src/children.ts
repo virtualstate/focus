@@ -8,6 +8,7 @@ import {
 import { isArray, isAsyncIterable, isIterable } from "./is";
 import { union } from "@virtualstate/union";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
+import {component} from "./component";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 
@@ -67,9 +68,10 @@ export async function* childrenSettledGenerator(
   node: unknown,
   options?: ChildrenOptions
 ): AsyncIterable<PromiseSettledResult<unknown>[]> {
+  if (!isUnknownJSXNode(node)) return;
   let knownLength = 0;
   try {
-    for await (const snapshot of childrenSettledGeneratorInner()) {
+    for await (const snapshot of childrenSettledGeneratorInner(getChildren(node), component(node))) {
       knownLength = snapshot.length;
       yield snapshot;
     }
@@ -80,12 +82,11 @@ export async function* childrenSettledGenerator(
       : [rejected];
   }
 
-  async function* childrenSettledGeneratorInner() {
-    if (!isUnknownJSXNode(node)) return;
-
-    const input = getChildren(node);
-    if (isIterable(input)) {
-      yield* yieldSnapshot(input);
+  async function* childrenSettledGeneratorInner(input: ReturnType<typeof getChildren>, component?: AsyncIterable<unknown>): ReturnType<typeof yieldSnapshot> {
+    if (component) {
+      yield * childrenSettledGeneratorInner(component);
+    } else if (isIterable(input)) {
+      yield * yieldSnapshot(input);
     } else if (isAsyncIterable(input)) {
       for await (const next of input) {
         yield* yieldSnapshot(next);

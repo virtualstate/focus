@@ -42,9 +42,9 @@ const multiTree = {
         <footer id="foot">Footer content</footer>,
         proxyH("test-proxy", { id: "test-proxy" }, "test"),
         staticH("test-static", { id: "test-static" }, "test"),
-        staticH(async function *Component() {
-          yield "component 1";
-        })
+        staticH(async function *Component(props: unknown) {
+          yield `component 1 ${JSON.stringify({ props })}`;
+        }, { id: "component" })
       ],
     },
   ],

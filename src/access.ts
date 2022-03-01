@@ -158,6 +158,14 @@ export function isProxyContextOptions(
   );
 }
 
+const Raw = Symbol.for("@virtualstate/fringe/tools/raw");
+
+export function raw(node: UnknownJSXNode): UnknownJSXNode {
+  const value = node[Raw] ?? node;
+  ok<UnknownJSXNode>(value);
+  return value;
+}
+
 export function proxy<
   Get extends GettersRecord = GettersRecord,
   Context extends ProxyContextOptions = ProxyContextOptions
@@ -188,6 +196,9 @@ export function get(
   context?: unknown
 ): unknown {
   assertUnknownJSXNode(node);
+  if (key === Raw) {
+    return node;
+  }
   const fn = getters?.[key] ?? GenericNodeFunctions[key];
   if (!fn) {
     return undefined;
@@ -233,25 +244,7 @@ export function getChildren(node: UnknownJSXNode) {
 export function getSyncOrAsyncChildren(node: UnknownJSXNode, key: Key): AsyncIterable<unknown> | Iterable<unknown> {
   if (!key) return [];
   const value = node[key];
-  const name = node[getNameKey(node)];
-  let children = getIterableChildren();
-  if (name && typeof name === "function") {
-    const childrenSnapshot = children;
-    children = {
-      async *[Symbol.asyncIterator]() {
-        yield * resolve(name(getProperties(node), createFragment({}, childrenSnapshot)));
-        async function *resolve(input: unknown): AsyncIterable<unknown> {
-          if (isIterable(input)) {
-            return yield input;
-          } else if (isAsyncIterable(input)) {
-            return yield * input;
-          }
-          yield await input;
-        }
-      }
-    }
-  }
-  return children;
+  return getIterableChildren();
 
   function getIterableChildren() {
     if (Array.isArray(value)) return value;
