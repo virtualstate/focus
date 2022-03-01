@@ -9,7 +9,8 @@ import {
   descendantsSettled,
 } from "../children";
 import { isNode, proxy } from "../access";
-import {component} from "../component";
+import {all} from "@virtualstate/promise";
+import {anAsyncThing} from "@virtualstate/promise/the-thing";
 
 const multiTree = {
   source: "name",
@@ -119,7 +120,8 @@ console.log({
     node.name,
     ...Object.entries(node[Symbol.for(":kdl/props")]).flatMap((value) => value),
   ]),
-  components
+  components,
+  componentsValues: await all(components.map(anAsyncThing))
 });
 
 console.log(multiTreeDescendants);

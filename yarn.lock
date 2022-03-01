@@ -1480,10 +1480,10 @@
   resolved "https://registry.npmjs.org/@virtualstate/hooks/-/hooks-2.46.0.tgz#7dde6849f234d9c0ebe7bb30b3c239e5880ac1d2"
   integrity sha512-KUTIxVSbU6JWmc6EkTiVsdymsSDGmxOtu7l0FoEwR8saq7e2dIjJfPO1UU7YJdjX+Di4gqjGY+BaEkDgq44+NA==
 
-"@virtualstate/promise@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.npmjs.org/@virtualstate/promise/-/promise-1.1.0.tgz#6a87893eb7e51703ebfd3e13ddfef702c7481eae"
-  integrity sha512-cjCsI1jko3piT7jb5edakHrJ62JOTm6h/5RETWr9V2xmky6E8Sdd+q7Rxi0KDGSIXMFQTALz3O+o6NgY1FQjSA==
+"@virtualstate/promise@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.npmjs.org/@virtualstate/promise/-/promise-1.1.2.tgz#e50c4bee87021cbb18018f58783050c81cff3835"
+  integrity sha512-e4LUZ/0Cii/AXJr3LW2RS4BwSiuvCnMeHrIxh/SCcvmNbY9KmfbVgcfHUV93OPILUA/WAR3287u0ORPDQVFZ2w==
 
 "@virtualstate/union@^2.46.0":
   version "2.46.0"
