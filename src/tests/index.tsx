@@ -1,12 +1,4 @@
 import { h } from "../static-h";
-import {
-  isFragment,
-  isUnknownJSXNode,
-  toGenericNode,
-  UnknownJSXNode,
-} from "../";
-import { isAsyncIterable, isIterable } from "../is";
-import { anAsyncThing } from "@virtualstate/promise/the-thing";
 import {stack} from "../stack";
 import {children, childrenSettled, descendants, descendantsSettled} from "../children";
 import {isNode, proxy} from "../access";
@@ -38,6 +30,7 @@ const multiTree = {
             },
           },
         },
+          <footer id="foot">Footer content</footer>
       ],
     },
   ],
