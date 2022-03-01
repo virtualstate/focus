@@ -1,5 +1,5 @@
 import { isAsyncIterable, isIterable } from "./is";
-import { ok } from "./like";
+import {isLike, ok} from "./like";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
@@ -25,7 +25,7 @@ const possibleFragmentNamesSource = [
 const possibleFragmentNames: Key[] = [...possibleFragmentNamesSource];
 export type FragmentName = ValuesOf<typeof possibleFragmentNamesSource>
 
-export const possibleNameKeysKey = [
+export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
   Symbol.for(":jsx/type"),
   Symbol.for("@virtualstate/fringe/source"),
@@ -66,37 +66,23 @@ type ValuesOf<T> = T extends ReadonlyArray<infer I>
   ? I
   : never;
 
-export type NameKey = ValuesOf<typeof possibleNameKeysKey> & {
-  [NameKeySymbol]: true;
-};
-export type TagKey = ValuesOf<typeof possibleTagKeys> & {
-  [TagKeySymbol]: true;
-};
-export type PropertiesKey = ValuesOf<typeof possiblePropertiesKeys> & {
-  [PropertiesKeySymbol]: true;
-};
-export type ValuesKey = ValuesOf<typeof possibleValuesKeys> & {
-  [ValuesKeySymbol]: true;
-};
-export type ChildrenKey = ValuesOf<typeof possibleChildrenKeys> & {
-  [ChildrenKeySymbol]: true;
-};
+export type NameAccessors = Record<ValuesOf<typeof possibleNameKeys>, ReturnType<typeof getName>>;
+export type PropertiesAccessors = Record<ValuesOf<typeof possiblePropertiesKeys>, ReturnType<typeof getProperties>>;
+export type ChildrenAccessors = Record<ValuesOf<typeof possibleChildrenKeys>, ReturnType<typeof getChildren>>;
+export type ValuesAccessors = Record<ValuesOf<typeof possibleValuesKeys>, ReturnType<typeof getValues>>;
+export type TagAccessors = Record<ValuesOf<typeof possibleTagKeys>, ReturnType<typeof getTag>>;
 
-// interface InternalGenericNode
-//   extends Record<NameKey, string | symbol>,
-//       Record<TagKey, string>,
-//       Record<ChildrenKey, Iterable<unknown> | AsyncIterable<unknown>>,
-//       Record<ValuesKey, Iterable<StaticChildNode> | AsyncIterable<unknown>>,
-//     Record<PropertiesKey, Record<string | symbol, unknown>> {}
+export type GenericAccessors = NameAccessors & PropertiesAccessors & ChildrenAccessors & ValuesAccessors & TagAccessors;
 
 interface GenericGetFn {
-  (node: UnknownJSXNode): unknown;
+  (node: UnknownJSXNode, context?: unknown): unknown;
 }
 function pair<A, B>(a: A, b: B): [A, B] {
   return [a, b];
 }
-const GenericNodeFunctions = new Map<Key, GenericGetFn>([
-  ...possibleNameKeysKey.map((key) => pair(key, getName)),
+export type GettersRecord  = Partial<Record<string | symbol, GenericGetFn>>
+const GenericNodeFunctions: GettersRecord = Object.fromEntries([
+  ...possibleNameKeys.map((key) => pair(key, getName)),
   ...possibleTagKeys.map((key) => pair(key, getTag)),
   ...possibleChildrenKeys.map((key) => pair(key, getChildren)),
   ...possiblePropertiesKeys.map((key) => pair(key, getProperties)),
@@ -127,19 +113,48 @@ export function isFragment(
   return possibleFragmentNames.includes(getName(node));
 }
 
-export function get(key: string | symbol, node: UnknownJSXNode): unknown {
-  const fn = GenericNodeFunctions.get(key);
+
+type GettersRecordKeys<Get extends GettersRecord, K extends keyof Get = keyof Get> = (string | symbol) extends K ? never : K;
+
+export type ProxyNode<Get extends GettersRecord> = UnknownJSXNode & {
+  [K in GettersRecordKeys<Get>]: Get[K] extends GenericGetFn ? ReturnType<Get[K]> : never
+} & {
+  [K in keyof Omit<GenericAccessors, GettersRecordKeys<Get>>]: GenericAccessors[K]
+}
+
+export interface ProxyContextOptions {
+  proxy: typeof proxy
+  getters?: GettersRecord
+}
+
+export function isProxyContextOptions(options: unknown): options is ProxyContextOptions {
+  return isLike<ProxyContextOptions>(options) && typeof options.proxy === "function";
+}
+
+export function proxy<Get extends GettersRecord = GettersRecord, Context extends ProxyContextOptions = ProxyContextOptions>(node: unknown, getters: Get, context: Context): ProxyNode<Get>
+export function proxy<Get extends GettersRecord = GettersRecord>(node: unknown, getters?: Get): ProxyNode<Get>
+export function proxy<Get extends GettersRecord = GettersRecord>(node: unknown, getters?: Get, context?: unknown): ProxyNode<Get> {
+  assertUnknownJSXNode(node);
+  const target = new Proxy(node, {
+    get(target: UnknownJSXNode, p: string | symbol) {
+      return get(p, node, getters, context);
+    }
+  });
+  ok<ProxyNode<Get>>(target);
+  return target;
+}
+
+export function get(key: string | symbol, node: unknown, getters?: GettersRecord, context?: unknown): unknown {
+  assertUnknownJSXNode(node);
+  const fn = getters?.[key] ?? GenericNodeFunctions[key];
   if (!fn) {
     return undefined;
   }
-  return fn(node);
+  return fn(node, context);
 }
 
 export function getName(node: UnknownJSXNode): string | symbol | undefined {
-  const isNameKey = (key: Key): key is NameKey => {
-    return isKey(node, key);
-  };
-  const nameKey: NameKey = possibleNameKeysKey.find(isNameKey);
+  const nameKey = possibleNameKeys.find(key => isKey(node, key));
   const value = node[nameKey];
   if (isUnknownJSXNode(value)) {
     return getName(value);
@@ -148,41 +163,29 @@ export function getName(node: UnknownJSXNode): string | symbol | undefined {
 }
 
 export function getTag(node: UnknownJSXNode) {
-  const isTagKey = (key: Key): key is TagKey => {
-    return isKey(node, key);
-  };
-  const tagKey: TagKey = possibleTagKeys.find(isTagKey);
+  const tagKey = possibleTagKeys.find(key => isKey(node, key));
   return getStringOrSymbol(node, tagKey);
 }
 
 export function getProperties(node: UnknownJSXNode) {
-  const isPropertiesKey = (key: Key): key is PropertiesKey => {
-    return isKey(node, key);
-  };
-  const propertiesKey: PropertiesKey =
-    possiblePropertiesKeys.find(isPropertiesKey);
+  const propertiesKey =
+    possiblePropertiesKeys.find(key => isKey(node, key));
   return getPropertiesRecord(node, propertiesKey);
 }
 
 export function getValues(node: UnknownJSXNode) {
-  const isValuesKey = (key: Key): key is ValuesKey => {
-    return isKey(node, key);
-  };
-  const valuesKey: ValuesKey = possibleValuesKeys.find(isValuesKey);
+  const valuesKey = possibleValuesKeys.find(key => isKey(node, key));
   const value = node[valuesKey];
   if (isIterable(value)) return value;
   return [];
 }
 
 export function getChildren(node: UnknownJSXNode) {
-  const isChildrenKey = (key: Key): key is ChildrenKey => {
-    return isKey(node, key);
-  };
-  const childrenKey: ChildrenKey = possibleChildrenKeys.find(isChildrenKey);
+  const childrenKey = possibleChildrenKeys.find(key => isKey(node, key));
   return getSyncOrAsyncChildren(node, childrenKey);
 }
 
-export function getSyncOrAsyncChildren(node: UnknownJSXNode, key: ChildrenKey) {
+export function getSyncOrAsyncChildren(node: UnknownJSXNode, key: Key) {
   if (!key) return [];
   const value = node[key];
   if (Array.isArray(value)) return value;
@@ -193,8 +196,8 @@ export function getSyncOrAsyncChildren(node: UnknownJSXNode, key: ChildrenKey) {
 
 function getPropertiesRecord(
   node: UnknownJSXNode,
-  key: PropertiesKey
-): Record<string, unknown> {
+  key: Key
+): Record<string | symbol, unknown> {
   if (!key) return {};
   const value = node[key];
   if (!isProperties(value)) return {};
@@ -204,7 +207,7 @@ function getPropertiesRecord(
   }
 }
 
-function getStringOrSymbol(node: UnknownJSXNode, key: NameKey | TagKey) {
+function getStringOrSymbol(node: UnknownJSXNode, key: Key) {
   const value = node[key];
   if (typeof value !== "string" && typeof value !== "symbol") return undefined;
   return value;
@@ -230,4 +233,8 @@ export function isNode<T extends UnknownJSXNode>(node: unknown): node is T {
 
 export function isUnknownJSXNode(node: unknown): node is UnknownJSXNode {
   return typeof node === "object" || typeof node === "function";
+}
+
+export function assertUnknownJSXNode(node: unknown): asserts node is UnknownJSXNode {
+  ok(isUnknownJSXNode(node), "Expected Node");
 }

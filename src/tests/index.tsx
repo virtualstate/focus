@@ -9,6 +9,7 @@ import { isAsyncIterable, isIterable } from "../is";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
 import {stack} from "../stack";
 import {children, childrenSettled, descendants, descendantsSettled} from "../children";
+import {isNode, proxy} from "../access";
 
 const multiTree = {
   source: "name",
@@ -97,3 +98,27 @@ console.log(await descendantsSettled({
     },
   ]
 }))
+
+const getters = { descendants, children, descendantsSettled, childrenSettled } as const;
+const context = { getters, proxy }
+
+const multiTreeProxy = proxy(multiTree, getters, context);
+const multiTreeDescendants = await multiTreeProxy.descendants;
+const proxied = multiTreeDescendants.filter<typeof multiTreeProxy>(isNode);
+console.log({ proxied: proxied.map(node => node.name) });
+
+console.log(multiTreeDescendants)
+console.log(await multiTreeProxy.descendantsSettled)
+console.log(await multiTreeProxy.children)
+const [main] = await multiTreeProxy.children;
+console.log({ main });
+const mainProxy = proxy(main, getters);
+const mainChildren = await mainProxy.children;
+console.log({ mainChildren });
+const mainChildrenSettled = await mainProxy.childrenSettled;
+console.log({ mainChildrenSettled });
+console.log({ mainName: mainProxy.name });
+const [section] = mainChildren;
+const sectionProxy = proxy(section);
+const sectionProps: Record<string | symbol, unknown> = sectionProxy.props;
+console.log({ sectionProps })

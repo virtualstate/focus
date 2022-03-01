@@ -1,5 +1,5 @@
 import {isUnknownJSXNode, UnknownJSXNode} from "./node";
-import {getChildren, isFragment, isStaticChildNode} from "./access";
+import {getChildren, isFragment, isProxyContextOptions, isStaticChildNode} from "./access";
 import {isArray, isAsyncIterable, isIterable} from "./is";
 import {union} from "@virtualstate/union";
 import {anAsyncThing} from "@virtualstate/promise/the-thing";
@@ -16,7 +16,7 @@ export function children(node: unknown, options?: ChildrenOptions) {
 
 export async function * childrenGenerator(node: unknown, options?: ChildrenOptions) {
     let rejected: PromiseRejectedResult[];
-    for await (const snapshot of childrenSettledGenerator(node)) {
+    for await (const snapshot of childrenSettledGenerator(node, options)) {
         rejected = snapshot.filter(isRejected);
         const resolvedSnapshot = snapshot.map(value => isFulfilled(value) ? value.value : undefined);
         if (!options?.[ThrowAtEnd]) {
@@ -45,11 +45,11 @@ function isFulfilled(value: PromiseSettledResult<unknown>): value is PromiseFulf
     return value.status === "fulfilled";
 }
 
-export function childrenSettled(node: unknown) {
-    return anAsyncThing(childrenSettledGenerator(node));
+export function childrenSettled(node: unknown, options?: ChildrenOptions) {
+    return anAsyncThing(childrenSettledGenerator(node, options));
 }
 
-export async function *childrenSettledGenerator(node: unknown): AsyncIterable<PromiseSettledResult<unknown>[]> {
+export async function *childrenSettledGenerator(node: unknown, options?: ChildrenOptions): AsyncIterable<PromiseSettledResult<unknown>[]> {
     let knownLength = 0;
     try {
         for await (const snapshot of childrenSettledGeneratorInner()) {
@@ -75,7 +75,12 @@ export async function *childrenSettledGenerator(node: unknown): AsyncIterable<Pr
     }
 
     async function *yieldSnapshot(input: unknown): AsyncIterable<PromiseSettledResult<unknown>[]> {
-        const snapshot = flat(input);
+        const proxyContextOptions = isProxyContextOptions(options) ? options : undefined;
+        const snapshot = flat(input).map(value => {
+            if (!proxyContextOptions) return value;
+            if (!isUnknownJSXNode(value)) return value;
+            return proxyContextOptions.proxy(value, proxyContextOptions.getters, proxyContextOptions);
+        });
 
         const fragments = Object.entries(snapshot)
             .filter(([, node]) => isUnknownJSXNode(node) && isFragment(node));
@@ -95,8 +100,8 @@ export async function *childrenSettledGenerator(node: unknown): AsyncIterable<Pr
             fragments.map(async function *([index, fragment]): AsyncIterable<[string, PromiseSettledResult<unknown>[]]> {
                 if (!isFragment(fragment)) return;
                 try {
-                    for await (const snapshot of children(fragment)) {
-                        yield [index, snapshot.map(value => ({ value, status: "fulfilled" }))];
+                    for await (const snapshot of childrenSettledGenerator(fragment, options)) {
+                        yield [index, snapshot];
                     }
                 } catch (reason) {
                     yield [index, [{ reason, status: "rejected" }]]
@@ -130,12 +135,12 @@ export function descendants(node: unknown, options?: DescendantsOptions) {
 }
 
 export function descendantsSettled(node: unknown, options?: DescendantsOptions) {
-    return anAsyncThing(descendantsSettledGenerator(node));
+    return anAsyncThing(descendantsSettledGenerator(node, options));
 }
 
 export async function * descendantsGenerator(node: unknown, options?: DescendantsOptions) {
     let rejected: PromiseRejectedResult[];
-    for await (const snapshot of descendantsSettledGenerator(node)) {
+    for await (const snapshot of descendantsSettledGenerator(node, options)) {
         rejected = snapshot.filter(isRejected);
         const resolvedSnapshot = snapshot.map(value => isFulfilled(value) ? value.value : undefined);
         if (!options?.[ThrowAtEnd]) {
@@ -146,7 +151,7 @@ export async function * descendantsGenerator(node: unknown, options?: Descendant
     await throwIfRejected(rejected);
 }
 
-export async function * descendantsSettledGenerator(node: unknown): AsyncIterable<PromiseSettledResult<unknown>[]> {
+export async function * descendantsSettledGenerator(node: unknown, options?: DescendantsOptions): AsyncIterable<PromiseSettledResult<unknown>[]> {
 
     let knownLength = 0;
     try {
@@ -163,7 +168,7 @@ export async function * descendantsSettledGenerator(node: unknown): AsyncIterabl
         if (!isUnknownJSXNode(node)) return;
         const descendantCache = new WeakMap<UnknownJSXNode, PromiseSettledResult<unknown>[]>();
 
-        for await (const snapshot of childrenSettledGenerator(node)) {
+        for await (const snapshot of childrenSettledGenerator(node, options)) {
 
             yield snapshot;
 
@@ -183,7 +188,7 @@ export async function * descendantsSettledGenerator(node: unknown): AsyncIterabl
                         if (cached) {
                             return yield [index, cached];
                         }
-                        for await (const snapshot of descendantsSettledGenerator(node)) {
+                        for await (const snapshot of descendantsSettledGenerator(node, options)) {
                             yield [index, snapshot];
                             descendantCache.set(node, snapshot);
                         }
