@@ -38,7 +38,7 @@ export async function* childrenGenerator(
   await throwIfRejected(rejected);
 }
 
-async function throwIfRejected(rejected: PromiseRejectedResult[]) {
+async function throwIfRejected(rejected: (PromiseRejectedResult | DescendantPromiseRejectedResult)[]) {
   if (!rejected?.length) return;
   const reasons = [...new Set(rejected.map(({ reason }) => reason))];
   if (reasons.length === 1) {
@@ -48,9 +48,9 @@ async function throwIfRejected(rejected: PromiseRejectedResult[]) {
   }
 }
 
-function isRejected(
+function isRejected<R extends PromiseRejectedResult>(
   value: PromiseSettledResult<unknown>
-): value is PromiseRejectedResult {
+): value is R {
   return value.status === "rejected";
 }
 
@@ -184,9 +184,9 @@ export async function* descendantsGenerator(
   node: unknown,
   options?: DescendantsOptions
 ) {
-  let rejected: PromiseRejectedResult[];
+  let rejected: DescendantPromiseRejectedResult[];
   for await (const snapshot of descendantsSettledGenerator(node, options)) {
-    rejected = snapshot.filter(isRejected);
+    rejected = snapshot.filter<DescendantPromiseRejectedResult>(isRejected);
     const resolvedSnapshot = snapshot.map((value) =>
       isFulfilled(value) ? value.value : undefined
     );
@@ -198,10 +198,22 @@ export async function* descendantsGenerator(
   await throwIfRejected(rejected);
 }
 
+export interface DescendantPromiseFulfilledResult extends PromiseFulfilledResult<unknown> {
+  parent: UnknownJSXNode;
+}
+
+export interface DescendantPromiseRejectedResult extends PromiseRejectedResult {
+  parent: UnknownJSXNode;
+}
+
+export type DescendantPromiseSettledResult = DescendantPromiseFulfilledResult | DescendantPromiseRejectedResult;
+
 export async function* descendantsSettledGenerator(
   node: unknown,
   options?: DescendantsOptions
-): AsyncIterable<PromiseSettledResult<unknown>[]> {
+): AsyncIterable<DescendantPromiseSettledResult[]> {
+  if (!isUnknownJSXNode(node)) return;
+  const parent = node;
   let knownLength = 0;
   try {
     for await (const snapshot of descendantsSettledGeneratorInner()) {
@@ -209,20 +221,21 @@ export async function* descendantsSettledGenerator(
       yield snapshot;
     }
   } catch (reason) {
-    const rejected = { reason, status: "rejected" } as const;
+    const rejected = { reason, status: "rejected", parent } as const;
     yield knownLength
       ? Array.from({ length: knownLength }, () => rejected)
       : [rejected];
   }
 
-  async function* descendantsSettledGeneratorInner() {
+  async function* descendantsSettledGeneratorInner(): AsyncIterable<DescendantPromiseSettledResult[]> {
     if (!isUnknownJSXNode(node)) return;
     const descendantCache = new WeakMap<
       UnknownJSXNode,
-      PromiseSettledResult<unknown>[]
+      DescendantPromiseSettledResult[]
     >();
 
-    for await (const snapshot of childrenSettledGenerator(node, options)) {
+    for await (const snapshotInput of childrenSettledGenerator(node, options)) {
+      const snapshot = snapshotInput.map(result => ({ parent, ...result }))
       yield snapshot;
 
       const nodes = Object.entries(snapshot).filter(
@@ -230,12 +243,12 @@ export async function* descendantsSettledGenerator(
       );
 
       const workingSet: (
-        | PromiseSettledResult<unknown>
-        | PromiseSettledResult<unknown>[]
+        | DescendantPromiseSettledResult
+        | DescendantPromiseSettledResult[]
       )[] = [...snapshot];
       for await (const childUpdates of union(
         nodes.map(async function* ([index, child]): AsyncIterable<
-          [string, PromiseSettledResult<unknown>[]]
+          [string, DescendantPromiseSettledResult[]]
         > {
           if (!isFulfilled(child)) return;
           const node = child.value;
@@ -244,10 +257,11 @@ export async function* descendantsSettledGenerator(
           if (cached) {
             return yield [index, cached];
           }
-          for await (const snapshot of descendantsSettledGenerator(
+          for await (const snapshotInput of descendantsSettledGenerator(
             node,
             options
           )) {
+            const snapshot = snapshotInput.map(result => ({ parent, ...result }))
             yield [index, snapshot];
             descendantCache.set(node, snapshot);
           }
