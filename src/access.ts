@@ -1,5 +1,6 @@
 import { isAsyncIterable, isIterable } from "./is";
 import { isLike, ok } from "./like";
+import {createFragment} from "./static-h";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
@@ -195,12 +196,16 @@ export function get(
 }
 
 export function getName(node: UnknownJSXNode): string | symbol | undefined {
-  const nameKey = possibleNameKeys.find((key) => isKey(node, key));
+  const nameKey = getNameKey(node);
   const value = node[nameKey];
   if (isUnknownJSXNode(value)) {
     return getName(value);
   }
   return getStringOrSymbol(node, nameKey);
+}
+
+export function getNameKey(node: UnknownJSXNode) {
+  return possibleNameKeys.find((key) => isKey(node, key));
 }
 
 export function getTag(node: UnknownJSXNode) {
@@ -225,13 +230,35 @@ export function getChildren(node: UnknownJSXNode) {
   return getSyncOrAsyncChildren(node, childrenKey);
 }
 
-export function getSyncOrAsyncChildren(node: UnknownJSXNode, key: Key) {
+export function getSyncOrAsyncChildren(node: UnknownJSXNode, key: Key): AsyncIterable<unknown> | Iterable<unknown> {
   if (!key) return [];
   const value = node[key];
-  if (Array.isArray(value)) return value;
-  if (isIterable(value)) return value;
-  if (isAsyncIterable(value)) return value;
-  return [];
+  const name = node[getNameKey(node)];
+  let children = getIterableChildren();
+  if (name && typeof name === "function") {
+    const childrenSnapshot = children;
+    children = {
+      async *[Symbol.asyncIterator]() {
+        yield * resolve(name(getProperties(node), createFragment({}, childrenSnapshot)));
+        async function *resolve(input: unknown): AsyncIterable<unknown> {
+          if (isIterable(input)) {
+            return yield input;
+          } else if (isAsyncIterable(input)) {
+            return yield * input;
+          }
+          yield await input;
+        }
+      }
+    }
+  }
+  return children;
+
+  function getIterableChildren() {
+    if (Array.isArray(value)) return value;
+    if (isIterable(value)) return value;
+    if (isAsyncIterable(value)) return value;
+    return [];
+  }
 }
 
 function getPropertiesRecord(

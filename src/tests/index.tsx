@@ -1,4 +1,4 @@
-import { h } from "../proxy-h";
+import {getters, h} from "../proxy-h";
 import { h as staticH } from "../static-h";
 import { h as proxyH } from "../proxy-h";
 import { stack } from "../stack";
@@ -9,6 +9,7 @@ import {
   descendantsSettled,
 } from "../children";
 import { isNode, proxy } from "../access";
+import {component} from "../component";
 
 const multiTree = {
   source: "name",
@@ -40,6 +41,9 @@ const multiTree = {
         <footer id="foot">Footer content</footer>,
         proxyH("test-proxy", { id: "test-proxy" }, "test"),
         staticH("test-static", { id: "test-static" }, "test"),
+        staticH(async function *Component() {
+          yield "component 1";
+        })
       ],
     },
   ],
@@ -104,22 +108,18 @@ console.log(
   })
 );
 
-const getters = {
-  descendants,
-  children,
-  descendantsSettled,
-  childrenSettled,
-} as const;
 const context = { getters, proxy };
 
 const multiTreeProxy = proxy(multiTree, getters, context);
 const multiTreeDescendants = await multiTreeProxy.descendants;
 const proxied = multiTreeDescendants.filter<typeof multiTreeProxy>(isNode);
+const components = proxied.filter(node => node.component).map(node => node.component)
 console.log({
   proxied: proxied.map((node) => [
     node.name,
     ...Object.entries(node[Symbol.for(":kdl/props")]).flatMap((value) => value),
   ]),
+  components
 });
 
 console.log(multiTreeDescendants);

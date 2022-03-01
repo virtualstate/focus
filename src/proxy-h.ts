@@ -2,10 +2,12 @@ import {GettersRecord, proxy, ProxyContextOptions, ProxyNode, UnknownJSXNode} fr
 
 import { createFragment as createFragmentFn, h as f } from "./static-h";
 import * as ChildrenAccessors from "./children";
+import * as ComponentAccessors from "./component";
 import {isLike} from "./like";
 
 export const getters = {
   ...ChildrenAccessors,
+  ...ComponentAccessors
 } as const;
 
 export const ProxyContext = Symbol.for("@virtualstate/fringe/tools/proxyContext");
