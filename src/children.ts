@@ -1,14 +1,16 @@
 import { isUnknownJSXNode, UnknownJSXNode } from "./node";
 import {
+  GenericAccessorThis,
   getChildren,
   isFragment,
   isProxyContextOptions,
-  isStaticChildNode,
+  isStaticChildNode, RawNode,
 } from "./access";
 import { isArray, isAsyncIterable, isIterable } from "./is";
 import { union } from "@virtualstate/union";
-import { anAsyncThing } from "@virtualstate/promise/the-thing";
+import {anAsyncThing, TheAsyncThing} from "@virtualstate/promise/the-thing";
 import {component} from "./component";
+import {ChildrenArray, ChildrenSettledArray} from "./children-output";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 
@@ -16,14 +18,24 @@ export interface ChildrenOptions {
   [ThrowAtEnd]?: boolean;
 }
 
-export function children(node: unknown, options?: ChildrenOptions) {
+export function children<N>(node: N, options?: ChildrenOptions): TheAsyncThing<ChildrenArray<N>>
+export function children(node: unknown, options?: ChildrenOptions): TheAsyncThing<unknown[]>
+export function children(node?: unknown, options?: ChildrenOptions): unknown {
   return anAsyncThing(childrenGenerator(node, options));
 }
 
+export function childrenGenerator<N>(
+    node: unknown,
+    options?: ChildrenOptions
+): AsyncIterable<ChildrenArray<N>>
+export function childrenGenerator(
+    node: unknown,
+    options?: ChildrenOptions
+): AsyncIterable<unknown[]>
 export async function* childrenGenerator(
   node: unknown,
   options?: ChildrenOptions
-) {
+): AsyncIterable<unknown[]> {
   let rejected: PromiseRejectedResult[];
   for await (const snapshot of childrenSettledGenerator(node, options)) {
     rejected = snapshot.filter(isRejected);
@@ -60,13 +72,23 @@ function isFulfilled(
   return value.status === "fulfilled";
 }
 
-export function childrenSettled(node: unknown, options?: ChildrenOptions) {
+export function childrenSettled<N>(node: N, options?: ChildrenOptions): TheAsyncThing<ChildrenSettledArray<N>>
+export function childrenSettled(node: unknown, options?: ChildrenOptions): TheAsyncThing<PromiseSettledResult<unknown>[]>
+export function childrenSettled(node: unknown, options?: ChildrenOptions): TheAsyncThing<PromiseSettledResult<unknown>[]> {
   return anAsyncThing(childrenSettledGenerator(node, options));
 }
 
+export function childrenSettledGenerator<N>(
+    node: N,
+    options?: ChildrenOptions
+): AsyncIterable<ChildrenSettledArray<N>>
+export function childrenSettledGenerator(
+    node: unknown,
+    options?: ChildrenOptions
+): AsyncIterable<PromiseSettledResult<unknown>[]>
 export async function* childrenSettledGenerator(
-  node: unknown,
-  options?: ChildrenOptions
+    node: unknown,
+    options?: ChildrenOptions
 ): AsyncIterable<PromiseSettledResult<unknown>[]> {
   if (!isUnknownJSXNode(node)) return;
   let knownLength = 0;

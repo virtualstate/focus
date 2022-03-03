@@ -1,16 +1,9 @@
 import { isAsyncIterable, isIterable } from "./is";
 import { isLike, ok } from "./like";
-import {createFragment} from "./static-h";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
 export type UnknownJSXNode = UnknownJSXNodeRecord;
-
-const NameKeySymbol = Symbol();
-const TagKeySymbol = Symbol();
-const PropertiesKeySymbol = Symbol();
-const ValuesKeySymbol = Symbol();
-const ChildrenKeySymbol = Symbol();
 
 export const JSXFragment = Symbol.for(":jsx/fragment");
 export const KDLFragment = Symbol.for(":kdl/fragment");
@@ -67,28 +60,35 @@ type ValuesOf<T> = T extends ReadonlyArray<infer I>
   ? I
   : never;
 
+export type NameKeys = ValuesOf<typeof possibleNameKeys>;
+export type PropertiesKeys = ValuesOf<typeof possiblePropertiesKeys>;
+export type ChildrenKeys = ValuesOf<typeof possibleChildrenKeys>;
+export type ValueKeys = ValuesOf<typeof possibleValuesKeys>;
+export type TagKeys = ValuesOf<typeof possibleTagKeys>;
+
 export type NameAccessors = Record<
-  ValuesOf<typeof possibleNameKeys>,
+    NameKeys,
   ReturnType<typeof getName>
 >;
 export type PropertiesAccessors = Record<
-  ValuesOf<typeof possiblePropertiesKeys>,
+    PropertiesKeys,
   ReturnType<typeof getProperties>
 >;
 export type ChildrenAccessors = Record<
-  ValuesOf<typeof possibleChildrenKeys>,
+  ChildrenKeys,
   ReturnType<typeof getChildren>
 >;
 export type ValuesAccessors = Record<
-  ValuesOf<typeof possibleValuesKeys>,
+    ValueKeys,
   ReturnType<typeof getValues>
 >;
 export type TagAccessors = Record<
-  ValuesOf<typeof possibleTagKeys>,
+    TagKeys,
   ReturnType<typeof getTag>
 >;
 
-export type GenericAccessors = NameAccessors &
+export type GenericAccessors =
+  NameAccessors &
   PropertiesAccessors &
   ChildrenAccessors &
   ValuesAccessors &
@@ -134,16 +134,33 @@ type GettersRecordKeys<
   K extends keyof Get = keyof Get
 > = string | symbol extends K ? never : K;
 
-export type ProxyNode<Get extends GettersRecord> = UnknownJSXNode & {
+export type RawNode<N> = {
+  __raw?: typeof Raw
+  [Raw]: N
+}
+export type RawNodeValue<N> = N extends RawNode<infer R> ? R extends RawNode<unknown> ? RawNodeValue<R> : R : N;
+
+export type GenericAccessorThis<N, R> = {
+  __input: N;
+  __return: R;
+}
+
+interface GetAccessorFnValueGet<N, R> {
+  (accessor: GenericAccessorThis<N, R>): GenericAccessorThis<N, R>
+}
+
+type GetAccessorFnValue<A extends GenericGetFn, N> = ReturnType<A>
+
+export type ProxyNode<Get extends GettersRecord, N = UnknownJSXNode> = UnknownJSXNode & {
   [K in GettersRecordKeys<Get>]: Get[K] extends GenericGetFn
-    ? ReturnType<Get[K]>
+    ? GetAccessorFnValue<Get[K], N>
     : never;
 } & {
   [K in keyof Omit<
     GenericAccessors,
     GettersRecordKeys<Get>
   >]: GenericAccessors[K];
-};
+} & RawNode<N>;
 
 export interface ProxyContextOptions {
   proxy: typeof proxy;
@@ -168,24 +185,25 @@ export function raw(node: UnknownJSXNode): UnknownJSXNode {
 
 export function proxy<
   Get extends GettersRecord = GettersRecord,
-  Context extends ProxyContextOptions = ProxyContextOptions
->(node: unknown, getters: Get, context: Context): ProxyNode<Get>;
-export function proxy<Get extends GettersRecord = GettersRecord>(
-  node: unknown,
+  Context extends ProxyContextOptions = ProxyContextOptions,
+  N = unknown
+>(node: N, getters?: Get, context?: Context): ProxyNode<Get, N>;
+export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
+  node: N,
   getters?: Get
-): ProxyNode<Get>;
-export function proxy<Get extends GettersRecord = GettersRecord>(
-  node: unknown,
+): ProxyNode<Get, N>;
+export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
+  node: N,
   getters?: Get,
   context?: unknown
-): ProxyNode<Get> {
+): ProxyNode<Get, N> {
   assertUnknownJSXNode(node);
   const target = new Proxy(node, {
     get(target: UnknownJSXNode, p: string | symbol) {
       return get(p, node, getters, context);
     },
   });
-  ok<ProxyNode<Get>>(target);
+  ok<ProxyNode<Get, N>>(target);
   return target;
 }
 
@@ -197,6 +215,9 @@ export function get(
 ): unknown {
   assertUnknownJSXNode(node);
   if (key === Raw) {
+    if (node[Raw]) {
+      return get(key, node[Raw], getters, context);
+    }
     return node;
   }
   const fn = getters?.[key] ?? GenericNodeFunctions[key];
