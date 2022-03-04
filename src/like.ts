@@ -1,6 +1,6 @@
 export function isLike<T>(value: unknown, ...and: unknown[]): value is T {
   if (!and.length) return !!value;
-  return !!value && and.every(value => !!value);
+  return !!value && and.every((value) => !!value);
 }
 
 export function ok<T>(value: unknown, message?: string): asserts value is T;

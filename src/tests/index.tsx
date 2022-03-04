@@ -1,5 +1,3 @@
-
-
 await import("./access");
 await import("./typed");
 

@@ -66,29 +66,19 @@ export type ChildrenKeys = ValuesOf<typeof possibleChildrenKeys>;
 export type ValueKeys = ValuesOf<typeof possibleValuesKeys>;
 export type TagKeys = ValuesOf<typeof possibleTagKeys>;
 
-export type NameAccessors = Record<
-    NameKeys,
-  ReturnType<typeof getName>
->;
+export type NameAccessors = Record<NameKeys, ReturnType<typeof getName>>;
 export type PropertiesAccessors = Record<
-    PropertiesKeys,
+  PropertiesKeys,
   ReturnType<typeof getProperties>
 >;
 export type ChildrenAccessors = Record<
   ChildrenKeys,
   ReturnType<typeof getChildren>
 >;
-export type ValuesAccessors = Record<
-    ValueKeys,
-  ReturnType<typeof getValues>
->;
-export type TagAccessors = Record<
-    TagKeys,
-  ReturnType<typeof getTag>
->;
+export type ValuesAccessors = Record<ValueKeys, ReturnType<typeof getValues>>;
+export type TagAccessors = Record<TagKeys, ReturnType<typeof getTag>>;
 
-export type GenericAccessors =
-  NameAccessors &
+export type GenericAccessors = NameAccessors &
   PropertiesAccessors &
   ChildrenAccessors &
   ValuesAccessors &
@@ -135,10 +125,14 @@ type GettersRecordKeys<
 > = string | symbol extends K ? never : K;
 
 export type RawNode<N> = {
-  __raw?: typeof Raw
-  [Raw]: N
-}
-export type RawNodeValue<N> = N extends RawNode<infer R> ? R extends RawNode<unknown> ? RawNodeValue<R> : R : N;
+  __raw?: typeof Raw;
+  [Raw]: N;
+};
+export type RawNodeValue<N> = N extends RawNode<infer R>
+  ? R extends RawNode<unknown>
+    ? RawNodeValue<R>
+    : R
+  : N;
 
 // export type GenericAccessorThis<K, N, R> = {
 //   __key: K;
@@ -154,10 +148,13 @@ export type RawNodeValue<N> = N extends RawNode<infer R> ? R extends RawNode<unk
 // }
 
 type GetAccessorFnValue<A extends GenericGetFn, N> =
-    // A extends GetAccessorFnValueGet<infer NN, infer R> ? R :
-    ReturnType<A>
+  // A extends GetAccessorFnValueGet<infer NN, infer R> ? R :
+  ReturnType<A>;
 
-export type ProxyNode<Get extends GettersRecord, N = UnknownJSXNode> = UnknownJSXNode & {
+export type ProxyNode<
+  Get extends GettersRecord,
+  N = UnknownJSXNode
+> = UnknownJSXNode & {
   [K in GettersRecordKeys<Get>]: Get[K] extends GenericGetFn
     ? GetAccessorFnValue<Get[K], N>
     : never;
@@ -268,7 +265,10 @@ export function getChildren(node: UnknownJSXNode) {
   return getSyncOrAsyncChildren(node, childrenKey);
 }
 
-export function getSyncOrAsyncChildren(node: UnknownJSXNode, key: Key): AsyncIterable<unknown> | Iterable<unknown> {
+export function getSyncOrAsyncChildren(
+  node: UnknownJSXNode,
+  key: Key
+): AsyncIterable<unknown> | Iterable<unknown> {
   if (!key) return [];
   const value = node[key];
   return getIterableChildren();
