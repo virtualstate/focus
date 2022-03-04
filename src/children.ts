@@ -1,6 +1,5 @@
 import { isUnknownJSXNode, UnknownJSXNode } from "./node";
 import {
-  GenericAccessorThis,
   getChildren,
   isFragment,
   isProxyContextOptions,
@@ -18,10 +17,11 @@ export interface ChildrenOptions {
   [ThrowAtEnd]?: boolean;
 }
 
+export function children<N>(node: N): TheAsyncThing<ChildrenArray<N>>
 export function children<N>(node: N, options?: ChildrenOptions): TheAsyncThing<ChildrenArray<N>>
 export function children(node: unknown, options?: ChildrenOptions): TheAsyncThing<unknown[]>
-export function children(node?: unknown, options?: ChildrenOptions): unknown {
-  return anAsyncThing(childrenGenerator(node, options));
+export function children(node?: unknown, options?: ChildrenOptions, ...rest: unknown[]): unknown {
+  return anAsyncThing(childrenGenerator(node, options === 1 ? {} : options));
 }
 
 export function childrenGenerator<N>(

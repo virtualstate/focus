@@ -40,29 +40,33 @@ let a: 1,
 
 console.log({ a, fiftyFive, fiftySix });
 
-// const treeProxied = proxy(tree, getters);
+const treeProxied = proxy(tree, getters);
+
+[a,,,,fiftyFive, fiftySix] = await children(treeProxied);
+console.log({ a, fiftyFive, fiftySix });
+
 //
 // type N = RawNodeValue<typeof treeProxied>;
 //
-// type C = typeof treeProxied.children;
+type C = typeof treeProxied.children;
 //
-// const proxiedChildren = await treeProxied.children;
+const proxiedChildren = await treeProxied.children;
 //
 // [a,,,,fiftyFive] = proxiedChildren;
 // console.log({ a, fiftyFive });
 
 
-// const smallTree = {
-//     source: "main",
-//     children: [
-//         1,
-//     ]
-// } as const;
-// const smallTreeProxied = proxy(smallTree, getters);
+const smallTree = {
+    source: "main",
+    children: [
+        1,
+    ]
+} as const;
+const smallTreeProxied = proxy(smallTree, getters);
 //
-// type SC = typeof smallTreeProxied.children;
+type SC = typeof smallTreeProxied.children;
 //
-// const smallTreeChildren = await smallTreeProxied.children;
+const smallTreeChildren = await smallTreeProxied.children;
 // [a] = smallTreeChildren;
 
 export default 1;

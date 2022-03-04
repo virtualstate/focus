@@ -23,7 +23,7 @@ export type ChildrenArray<N, C extends ChildrenOfNode<N> = ChildrenOfNode<N>> =
     C extends AsyncIterable<[infer Z, ...infer T]> ? ChildrenArrayTupleResolution<Z, T> :
     C extends AsyncIterable<Iterable<infer T>> ? FlatArray<T> : (never[] & { length: 0 })
 
-type ValuesOf<A extends unknown[]> = A[keyof A];
+type ValuesOf<A> = A[keyof A];
 
 export type ChildrenSettledArray<N> =
     ChildrenArray<N> extends [infer Z, ...infer T] ?

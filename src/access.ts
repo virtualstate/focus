@@ -140,16 +140,22 @@ export type RawNode<N> = {
 }
 export type RawNodeValue<N> = N extends RawNode<infer R> ? R extends RawNode<unknown> ? RawNodeValue<R> : R : N;
 
-export type GenericAccessorThis<N, R> = {
-  __input: N;
-  __return: R;
-}
+// export type GenericAccessorThis<K, N, R> = {
+//   __key: K;
+//   __input: N;
+//   __return: R;
+// }
 
-interface GetAccessorFnValueGet<N, R> {
-  (accessor: GenericAccessorThis<N, R>): GenericAccessorThis<N, R>
-}
+// interface GetAccessorFnValueGet<N, R> {
+//   (node: N, arg: unknown, returnType1: [R, R, N]): [R, R, R, N, R, N]
+// }
+// interface GetAccessorFnValueGet<N, R> {
+//   (node: N): R
+// }
 
-type GetAccessorFnValue<A extends GenericGetFn, N> = ReturnType<A>
+type GetAccessorFnValue<A extends GenericGetFn, N> =
+    // A extends GetAccessorFnValueGet<infer NN, infer R> ? R :
+    ReturnType<A>
 
 export type ProxyNode<Get extends GettersRecord, N = UnknownJSXNode> = UnknownJSXNode & {
   [K in GettersRecordKeys<Get>]: Get[K] extends GenericGetFn
