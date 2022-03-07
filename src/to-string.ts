@@ -1,5 +1,4 @@
 import {PossibleChildrenKeys, PossibleNameKeys} from "./node";
-import {ChildrenArray} from "./children-output";
 
 
 type GetValueOfProperty<N, P> = {
@@ -10,55 +9,192 @@ export type GetName<N> = GetValueOfProperty<N, PossibleNameKeys>;
 export type GetChildren<N> = GetValueOfProperty<N, PossibleChildrenKeys>;
 
 
-type JSONValue = string | boolean | symbol | number;
+export type IsFragment<N, True, False> = N extends { name: "fragment" }
+    ? True
+    : False;
 
-export type ToJSONString<N> =
-    N extends string ? `"${N}"` :
-        N extends number | boolean ? `${N}` :
-            N extends symbol ? `Symbol(${string})` : string;
+export namespace KDL {
 
-export type ToKDLString<N> =
-    N extends JSONValue ? `${ToJSONString<N>}` :
-        GetName<N> extends JSONValue ?
-            `${ToJSONString<GetName<N>>} ${ToKDLStringChildren<N> extends "" ? "" : `{\n${ToKDLStringChildren<N>}\n}`}` : ToKDLStringChildren<N>;
-
-type ToKDLStringChildrenItems<C extends unknown[]> = {
-    [K in keyof C]: ToKDLString<C[K]>
-}[keyof C];
-
-export type ToKDLStringChildren<N> =
-    GetChildren<{ children: N }> extends [] ? `${ToKDLStringChildren<{ children: N }>}` :
-    GetChildren<N> extends never ? "" : `${
-    ChildrenArray<N> extends [
-            infer Z,
-            ...infer T
+    export type ChildrenArrayTupleResolution<Z, T extends unknown[]> = T extends [
+            infer K,
+            ...infer L
         ]
-        ? `${ToKDLString<Z>}\n${T extends [] ? "" : ToKDLStringChildren<{ children: T }>}`
-        : `${ToKDLStringChildrenItems<ChildrenArray<N>>}`
-    }`;
+        ? IsFragment<
+            Z,
+            `${ChildrenArray<Z>}\n${ChildrenArrayTupleResolution<K, L>}`,
+            `${ToString<Z>}\n${ChildrenArrayTupleResolution<K, L>}`
+            >
+        : T extends []
+            ? IsFragment<Z, ChildrenArray<Z>, ToString<Z>>
+            : IsFragment<
+                Z,
+                IsFragment<
+                    T,
+                    `${ChildrenArray<Z>}\n${ChildrenArray<T>}`,
+                    `${ChildrenArray<Z>}\n${ToString<T>}`
+                    >,
+                `${ToString<Z>}\n${IsFragment<T, ChildrenArray<T>, ToString<T>>}`
+                >;
 
 
-export type ToJSXJSONString<N> =
-    N extends string ? `{"${N}"}` :
-        N extends number | boolean ? `{${N}}` :
-            N extends symbol ? `{Symbol(${string})}` : string;
+    export type FlatArrayValues<A> = A extends unknown[]
+        ? {
+            [K in keyof A]: A[K] extends [] ? FlatArray<A[K]> : ToString<A[K]>;
+        }[keyof A]
+        : ToString<A>;
+    export type FlatArray<A> = `${FlatArrayValues<A>}`;
 
-export type ToJSXString<N> =
-    N extends JSONValue ? `${ToJSXJSONString<N>}` :
-        GetName<N> extends string ?
-            `<${GetName<N>} ${ToJSXStringChildren<N> extends "" ? " />" : `>\n${ToJSXStringChildren<N>}\n</${GetName<N>}>`}` : ToJSXStringChildren<N>;
+    export type ChildrenArray<
+        N,
+        C extends GetChildren<N> = GetChildren<N>
+        > = C extends Readonly<[infer Z, ...infer T]>
+        ? ChildrenArrayTupleResolution<Z, T>
+        : C extends [infer Z, ...infer T]
+            ? ChildrenArrayTupleResolution<Z, T>
+            : C extends Iterable<infer T>
+                ? FlatArray<T>
+                : C extends AsyncIterable<Readonly<[infer Z, ...infer T]>>
+                    ? ChildrenArrayTupleResolution<Z, T>
+                    : C extends AsyncIterable<[infer Z, ...infer T]>
+                        ? ChildrenArrayTupleResolution<Z, T>
+                        : C extends AsyncIterable<Iterable<infer T>>
+                            ? FlatArray<T>
+                            : "";
 
-type ToJSXStringChildrenItems<C extends unknown[]> = {
-    [K in keyof C]: ToJSXString<C[K]>
-}[keyof C];
+    type JSONValue = string | boolean | symbol | number;
 
-export type ToJSXStringChildren<N> =
-    GetChildren<N> extends never ? "" : `${
-    ChildrenArray<N> extends [
-            infer Z,
-            ...infer T
+    export type ToJSONString<N> =
+        N extends string ? `"${N}"` :
+            N extends number | boolean ? `${N}` :
+                N extends symbol ? `Symbol(${string})` : string;
+
+    export type ToString<N> =
+        N extends JSONValue ? `${ToJSONString<N>}` :
+            GetName<N> extends JSONValue ?
+                `${ToJSONString<GetName<N>>} ${ChildrenArray<N> extends "" ? "" : `{\n${ChildrenArray<N>}\n}`}` : ChildrenArray<N>;
+
+}
+
+export namespace JSX {
+
+    export type ChildrenArrayTupleResolution<Z, T extends unknown[]> = T extends [
+            infer K,
+            ...infer L
         ]
-        ? `${ToJSXString<Z>}\n${T extends [] ? "" : ToJSXStringChildren<{ children: T }>}`
-        : `${ToJSXStringChildrenItems<ChildrenArray<N>>}`
-    }`;
+        ? IsFragment<
+            Z,
+            `${ChildrenArray<Z>}\n${ChildrenArrayTupleResolution<K, L>}`,
+            `${ToString<Z>}\n${ChildrenArrayTupleResolution<K, L>}`
+            >
+        : T extends []
+            ? IsFragment<Z, ChildrenArray<Z>, ToString<Z>>
+            : IsFragment<
+                Z,
+                IsFragment<
+                    T,
+                    `${ChildrenArray<Z>}\n${ChildrenArray<T>}`,
+                    `${ChildrenArray<Z>}\n${ToString<T>}`
+                    >,
+                `${ToString<Z>}\n${IsFragment<T, ChildrenArray<T>, ToString<T>>}`
+                >;
 
+
+    export type FlatArrayValues<A> = A extends unknown[]
+        ? {
+            [K in keyof A]: A[K] extends [] ? FlatArray<A[K]> : ToString<A[K]>;
+        }[keyof A]
+        : ToString<A>;
+    export type FlatArray<A> = `${FlatArrayValues<A>}`;
+
+    export type ChildrenArray<
+        N,
+        C extends GetChildren<N> = GetChildren<N>
+        > = C extends Readonly<[infer Z, ...infer T]>
+        ? ChildrenArrayTupleResolution<Z, T>
+        : C extends [infer Z, ...infer T]
+            ? ChildrenArrayTupleResolution<Z, T>
+            : C extends Iterable<infer T>
+                ? FlatArray<T>
+                : C extends AsyncIterable<Readonly<[infer Z, ...infer T]>>
+                    ? ChildrenArrayTupleResolution<Z, T>
+                    : C extends AsyncIterable<[infer Z, ...infer T]>
+                        ? ChildrenArrayTupleResolution<Z, T>
+                        : C extends AsyncIterable<Iterable<infer T>>
+                            ? FlatArray<T>
+                            : "";
+
+    type JSONValue = string | boolean | symbol | number;
+
+    export type ToJSONString<N> =
+        N extends string ? `{"${N}"}` :
+            N extends number | boolean ? `{${N}}` :
+                N extends symbol ? `{Symbol(${string})}` : `{${string}}`;
+
+    export type ToString<N> =
+        N extends JSONValue ? `${ToJSONString<N>}` :
+            GetName<N> extends string ?
+                `<${GetName<N>}${ChildrenArray<N> extends "" ? "/>" : `>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>;
+
+}
+
+export namespace HTML {
+
+    export type ChildrenArrayTupleResolution<Z, T extends unknown[]> = T extends [
+            infer K,
+            ...infer L
+        ]
+        ? IsFragment<
+            Z,
+            `${ChildrenArray<Z>}\n${ChildrenArrayTupleResolution<K, L>}`,
+            `${ToString<Z>}\n${ChildrenArrayTupleResolution<K, L>}`
+            >
+        : T extends []
+            ? IsFragment<Z, ChildrenArray<Z>, ToString<Z>>
+            : IsFragment<
+                Z,
+                IsFragment<
+                    T,
+                    `${ChildrenArray<Z>}\n${ChildrenArray<T>}`,
+                    `${ChildrenArray<Z>}\n${ToString<T>}`
+                    >,
+                `${ToString<Z>}\n${IsFragment<T, ChildrenArray<T>, ToString<T>>}`
+                >;
+
+
+    export type FlatArrayValues<A> = A extends unknown[]
+        ? {
+            [K in keyof A]: A[K] extends [] ? FlatArray<A[K]> : ToString<A[K]>;
+        }[keyof A]
+        : ToString<A>;
+    export type FlatArray<A> = `${FlatArrayValues<A>}`;
+
+    export type ChildrenArray<
+        N,
+        C extends GetChildren<N> = GetChildren<N>
+        > = C extends Readonly<[infer Z, ...infer T]>
+        ? ChildrenArrayTupleResolution<Z, T>
+        : C extends [infer Z, ...infer T]
+            ? ChildrenArrayTupleResolution<Z, T>
+            : C extends Iterable<infer T>
+                ? FlatArray<T>
+                : C extends AsyncIterable<Readonly<[infer Z, ...infer T]>>
+                    ? ChildrenArrayTupleResolution<Z, T>
+                    : C extends AsyncIterable<[infer Z, ...infer T]>
+                        ? ChildrenArrayTupleResolution<Z, T>
+                        : C extends AsyncIterable<Iterable<infer T>>
+                            ? FlatArray<T>
+                            : "";
+
+    type JSONValue = string | boolean | symbol | number;
+
+    export type ToJSONString<N> =
+        N extends string ? `${N}` :
+            N extends number | boolean ? `${N}` :
+                N extends symbol ? `Symbol(${string})` : string;
+
+    export type ToString<N> =
+        N extends JSONValue ? `${ToJSONString<N>}` :
+            GetName<N> extends string ?
+                `<${GetName<N>}${ChildrenArray<N> extends "" ? "/>" : `>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>;
+
+}

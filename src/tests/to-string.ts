@@ -1,26 +1,6 @@
-import {GetName, ToJSXString, ToKDLString} from "../to-string"
-import {proxy} from "../access";
+import {GetName, JSX, KDL, HTML} from "../to-string";
 
 export default 1;
-
-function Component() {
-    return {
-        $$type: "section",
-        props: {
-            id: "section-1"
-        },
-        children: [
-            "Hello!",
-            Promise.resolve("ASYNC" as const),
-            {
-                async *[Symbol.asyncIterator]() {
-                    yield "WORLD" as const;
-                },
-            }
-        ]
-    } as const;
-}
-type ComponentType = ReturnType<typeof Component>;
 
 const tree = {
     source: "main" as const,
@@ -31,20 +11,12 @@ const tree = {
             name: "child1" as const,
             children: {
                 async *[Symbol.asyncIterator]() {
-                    yield 1 as const;
-                    // I expect to be able to do a compile time hoist of this type
-                    yield Component() as ComponentType;
+                    yield [99, "child1inner"] as const;
                 },
             },
         },
         {
-            name: "child2" as const,
-            children: {
-                *[Symbol.iterator]() {
-                    yield 2 as const;
-                    yield 3 as const;
-                },
-            },
+            name: "child2" as const
         },
         {
             name: "fragment" as const,
@@ -55,11 +27,13 @@ const tree = {
 
 type Tree = typeof tree;
 
-type TreeKDLString = ToKDLString<Tree>;
-type TreeJSXString = ToJSXString<Tree>;
+type TreeKDLString = KDL.ToString<Tree>;
+type TreeJSXString = JSX.ToString<Tree>;
+type TreeHTMLString = HTML.ToString<Tree>;
 
 const tKDL: TreeKDLString = "" as TreeKDLString;
 const tJSX: TreeJSXString = "" as TreeJSXString;
+const tHTML: TreeHTMLString = "" as TreeHTMLString;
 
 let n: GetName<Tree>;
 

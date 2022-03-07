@@ -24,7 +24,7 @@ export type ChildrenArrayTupleResolution<Z, T extends unknown[]> = T extends [
       [...ChildrenArray<Z>, ...ChildrenArrayTupleResolution<K, L>],
       [Z, ...ChildrenArrayTupleResolution<K, L>]
     >
-  : T extends { length: 0 }
+  : T extends []
   ? IsFragment<Z, ChildrenArray<Z>, [Z]>
   : IsFragment<
       Z,
