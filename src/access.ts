@@ -124,6 +124,7 @@ type GettersRecordKeys<
   K extends keyof Get = keyof Get
 > = string | symbol extends K ? never : K;
 
+const Raw = Symbol.for("@virtualstate/fringe/tools/raw");
 export type RawNode<N> = {
   __raw?: typeof Raw;
   [Raw]: N;
@@ -178,7 +179,6 @@ export function isProxyContextOptions(
   );
 }
 
-const Raw = Symbol.for("@virtualstate/fringe/tools/raw");
 
 export function raw(node: UnknownJSXNode): UnknownJSXNode {
   const value = node[Raw] ?? node;

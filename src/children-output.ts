@@ -1,4 +1,4 @@
-import { ChildrenKeys, RawNodeValue } from "./access";
+import { RawNodeValue } from "./access";
 
 export type ChildrenOfNode<N> = RawNodeValue<N> extends { children: infer C }
   ? C
