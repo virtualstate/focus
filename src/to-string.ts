@@ -1,4 +1,5 @@
-import {ChildrenKeys, FragmentName, NameKeys} from "./access";
+import {ChildrenKeys, FragmentName, NameKeys, PropertiesKeys} from "./access";
+import {Join} from "./join.types";
 
 
 type GetValueOfProperty<N, P> = {
@@ -7,12 +8,19 @@ type GetValueOfProperty<N, P> = {
 
 export type GetName<N> = GetValueOfProperty<N, NameKeys>;
 export type GetChildren<N> = GetValueOfProperty<N, ChildrenKeys>;
+export type GetProperties<N> = GetValueOfProperty<N, PropertiesKeys>;
 
 export type IsFragment<N, True, False> = GetName<N> extends FragmentName
     ? True
     : False;
 
 export namespace KDL {
+
+    export type RecordToString<R> = {
+        [K in keyof R]: K extends string ? `${K}=${ToJSONString<R[K]>}` : never
+    }[keyof R]
+
+    export type PropertiesToString<N> = GetProperties<N> extends never ? "" : RecordToString<GetProperties<N>> extends string ? `${Join<` ${RecordToString<GetProperties<N>>}`>}` : "";
 
     export type ChildrenArrayTupleResolution<Z, T extends unknown[]> = T extends [
             infer K,
@@ -69,12 +77,18 @@ export namespace KDL {
 
     export type ToString<N> =
         N extends JSONValue ? `${ToJSONString<N>}` :
-            IsFragment<N, ChildrenArray<N>, GetName<N> extends JSONValue ?
-                `${ToJSONString<GetName<N>>} ${ChildrenArray<N> extends "" ? "" : `{\n${ChildrenArray<N>}\n}`}` : ChildrenArray<N>>;
+            IsFragment<N, ChildrenArray<N>, GetName<N> extends string ?
+                `${ToJSONString<GetName<N>>}${ChildrenArray<N> extends "" ? `${PropertiesToString<N>}` : `${PropertiesToString<N>} {\n${ChildrenArray<N>}\n}`}` : ChildrenArray<N>>;
 
 }
 
 export namespace JSX {
+
+    export type RecordToString<R> = {
+        [K in keyof R]: K extends string ? `${K}${R[K] extends true ? "" : `=${R[K] extends (string & infer V) ? `"${V & string}"` : `${ToJSONString<R[K]>}`}`}` : never
+    }[keyof R]
+
+    export type PropertiesToString<N> = GetProperties<N> extends never ? "" : RecordToString<GetProperties<N>> extends string ? `${Join<` ${RecordToString<GetProperties<N>>}`>}` : "";
 
     export type ChildrenArrayTupleResolution<Z, T extends unknown[]> = T extends [
             infer K,
@@ -96,7 +110,6 @@ export namespace JSX {
                     >,
                 `${ToString<Z>}\n${IsFragment<T, ChildrenArray<T>, ToString<T>>}`
                 >;
-
 
     export type FlatArrayValues<A> = A extends unknown[]
         ? {
@@ -132,11 +145,18 @@ export namespace JSX {
     export type ToString<N> =
         N extends JSONValue ? `${ToJSONString<N>}` :
             IsFragment<N, ChildrenArray<N>, GetName<N> extends string ?
-                `<${GetName<N>}${ChildrenArray<N> extends "" ? "/>" : `>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>>;
+                `<${GetName<N>}${ChildrenArray<N> extends "" ? `${PropertiesToString<N>}/>` : `${PropertiesToString<N>}>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>>;
+
 
 }
 
 export namespace HTML {
+
+    export type RecordToString<R> = {
+        [K in keyof R]: K extends string ? R[K] extends false ? "" : `${K}${R[K] extends true ? "" : `="${ToJSONString<R[K]>}"`}` : never
+    }[keyof R]
+
+    export type PropertiesToString<N> = GetProperties<N> extends never ? "" : RecordToString<GetProperties<N>> extends string ? `${Join<` ${RecordToString<GetProperties<N>>}`>}` : "";
 
     export type ChildrenArrayTupleResolution<Z, T extends unknown[]> = T extends [
             infer K,
@@ -194,7 +214,7 @@ export namespace HTML {
     export type ToString<N> =
         N extends JSONValue ? `${ToJSONString<N>}` :
             IsFragment<N, ChildrenArray<N>, GetName<N> extends string ?
-                `<${GetName<N>}${ChildrenArray<N> extends "" ? "/>" : `>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>>
-            ;
+                `<${GetName<N>}${ChildrenArray<N> extends "" ? `${PropertiesToString<N>}/>` : `${PropertiesToString<N>}>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>>;
+
 
 }

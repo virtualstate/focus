@@ -39,6 +39,10 @@ let n: GetName<Tree>;
 
 const tree2 = {
     source: "main" as const,
+    props: {
+        id: "main",
+        class: "section"
+    },
     children: [
         1,
         "a" as const,
@@ -51,7 +55,11 @@ const tree2 = {
             },
         },
         {
-            name: "child2" as const
+            name: "input" as const,
+            options: {
+                value: 2,
+                type: "number"
+            }
         },
         {
             name: "fragment" as const,
@@ -72,6 +80,9 @@ type Tree2 = typeof tree2;
 type Tree2KDLString = KDL.ToString<Tree2>;
 type Tree2JSXString = JSX.ToString<Tree2>;
 type Tree2HTMLString = HTML.ToString<Tree2>;
+
+type Tree2Props = KDL.PropertiesToString<Tree2>;
+let t2Props: Tree2Props;
 
 let t2KDL: Tree2KDLString;
 let t2JSX: Tree2JSXString;
