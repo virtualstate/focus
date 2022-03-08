@@ -1,28 +1,28 @@
-import {GetName, JSX, KDL, HTML} from "../to-string";
+import { GetName, JSX, KDL, HTML } from "../to-string";
 
 export default 1;
 
 const tree = {
-    source: "main" as const,
-    children: [
-        1,
-        "a" as const,
-        {
-            name: "child1" as const,
-            children: {
-                async *[Symbol.asyncIterator]() {
-                    yield [99, "child1inner"] as const;
-                },
-            },
+  source: "main" as const,
+  children: [
+    1,
+    "a" as const,
+    {
+      name: "child1" as const,
+      children: {
+        async *[Symbol.asyncIterator]() {
+          yield [99, "child1inner"] as const;
         },
-        {
-            name: "child2" as const
-        },
-        {
-            name: "fragment" as const,
-            children: [55, 56],
-        },
-    ],
+      },
+    },
+    {
+      name: "child2" as const,
+    },
+    {
+      name: "fragment" as const,
+      children: [55, 56],
+    },
+  ],
 } as const;
 
 type Tree = typeof tree;
@@ -38,42 +38,42 @@ let tHTML: TreeHTMLString;
 let n: GetName<Tree>;
 
 const tree2 = {
-    source: "main" as const,
-    props: {
-        id: "main",
-        class: "section"
+  source: "main" as const,
+  props: {
+    id: "main",
+    class: "section",
+  },
+  children: [
+    1,
+    "a" as const,
+    {
+      name: "child1" as const,
+      children: {
+        async *[Symbol.asyncIterator]() {
+          yield [99, "child1inner"] as const;
+        },
+      },
     },
-    children: [
-        1,
-        "a" as const,
-        {
-            name: "child1" as const,
-            children: {
-                async *[Symbol.asyncIterator]() {
-                    yield [99, "child1inner"] as const;
-                },
-            },
-        },
-        {
-            name: "input" as const,
-            options: {
-                value: 2,
-                type: "number"
-            }
-        },
-        {
-            name: "fragment" as const,
-            children: [55, 59],
-        },
-        {
-            name: Symbol.for(":kdl/fragment"),
-            children: [60],
-        },
-        {
-            name: Symbol.for(":jsx/fragment"),
-            children: [61],
-        },
-    ],
+    {
+      name: "input" as const,
+      options: {
+        value: 2,
+        type: "number",
+      },
+    },
+    {
+      name: "fragment" as const,
+      children: [55, 59],
+    },
+    {
+      name: Symbol.for(":kdl/fragment"),
+      children: [60],
+    },
+    {
+      name: Symbol.for(":jsx/fragment"),
+      children: [61],
+    },
+  ],
 } as const;
 
 type Tree2 = typeof tree2;
@@ -90,10 +90,10 @@ let t2HTML: Tree2HTMLString;
 
 type IsMatch<L, R> = L extends R ? true : false;
 
-let t1To2MatchKDL: IsMatch<TreeKDLString, Tree2KDLString>
-let t1To2MatchJSX: IsMatch<TreeJSXString, Tree2JSXString>
-let t1To2MatchHTML: IsMatch<TreeHTMLString, Tree2HTMLString>
+let t1To2MatchKDL: IsMatch<TreeKDLString, Tree2KDLString>;
+let t1To2MatchJSX: IsMatch<TreeJSXString, Tree2JSXString>;
+let t1To2MatchHTML: IsMatch<TreeHTMLString, Tree2HTMLString>;
 
-let t2To2MatchKDL: IsMatch<Tree2KDLString, Tree2KDLString>
-let t2To2MatchJSX: IsMatch<Tree2JSXString, Tree2JSXString>
-let t2To2MatchHTML: IsMatch<Tree2HTMLString, Tree2HTMLString>
+let t2To2MatchKDL: IsMatch<Tree2KDLString, Tree2KDLString>;
+let t2To2MatchJSX: IsMatch<Tree2JSXString, Tree2JSXString>;
+let t2To2MatchHTML: IsMatch<Tree2HTMLString, Tree2HTMLString>;

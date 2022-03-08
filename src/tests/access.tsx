@@ -142,7 +142,8 @@ console.log({ mainName: mainProxy.name });
 const [section] = mainChildren;
 const sectionProxy = proxy(section);
 const sectionProps: Record<string | symbol, unknown> = sectionProxy.props;
-const sectionPropsSymbol: Record<string | symbol, unknown> = sectionProxy.options;
+const sectionPropsSymbol: Record<string | symbol, unknown> =
+  sectionProxy.options;
 console.log({ sectionProps });
 console.log({ sectionPropsSymbol });
 

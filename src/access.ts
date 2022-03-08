@@ -29,10 +29,13 @@ export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
   Symbol.for(":jsx/type"),
   Symbol.for("@virtualstate/fringe/source"),
-  ...possibleNameKeysStrings
+  ...possibleNameKeysStrings,
 ] as const;
 export const possibleTagKeysStrings = ["tag"] as const;
-export const possibleTagKeys = [Symbol.for(":kdl/tag"), ...possibleTagKeysStrings] as const;
+export const possibleTagKeys = [
+  Symbol.for(":kdl/tag"),
+  ...possibleTagKeysStrings,
+] as const;
 export const possiblePropertiesKeysStrings = [
   "properties",
   "props",
@@ -47,18 +50,13 @@ export const possiblePropertiesKeys = [
   Symbol.for("@virtualstate/fringe/options"),
   ...possiblePropertiesKeysStrings,
 ] as const;
-export const possibleValuesKeysStrings = [
-  "values",
-] as const;
+export const possibleValuesKeysStrings = ["values"] as const;
 export const possibleValuesKeys = [
   Symbol.for(":kdl/values"),
   Symbol.for(":jsx/values"),
-  ...possibleValuesKeysStrings
+  ...possibleValuesKeysStrings,
 ] as const;
-export const possibleChildrenKeysStrings = [
-  "children",
-  "_children",
-] as const;
+export const possibleChildrenKeysStrings = ["children", "_children"] as const;
 export const possibleChildrenKeys = [
   Symbol.for(":kdl/children"),
   Symbol.for(":jsx/children"),
@@ -186,7 +184,6 @@ export function isProxyContextOptions(
     isLike<ProxyContextOptions>(options) && typeof options.proxy === "function"
   );
 }
-
 
 export function raw(node: UnknownJSXNode): UnknownJSXNode {
   const value = node[Raw] ?? node;

@@ -30,11 +30,11 @@ const possibleFragmentNames: Key[] = [...possibleFragmentNamesSource];
 export type FragmentName = typeof possibleFragmentNames[number];
 
 export type PossibleNameKeys =
-    | "source"
-    | "type"
-    | "$$type"
-    | "reference"
-    | "name";
+  | "source"
+  | "type"
+  | "$$type"
+  | "reference"
+  | "name";
 
 export const possibleNameKeysKey: Key[] = [
   Symbol.for(":kdl/name"),
@@ -63,9 +63,7 @@ export const possibleValuesKeys: Key[] = [
   Symbol.for(":jsx/values"),
   "values",
 ];
-export type PossibleChildrenKeys =
-  | "children"
-  | "_children";
+export type PossibleChildrenKeys = "children" | "_children";
 export const possibleChildrenKeys: Key[] = [
   Symbol.for(":kdl/children"),
   Symbol.for(":jsx/children"),
