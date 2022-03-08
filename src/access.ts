@@ -9,27 +9,35 @@ export const JSXFragment = Symbol.for(":jsx/fragment");
 export const KDLFragment = Symbol.for(":kdl/fragment");
 export const VSXFringeFragment = Symbol.for("@virtualstate/fringe/fragment");
 
-const possibleFragmentNamesSource = [
+const possibleFragmentNames = [
   JSXFragment,
   KDLFragment,
   VSXFringeFragment,
   "Fragment",
   "fragment",
 ] as const;
-const possibleFragmentNames: Key[] = [...possibleFragmentNamesSource];
-export type FragmentName = ValuesOf<typeof possibleFragmentNamesSource>;
+export type FragmentName = typeof possibleFragmentNames[number];
 
-export const possibleNameKeys = [
-  Symbol.for(":kdl/name"),
-  Symbol.for(":jsx/type"),
-  Symbol.for("@virtualstate/fringe/source"),
+export const possibleNameKeysStrings = [
   "source",
   "type",
   "$$type",
   "reference",
   "name",
 ] as const;
-export const possibleTagKeys = [Symbol.for(":kdl/tag"), "tag"] as const;
+export const possibleNameKeys = [
+  Symbol.for(":kdl/name"),
+  Symbol.for(":jsx/type"),
+  Symbol.for("@virtualstate/fringe/source"),
+  ...possibleNameKeysStrings
+] as const;
+export const possibleTagKeysStrings = ["tag"] as const;
+export const possibleTagKeys = [Symbol.for(":kdl/tag"), ...possibleTagKeysStrings] as const;
+export const possiblePropertiesKeysStrings = [
+  "properties",
+  "props",
+  "options",
+] as const;
 export const possiblePropertiesKeys = [
   Symbol.for(":kdl/properties"),
   Symbol.for(":kdl/props"),
@@ -37,34 +45,33 @@ export const possiblePropertiesKeys = [
   Symbol.for(":jsx/properties"),
   Symbol.for(":jsx/options"),
   Symbol.for("@virtualstate/fringe/options"),
-  "properties",
-  "props",
-  "options",
+  ...possiblePropertiesKeysStrings,
+] as const;
+export const possibleValuesKeysStrings = [
+  "values",
 ] as const;
 export const possibleValuesKeys = [
   Symbol.for(":kdl/values"),
   Symbol.for(":jsx/values"),
-  "values",
+  ...possibleValuesKeysStrings
+] as const;
+export const possibleChildrenKeysStrings = [
+  "children",
+  "_children",
 ] as const;
 export const possibleChildrenKeys = [
   Symbol.for(":kdl/children"),
   Symbol.for(":jsx/children"),
   Symbol.for("@virtualstate/fringe/children"),
   "children",
-  "_children",
+  ...possibleChildrenKeysStrings,
 ] as const;
 
-type ValuesOf<T> = T extends ReadonlyArray<infer I>
-  ? I
-  : T extends Array<infer I>
-  ? I
-  : never;
-
-export type NameKeys = ValuesOf<typeof possibleNameKeys>;
-export type PropertiesKeys = ValuesOf<typeof possiblePropertiesKeys>;
-export type ChildrenKeys = ValuesOf<typeof possibleChildrenKeys>;
-export type ValueKeys = ValuesOf<typeof possibleValuesKeys>;
-export type TagKeys = ValuesOf<typeof possibleTagKeys>;
+export type NameKeys = typeof possibleNameKeysStrings[number];
+export type PropertiesKeys = typeof possiblePropertiesKeysStrings[number];
+export type ChildrenKeys = typeof possibleChildrenKeysStrings[number];
+export type ValueKeys = typeof possibleValuesKeysStrings[number];
+export type TagKeys = typeof possibleTagKeysStrings[number];
 
 export type NameAccessors = Record<NameKeys, ReturnType<typeof getName>>;
 export type PropertiesAccessors = Record<
@@ -116,7 +123,8 @@ export interface FragmentNode extends UnknownJSXNode {}
 export function isFragment(node: unknown): node is FragmentNode {
   if (!node) return false;
   if (!isUnknownJSXNode(node)) return false;
-  return possibleFragmentNames.includes(getName(node));
+  const unknown: ReadonlyArray<unknown> = possibleFragmentNames;
+  return unknown.includes(getName(node));
 }
 
 type GettersRecordKeys<

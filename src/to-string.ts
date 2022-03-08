@@ -1,15 +1,14 @@
-import {PossibleChildrenKeys, PossibleNameKeys} from "./node";
+import {ChildrenKeys, FragmentName, NameKeys} from "./access";
 
 
 type GetValueOfProperty<N, P> = {
     [K in keyof N]: K extends P ? N[K] : never
 }[keyof N];
 
-export type GetName<N> = GetValueOfProperty<N, PossibleNameKeys>;
-export type GetChildren<N> = GetValueOfProperty<N, PossibleChildrenKeys>;
+export type GetName<N> = GetValueOfProperty<N, NameKeys>;
+export type GetChildren<N> = GetValueOfProperty<N, ChildrenKeys>;
 
-
-export type IsFragment<N, True, False> = N extends { name: "fragment" }
+export type IsFragment<N, True, False> = GetName<N> extends FragmentName
     ? True
     : False;
 
@@ -70,8 +69,8 @@ export namespace KDL {
 
     export type ToString<N> =
         N extends JSONValue ? `${ToJSONString<N>}` :
-            GetName<N> extends JSONValue ?
-                `${ToJSONString<GetName<N>>} ${ChildrenArray<N> extends "" ? "" : `{\n${ChildrenArray<N>}\n}`}` : ChildrenArray<N>;
+            IsFragment<N, ChildrenArray<N>, GetName<N> extends JSONValue ?
+                `${ToJSONString<GetName<N>>} ${ChildrenArray<N> extends "" ? "" : `{\n${ChildrenArray<N>}\n}`}` : ChildrenArray<N>>;
 
 }
 
@@ -132,8 +131,8 @@ export namespace JSX {
 
     export type ToString<N> =
         N extends JSONValue ? `${ToJSONString<N>}` :
-            GetName<N> extends string ?
-                `<${GetName<N>}${ChildrenArray<N> extends "" ? "/>" : `>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>;
+            IsFragment<N, ChildrenArray<N>, GetName<N> extends string ?
+                `<${GetName<N>}${ChildrenArray<N> extends "" ? "/>" : `>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>>;
 
 }
 
@@ -194,7 +193,8 @@ export namespace HTML {
 
     export type ToString<N> =
         N extends JSONValue ? `${ToJSONString<N>}` :
-            GetName<N> extends string ?
-                `<${GetName<N>}${ChildrenArray<N> extends "" ? "/>" : `>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>;
+            IsFragment<N, ChildrenArray<N>, GetName<N> extends string ?
+                `<${GetName<N>}${ChildrenArray<N> extends "" ? "/>" : `>\n${ChildrenArray<N>}\n</${GetName<N>}>`}` : ChildrenArray<N>>
+            ;
 
 }
