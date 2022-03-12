@@ -1,6 +1,6 @@
 import { ChildrenKeys, FragmentName, NameKeys, PropertiesKeys } from "./access";
 import { Join } from "./join.types";
-import {SplitAddJoin} from "./split.types";
+import { SplitAddJoin } from "./split.types";
 
 type GetValueOfProperty<N, P> = {
   [K in keyof N]: K extends P ? N[K] : never;
@@ -88,7 +88,11 @@ export namespace KDL {
         GetName<N> extends string
           ? `${ToJSONString<GetName<N>>}${ChildrenArray<N> extends ""
               ? `${PropertiesToString<N>}`
-              : `${PropertiesToString<N>} {\n${SplitAddJoin<ChildrenArray<N>, "\n", "  ">}\n}`}`
+              : `${PropertiesToString<N>} {\n${SplitAddJoin<
+                  ChildrenArray<N>,
+                  "\n",
+                  "  "
+                >}\n}`}`
           : ChildrenArray<N>
       >;
 }
@@ -173,7 +177,11 @@ export namespace JSX {
         GetName<N> extends string
           ? `<${GetName<N>}${ChildrenArray<N> extends ""
               ? `${PropertiesToString<N>}/>`
-              : `${PropertiesToString<N>}>\n${SplitAddJoin<ChildrenArray<N>, "\n", "  ">}\n</${GetName<N>}>`}`
+              : `${PropertiesToString<N>}>\n${SplitAddJoin<
+                  ChildrenArray<N>,
+                  "\n",
+                  "  "
+                >}\n</${GetName<N>}>`}`
           : ChildrenArray<N>
       >;
 }
@@ -256,7 +264,11 @@ export namespace HTML {
         GetName<N> extends string
           ? `<${GetName<N>}${ChildrenArray<N> extends ""
               ? `${PropertiesToString<N>}/>`
-              : `${PropertiesToString<N>}>\n${SplitAddJoin<ChildrenArray<N>, "\n", "  ">}\n</${GetName<N>}>`}`
+              : `${PropertiesToString<N>}>\n${SplitAddJoin<
+                  ChildrenArray<N>,
+                  "\n",
+                  "  "
+                >}\n</${GetName<N>}>`}`
           : ChildrenArray<N>
       >;
 }

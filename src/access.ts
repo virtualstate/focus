@@ -24,6 +24,7 @@ export const possibleNameKeysStrings = [
   "$$type",
   "reference",
   "name",
+  "tagName"
 ] as const;
 export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
@@ -65,11 +66,28 @@ export const possibleChildrenKeys = [
   ...possibleChildrenKeysStrings,
 ] as const;
 
+export const possibleInstanceKeysStrings = [
+  "instance",
+  "sourceInstance",
+  "typeInstance",
+  "$$typeInstance",
+  "referenceInstance",
+  "nameInstance",
+] as const;
+export const possibleInstanceKeys = [
+  Symbol.for(":kdl/instance"),
+  Symbol.for(":jsx/instance"),
+  Symbol.for("@virtualstate/fringe/instance"),
+  Symbol.for("@virtualstate/fringe/SourceInstance"),
+  ...possibleInstanceKeysStrings,
+] as const;
+
 export type NameKeys = typeof possibleNameKeysStrings[number];
 export type PropertiesKeys = typeof possiblePropertiesKeysStrings[number];
 export type ChildrenKeys = typeof possibleChildrenKeysStrings[number];
 export type ValueKeys = typeof possibleValuesKeysStrings[number];
 export type TagKeys = typeof possibleTagKeysStrings[number];
+export type InstanceKeys = typeof possibleInstanceKeysStrings[number];
 
 export type NameAccessors = Record<NameKeys, ReturnType<typeof getName>>;
 export type PropertiesAccessors = Record<
@@ -82,12 +100,17 @@ export type ChildrenAccessors = Record<
 >;
 export type ValuesAccessors = Record<ValueKeys, ReturnType<typeof getValues>>;
 export type TagAccessors = Record<TagKeys, ReturnType<typeof getTag>>;
+export type InstanceAccessors = Record<
+  InstanceKeys,
+  ReturnType<typeof getInstance>
+>;
 
 export type GenericAccessors = NameAccessors &
   PropertiesAccessors &
   ChildrenAccessors &
   ValuesAccessors &
-  TagAccessors;
+  TagAccessors &
+  InstanceAccessors;
 
 interface GenericGetFn {
   (node: UnknownJSXNode, context?: unknown): unknown;
@@ -102,6 +125,7 @@ const GenericNodeFunctions: GettersRecord = Object.fromEntries([
   ...possibleChildrenKeys.map((key) => pair(key, getChildren)),
   ...possiblePropertiesKeys.map((key) => pair(key, getProperties)),
   ...possibleValuesKeys.map((key) => pair(key, getValues)),
+  ...possibleInstanceKeys.map((key) => pair(key, getInstance)),
 ]);
 
 export type StaticChildNode = string | number | boolean;
@@ -206,8 +230,13 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
   context?: unknown
 ): ProxyNode<Get, N> {
   assertUnknownJSXNode(node);
-  const target = new Proxy(node, {
+  const instance = getInstance(node) ?? node;
+  assertUnknownJSXNode(instance);
+  const target = new Proxy(instance, {
     get(target: UnknownJSXNode, p: string | symbol) {
+      if (isKey(instance, p)) {
+        return instance[p];
+      }
       return get(p, node, getters, context);
     },
   });
@@ -305,8 +334,7 @@ function getStringOrSymbol(node: UnknownJSXNode, key: Key) {
   return value;
 }
 
-function isKey<K extends Key>(unknown: unknown, key: Key): key is K {
-  ok<UnknownJSXNode>(unknown);
+function isKey(unknown: UnknownJSXNode, key: Key): key is Key {
   const value = unknown[key];
   return typeof value !== "undefined" && value !== null;
 }
@@ -331,4 +359,10 @@ export function assertUnknownJSXNode(
   node: unknown
 ): asserts node is UnknownJSXNode {
   ok(isUnknownJSXNode(node), "Expected Node");
+}
+
+export function getInstance(node: UnknownJSXNode): unknown {
+  const instanceKey = possibleInstanceKeys.find((key) => isKey(node, key));
+  if (!instanceKey) return undefined;
+  return node[instanceKey];
 }
