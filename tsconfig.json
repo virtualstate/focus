@@ -16,7 +16,9 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "createFragment",
     "allowJs": true,
-    "paths": {}
+    "paths": {
+      "@virtualstate/focus": ["./"]
+    }
   },
   "include": ["src/**/*"],
   "typeRoots": ["./node_modules/@types", "src/types"],
