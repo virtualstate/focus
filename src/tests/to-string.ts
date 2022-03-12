@@ -50,7 +50,7 @@ const tree2 = {
       name: "child1" as const,
       children: {
         async *[Symbol.asyncIterator]() {
-          yield [99, "child1inner"] as const;
+          yield [Math.random() ? 9 : 10, "child1inner"] as const;
         },
       },
     },

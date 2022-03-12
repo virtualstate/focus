@@ -11,11 +11,13 @@ import { union } from "@virtualstate/union";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
 import { component } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
+import {all} from "@virtualstate/promise";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 
 export interface ChildrenOptions {
   [ThrowAtEnd]?: boolean;
+  component?: typeof component
 }
 
 export function children<N>(node: N): TheAsyncThing<ChildrenArray<N>>;
@@ -117,7 +119,7 @@ export async function* childrenSettledGenerator(
   try {
     for await (const snapshot of childrenSettledGeneratorInner(
       getChildren(node),
-      component(node)
+      (options?.component ?? component)(node)
     )) {
       knownLength = snapshot.length;
       yield snapshot;
@@ -180,7 +182,7 @@ export async function* childrenSettledGenerator(
       workingSet[+index] = undefined;
     }
 
-    for await (const fragmentUpdates of union(
+    for await (const fragmentUpdates of all(
       fragments.map(async function* ([index, fragment]): AsyncIterable<
         [string, PromiseSettledResult<unknown>[]]
       > {

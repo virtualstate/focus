@@ -12,7 +12,7 @@ export function isComponentFn(node: unknown): node is ComponentFn {
   return isLike(node, typeof node === "function");
 }
 
-export function component(input: UnknownJSXNode): AsyncIterable<unknown> {
+export function component(input: UnknownJSXNode): AsyncIterable<unknown> | undefined {
   const node = raw(input);
   const name = isComponentFn(node) ? node : node[getNameKey(node)];
   if (!isComponentFn(name)) return undefined;
