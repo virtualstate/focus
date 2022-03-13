@@ -4,6 +4,19 @@
   "main": "./esnext/index.js",
   "module": "./esnext/index.js",
   "types": "./esnext/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./esnext/index.d.ts"
+      ],
+      "tests": [
+        "./esnext/tests/index.d.ts"
+      ],
+      "tests/dom-h": [
+        "./esnext/tests/dom-h.d.ts"
+      ]
+    }
+  },
   "type": "module",
   "sideEffects": false,
   "keywords": [],
