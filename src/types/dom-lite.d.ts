@@ -1,3 +1,7 @@
 declare module "dom-lite" {
-  export const document: Document;
+  namespace Default {
+    export const document: Document
+    export class HTMLElement {}
+  }
+  export default Default;
 }

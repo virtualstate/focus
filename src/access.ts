@@ -82,12 +82,12 @@ export const possibleInstanceKeys = [
   ...possibleInstanceKeysStrings,
 ] as const;
 
-export type NameKeys = typeof possibleNameKeysStrings[number];
-export type PropertiesKeys = typeof possiblePropertiesKeysStrings[number];
-export type ChildrenKeys = typeof possibleChildrenKeysStrings[number];
-export type ValueKeys = typeof possibleValuesKeysStrings[number];
-export type TagKeys = typeof possibleTagKeysStrings[number];
-export type InstanceKeys = typeof possibleInstanceKeysStrings[number];
+export type NameKeys = typeof possibleNameKeys[number];
+export type PropertiesKeys = typeof possiblePropertiesKeys[number];
+export type ChildrenKeys = typeof possibleChildrenKeys[number];
+export type ValueKeys = typeof possibleValuesKeys[number];
+export type TagKeys = typeof possibleTagKeys[number];
+export type InstanceKeys = typeof possibleInstanceKeys[number];
 
 export type NameAccessors = Record<NameKeys, ReturnType<typeof getName>>;
 export type PropertiesAccessors = Record<

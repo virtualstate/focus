@@ -3,7 +3,7 @@ import {proxy} from "@virtualstate/focus";
 import {descendants, descendantsSettled} from "@virtualstate/focus";
 import {ok} from "@virtualstate/focus";
 
-const { document } = dom;
+const { default: { document, HTMLElement } } = dom;
 
 function createElement(tagName: string, options?: unknown, ...children: unknown[]) {
   let instance: HTMLElement;
@@ -24,7 +24,7 @@ const value = Math.random();
 
 const div: HTMLElement = <div><input value={1} type="number" /><section id="section">{value}</section></div>
 
-console.log({ div });
+console.log({ div, instance: div instanceof HTMLElement });
 
 div.id = "1";
 
