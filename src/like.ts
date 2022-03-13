@@ -31,7 +31,7 @@ export function isDescendantFulfilled(result: DescendantPromiseSettledResult): r
   return isFulfilled(result);
 }
 
-export function isKeyIn<U, K extends string>(unknown: U, key: K): unknown is U & Record<K, unknown> {
+export function isKeyIn<U, K extends string | symbol | number>(unknown: U, key: K): unknown is U & Record<K, unknown> {
   return !!unknown && (typeof unknown === "object" || typeof unknown === "function") && key in unknown;
 }
 

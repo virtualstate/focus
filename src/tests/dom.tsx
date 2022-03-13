@@ -4,7 +4,7 @@ import {
     getInstance,
     getName,
     isDescendantFulfilled,
-    isFulfilled,
+    isFulfilled, isKey,
     isKeyIn,
     isLike,
     proxy
@@ -41,9 +41,28 @@ function createElement(tagName: string, options?: unknown, ...children: unknown[
 function setOptions(element: HTMLElement, options: unknown) {
     setAttributes(element, options);
     for (const [key, value] of Object.entries(options ?? {})) {
-        if (!isKeyIn(element, key)) continue;
+        if (set(`${key}List`, value)) continue;
+        if (key.endsWith("Name")) {
+            const withoutName = key.replace(/Name$/, "");
+            if (set(`${withoutName}List`, value)) continue;
+        }
+        set(key, value)
+    }
 
-        if (isKeyIn(value, "length")) {
+    function isDOMTokenList(value: unknown): value is DOMTokenList  {
+        return isLike<DOMTokenList>(value) && typeof value.add === "function";
+    }
+
+    function isArrayLike(value: unknown): value is unknown[] {
+        return isKeyIn(value, "length");
+    }
+
+    function set(key: string | symbol, value: unknown) {
+        if (!isKeyIn(element, key)) return false;
+        if (typeof key === "string" && key.endsWith("List") && typeof value === "string") {
+            value = value.split(/\s+/g).filter(Boolean)
+        }
+        if (isArrayLike(value)) {
             // const add = Array.isArray(element[key]) ?
             //     ((target: unknown[]) => (value: unknown) => target.push(value))(element[key]) :
             // Object.assign(element[key], { length: value.length }, { ...value });
@@ -80,11 +99,7 @@ function setOptions(element: HTMLElement, options: unknown) {
         } else {
             element[key] = value;
         }
-
-    }
-
-    function isDOMTokenList(value: unknown): value is DOMTokenList  {
-        return isLike<DOMTokenList>(value) && typeof value.add === "function";
+        return true;
     }
 }
 
@@ -102,7 +117,7 @@ const h = createElement;
 
 const value = Math.random();
 
-const div: HTMLElement = <div><input value={1} type="number" /><section id="section" classList={["a", "b"]}>{value}</section></div>
+const div: HTMLElement = <div><input value={1} type="number" /><section id="section" class="a b">{value}</section></div>
 
 console.log({ div, instance: div instanceof HTMLElement });
 
