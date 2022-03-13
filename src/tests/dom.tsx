@@ -136,7 +136,23 @@ ok((await descendants(div)).includes(value));
 console.log({ descendantsSettled: await descendantsSettled(div) });
 ok((await descendantsSettled(div)).map(status => status.status === "fulfilled" ? status.value : undefined).includes(value));
 
-async function mount(node: unknown) {
+async function appendChild(node: HTMLElement, parent: HTMLElement) {
+    const appended = appendDescendants(node);
+    await Promise.any([appended, new Promise<void>(queueMicrotask)]);
+    if (node instanceof HTMLElement) {
+        if (node.parentElement) {
+            if (node.parentElement !== parent) {
+                node.parentElement.removeChild(node);
+                parent.appendChild(node)
+            }
+        } else {
+            parent.appendChild(node);
+        }
+    }
+    await appended;
+}
+
+async function appendDescendants(node: unknown) {
   for await (const descendants of descendantsSettled(node)) {
     const parents = descendants
         .filter(isDescendantFulfilled)
@@ -194,8 +210,12 @@ async function mount(node: unknown) {
   }
 }
 
-await mount(div);
+await appendDescendants(div);
 
+await appendChild(div, document.body);
+// These two are noop
+await appendChild(div, document.body);
+await appendChild(div, document.body);
 
 console.log({ descendants: await descendants(div) });
 
