@@ -1,10 +1,8 @@
-import { isUnknownJSXNode, UnknownJSXNode } from "./node";
+import { UnknownJSXNode } from "./node";
 import {
   getChildren,
   isFragment,
   isProxyContextOptions,
-  isStaticChildNode,
-  RawNode,
 } from "./access";
 import { isArray, isAsyncIterable, isIterable } from "./is";
 import { union } from "@virtualstate/union";
@@ -12,6 +10,7 @@ import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
 import { component } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
 import { all } from "@virtualstate/promise";
+import {isFulfilled, isRejected, isStaticChildNode, isUnknownJSXNode} from "./like";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 
@@ -73,18 +72,6 @@ async function throwIfRejected(
   } else {
     throw new AggregateError(reasons);
   }
-}
-
-function isRejected<R extends PromiseRejectedResult>(
-  value: PromiseSettledResult<unknown>
-): value is R {
-  return value.status === "rejected";
-}
-
-function isFulfilled(
-  value: PromiseSettledResult<unknown>
-): value is PromiseFulfilledResult<unknown> {
-  return value.status === "fulfilled";
 }
 
 export function childrenSettled<N>(

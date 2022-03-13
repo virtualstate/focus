@@ -1,11 +1,11 @@
 import {
   isFragment,
-  isUnknownJSXNode,
   toGenericNode,
   UnknownJSXNode,
 } from "./node";
 import { isAsyncIterable, isIterable } from "./is";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
+import {isUnknownJSXNode} from "./like";
 
 export async function stack(input: UnknownJSXNode): Promise<unknown[]> {
   const node = toGenericNode(input);

@@ -7,9 +7,10 @@ import {
   descendants,
   descendantsSettled,
 } from "../children";
-import { isNode, proxy } from "../access";
+import { proxy } from "../access";
 import { all } from "@virtualstate/promise";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
+import {isNode} from "../like";
 
 const multiTree = {
   source: "name",

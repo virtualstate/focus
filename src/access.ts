@@ -1,5 +1,5 @@
 import { isAsyncIterable, isIterable } from "./is";
-import { isLike, ok } from "./like";
+import {assertUnknownJSXNode, isKey, isLike, isUnknownJSXNode, ok} from "./like";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
@@ -230,15 +230,25 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
   context?: unknown
 ): ProxyNode<Get, N> {
   assertUnknownJSXNode(node);
-  const instance = getInstance(node) ?? node;
-  assertUnknownJSXNode(instance);
-  const target = new Proxy(instance, {
-    get(target: UnknownJSXNode, p: string | symbol) {
-      if (isKey(instance, p)) {
-        return instance[p];
+  const instance = getInstance(node);
+  const source = isUnknownJSXNode(instance) ? instance : node;
+  const target = new Proxy(source, {
+    get(target, p) {
+      if (isUnknownJSXNode(instance) && isKey(instance, p)) {
+        const value = instance[p];
+        if (typeof value === "function") {
+          return value.bind(instance);
+        }
+        return value;
       }
       return get(p, node, getters, context);
     },
+    set(target, p, value, receiver): boolean {
+      if (isUnknownJSXNode(instance)) {
+        instance[p] = value;
+      }
+      return true;
+    }
   });
   ok<ProxyNode<Get, N>>(target);
   return target;
@@ -264,7 +274,9 @@ export function get(
   return fn(node, context);
 }
 
-export function getName(node: UnknownJSXNode): string | symbol | undefined {
+export function getName(node: UnknownJSXNode): string | symbol | undefined
+export function getName(node: unknown): string | symbol | undefined
+export function getName(node: UnknownJSXNode): string | symbol | undefined{
   const nameKey = getNameKey(node);
   const value = node[nameKey];
   if (isUnknownJSXNode(value)) {
@@ -332,33 +344,6 @@ function getStringOrSymbol(node: UnknownJSXNode, key: Key) {
   const value = node[key];
   if (typeof value !== "string" && typeof value !== "symbol") return undefined;
   return value;
-}
-
-function isKey(unknown: UnknownJSXNode, key: Key): key is Key {
-  const value = unknown[key];
-  return typeof value !== "undefined" && value !== null;
-}
-
-export function isStaticChildNode(node: unknown): node is StaticChildNode {
-  return (
-    typeof node === "string" ||
-    typeof node === "boolean" ||
-    typeof node === "number"
-  );
-}
-
-export function isNode<T extends UnknownJSXNode>(node: unknown): node is T {
-  return isUnknownJSXNode(node);
-}
-
-export function isUnknownJSXNode(node: unknown): node is UnknownJSXNode {
-  return typeof node === "object" || typeof node === "function";
-}
-
-export function assertUnknownJSXNode(
-  node: unknown
-): asserts node is UnknownJSXNode {
-  ok(isUnknownJSXNode(node), "Expected Node");
 }
 
 export function getInstance(node: UnknownJSXNode): unknown {

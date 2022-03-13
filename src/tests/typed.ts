@@ -1,6 +1,5 @@
 import { children, childrenSettled } from "../children";
-import { ChildrenArray, ChildrenOfNode } from "../children-output";
-import { proxy, RawNodeValue } from "../access";
+import { proxy } from "../access";
 import { getters } from "../proxy-h";
 
 const tree = {

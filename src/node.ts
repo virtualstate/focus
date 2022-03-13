@@ -1,6 +1,6 @@
 import { isAsyncIterable, isIterable } from "./is";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
-import { ok } from "./like";
+import {isGenericChildNode, isKey, isStaticChildNode, ok} from "./like";
 import { union } from "@virtualstate/union";
 
 export type Key = string | symbol;
@@ -370,26 +370,4 @@ function getStringOrSymbol(node: UnknownJSXNode, key: NameKey | TagKey) {
   const value = node[key];
   if (typeof value !== "string" && typeof value !== "symbol") return undefined;
   return value;
-}
-
-function isKey<K extends Key>(unknown: unknown, key: Key): key is K {
-  ok<UnknownJSXNode>(unknown);
-  const value = unknown[key];
-  return typeof value !== "undefined" && value !== null;
-}
-
-export function isStaticChildNode(node: unknown): node is StaticChildNode {
-  return (
-    typeof node === "string" ||
-    typeof node === "boolean" ||
-    typeof node === "number"
-  );
-}
-
-export function isGenericChildNode(node: unknown): node is GenericNode {
-  return !isStaticChildNode(node);
-}
-
-export function isUnknownJSXNode(node: unknown): node is UnknownJSXNode {
-  return typeof node === "object" || typeof node === "function";
 }
