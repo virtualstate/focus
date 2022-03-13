@@ -79,8 +79,9 @@
     "./src/polyfill": "./src/polyfill.ts",
     "./src/location": "./src/location.ts",
     "./src/history": "./src/history.ts",
-    "./esnext/util/parse-dom-deno.js": "./src/util/parse-dom-deno.ts",
-    "./esnext/util/parse-dom.js": "./src/util/parse-dom-deno.ts",
+    "./esnext/util/parse-dom-deno.js": "./esnext/util/parse-dom-deno.ts",
+    "./esnext/util/parse-dom.js": "./esnext/util/parse-dom-deno.ts",
+    "@virtualstate/focus": "./esnext/index.js",
     "cheerio": "./scripts/nop/index.js"
   }
 }
