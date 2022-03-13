@@ -1,8 +1,7 @@
-import * as dom from "dom-lite";
-import { DOMNamespace } from "dom-lite";
+import type { DOMNamespace } from "dom-lite";
 import {ok} from "@virtualstate/focus";
 
-let exportDefault: DOMNamespace = dom.default;
+let exportDefault: DOMNamespace;
 
 try {
     // @ts-ignore
@@ -24,7 +23,16 @@ try {
            HTMLElement: window.HTMLElement,
            Node: window.Node
        };
+   } else {
+       try {
+           const dom = await import("dom-lite");
+           exportDefault = dom.default;
+       } catch {
+
+       }
    }
 }
+
+ok(exportDefault);
 
 export default exportDefault;
