@@ -26,7 +26,6 @@ export function createElement(tagName: string, options?: unknown, ...children: u
         options,
         get instance() {
             if (instance) return instance;
-
             instance = document.createElement(tagName, options);
             setOptions(instance, options);
             return instance;

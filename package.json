@@ -8,7 +8,9 @@
   "sideEffects": false,
   "keywords": [],
   "exports": {
-    ".": "./esnext/index.js"
+    ".": "./esnext/index.js",
+    "./tests": "./esnext/tests/index.js",
+    "./tests/dom-h": "./esnext/tests/dom-h.js"
   },
   "repository": {
     "type": "git",
