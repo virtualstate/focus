@@ -7,7 +7,7 @@ import {h, appendChild, appendDescendants, HTMLElement, document} from "./dom-h"
 
 const value = Math.random();
 
-const div: HTMLElement = <div><input value={1} type="number" /><section id="section" class="a b">{value}</section></div>
+const div: HTMLElement = <div className={["div", "dov"]}><input value={1} type="number" /><section id="section" class="a b">{value}</section></div>
 
 console.log({ div, instance: div instanceof HTMLElement });
 
@@ -16,7 +16,7 @@ const expectedId = `${Math.random()}`
 div.id = expectedId;
 div.setAttribute("id", expectedId);
 
-console.log({ id: div.getAttribute("id"), [expectedId]: div.getAttribute(expectedId) });
+console.log({ id: div.getAttribute("id"), [expectedId]: div.getAttribute(expectedId), className: div.className });
 
 ok(div.getAttribute("id") === expectedId || div.getAttribute(expectedId) === expectedId);
 
