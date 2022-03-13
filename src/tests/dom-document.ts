@@ -18,7 +18,13 @@ try {
 
     exportDefault = nextDefault;
 } catch {
-
+   if (typeof window !== "undefined" && window.document) {
+       exportDefault = {
+           document: window.document,
+           HTMLElement: window.HTMLElement,
+           Node: window.Node
+       };
+   }
 }
 
 export default exportDefault;
