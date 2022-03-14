@@ -60,6 +60,10 @@ ok(object.type === "text");
 
 JSX nodes can have children nodes associated with them, this lets us create trees and graphs with JSX
 
+Children may be resolvable completely synchronously, or async, either way, we use an async interface to our
+JSX node's children to ensure a consistent API across all nodes, and allowing this
+resolution to be freely swapped behind the scenes without changing dependent implementation.
+
 One way we can read this tree is as if each node was a parent to some children, if we need to access
 those same children's children, we just repeat the same process again, until we have explored the entire tree.
 
