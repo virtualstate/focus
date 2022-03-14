@@ -1,4 +1,4 @@
-import { getName } from "@virtualstate/focus";
+import { name } from "@virtualstate/focus";
 import { descendants, descendantsSettled } from "@virtualstate/focus";
 import { ok } from "@virtualstate/focus";
 import {
@@ -18,7 +18,11 @@ const div: HTMLElement = (
       value={1}
       type="number"
     />
-    <section id="section" class="a b" style="font-weight: normal; color: yellow;">
+    <section
+      id="section"
+      class="a b"
+      style="font-weight: normal; color: yellow;"
+    >
       {value}
     </section>
   </div>
@@ -62,8 +66,8 @@ await appendChild(div, document.body);
 console.log({ descendants: await descendants(div) });
 
 const d = await descendants(div);
-const input = d.find((node) => getName(node) === "input");
-const section = d.find((node) => getName(node) === "section");
+const input = d.find((node) => name(node) === "input");
+const section = d.find((node) => name(node) === "section");
 
 console.dir({
   section,
@@ -72,7 +76,7 @@ console.dir({
         classList: section.classList,
         className: section.className,
         style: section.style,
-          styleAttribute: section.getAttribute("style"),
+        styleAttribute: section.getAttribute("style"),
       }
     : undefined),
 });

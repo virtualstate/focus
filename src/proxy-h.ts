@@ -40,7 +40,7 @@ export function h(
   options?: Record<string | symbol, unknown>,
   ...children: unknown[]
 ): ProxyNode<GettersRecord> {
-  const passedContext = options[ProxyContext];
+  const passedContext = options?.[ProxyContext];
   const context = isLike<ProxyContextOptions>(passedContext)
     ? passedContext
     : ({ getters, proxy } as const);

@@ -21,13 +21,13 @@ export function ok(value: unknown, message?: string): asserts value {
 export function isRejected<R extends PromiseRejectedResult>(
   value: PromiseSettledResult<unknown>
 ): value is R {
-  return value.status === "rejected";
+  return value?.status === "rejected";
 }
 
 export function isFulfilled<T>(
   value: PromiseSettledResult<T>
 ): value is PromiseFulfilledResult<T> {
-  return value.status === "fulfilled";
+  return value?.status === "fulfilled";
 }
 
 export function isDescendantFulfilled(
@@ -50,6 +50,7 @@ export function isKeyIn<U, K extends string | symbol | number>(
 export function isKey(unknown: UnknownJSXNode, key: Key): key is Key;
 export function isKey<K extends Key>(unknown: unknown, key: Key): key is K;
 export function isKey(unknown: UnknownJSXNode, key: Key): key is Key {
+  if (!unknown) return false;
   const value = unknown[key];
   return typeof value !== "undefined" && value !== null;
 }
@@ -67,7 +68,7 @@ export function isNode<T extends UnknownJSXNode>(node: unknown): node is T {
 }
 
 export function isUnknownJSXNode(node: unknown): node is UnknownJSXNode {
-  return typeof node === "object" || typeof node === "function";
+  return !!node && (typeof node === "object" || typeof node === "function");
 }
 
 export function assertUnknownJSXNode(

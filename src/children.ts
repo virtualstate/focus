@@ -1,5 +1,9 @@
 import { UnknownJSXNode } from "./node";
-import { getChildren, isFragment, isProxyContextOptions } from "./access";
+import {
+  getChildrenFromRawNode,
+  isFragment,
+  isProxyContextOptions,
+} from "./access";
 import { isArray, isAsyncIterable, isIterable } from "./is";
 import { union } from "@virtualstate/union";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
@@ -106,7 +110,7 @@ export async function* childrenSettledGenerator(
   let knownLength = 0;
   try {
     for await (const snapshot of childrenSettledGeneratorInner(
-      getChildren(node),
+      getChildrenFromRawNode(node),
       (options?.component ?? component)(node)
     )) {
       knownLength = snapshot.length;
@@ -120,7 +124,7 @@ export async function* childrenSettledGenerator(
   }
 
   async function* childrenSettledGeneratorInner(
-    input: ReturnType<typeof getChildren>,
+    input: ReturnType<typeof getChildrenFromRawNode>,
     component?: AsyncIterable<unknown>
   ): ReturnType<typeof yieldSnapshot> {
     if (component) {
@@ -168,6 +172,10 @@ export async function* childrenSettledGenerator(
     )[] = [...snapshotStatus];
     for (const [index] of fragments) {
       workingSet[+index] = undefined;
+    }
+
+    if (fragments.length !== snapshot.length) {
+      yield workingSet.flatMap((value) => value);
     }
 
     for await (const fragmentUpdates of all(
