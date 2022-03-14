@@ -18,7 +18,7 @@ const div: HTMLElement = (
       value={1}
       type="number"
     />
-    <section id="section" class="a b">
+    <section id="section" class="a b" style="font-weight: normal; color: yellow;">
       {value}
     </section>
   </div>
@@ -72,6 +72,7 @@ console.dir({
         classList: section.classList,
         className: section.className,
         style: section.style,
+          styleAttribute: section.getAttribute("style"),
       }
     : undefined),
 });
