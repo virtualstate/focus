@@ -1,16 +1,17 @@
 import { UnknownJSXNode } from "./node";
-import {
-  getChildren,
-  isFragment,
-  isProxyContextOptions,
-} from "./access";
+import { getChildren, isFragment, isProxyContextOptions } from "./access";
 import { isArray, isAsyncIterable, isIterable } from "./is";
 import { union } from "@virtualstate/union";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
 import { component } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
 import { all } from "@virtualstate/promise";
-import {isFulfilled, isRejected, isStaticChildNode, isUnknownJSXNode} from "./like";
+import {
+  isFulfilled,
+  isRejected,
+  isStaticChildNode,
+  isUnknownJSXNode,
+} from "./like";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 

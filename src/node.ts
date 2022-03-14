@@ -1,6 +1,6 @@
 import { isAsyncIterable, isIterable } from "./is";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
-import {isGenericChildNode, isKey, isStaticChildNode, ok} from "./like";
+import { isGenericChildNode, isKey, isStaticChildNode, ok } from "./like";
 import { union } from "@virtualstate/union";
 
 export type Key = string | symbol;

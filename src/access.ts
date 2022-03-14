@@ -1,5 +1,12 @@
 import { isAsyncIterable, isIterable } from "./is";
-import {assertUnknownJSXNode, isKey, isKeyIn, isLike, isUnknownJSXNode, ok} from "./like";
+import {
+  assertUnknownJSXNode,
+  isKey,
+  isKeyIn,
+  isLike,
+  isUnknownJSXNode,
+  ok,
+} from "./like";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
@@ -24,7 +31,7 @@ export const possibleNameKeysStrings = [
   "$$type",
   "reference",
   "name",
-  "tagName"
+  "tagName",
 ] as const;
 export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
@@ -234,7 +241,10 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
   const source = isUnknownJSXNode(instance) ? instance : node;
   const target = new Proxy(source, {
     get(target, p) {
-      if (isUnknownJSXNode(instance) && (isKeyIn(instance, p) || isKey(instance, p))) {
+      if (
+        isUnknownJSXNode(instance) &&
+        (isKeyIn(instance, p) || isKey(instance, p))
+      ) {
         const value = instance[p];
         if (typeof value === "function") {
           return value.bind(instance);
@@ -248,7 +258,7 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
         instance[p] = value;
       }
       return true;
-    }
+    },
   });
   ok<ProxyNode<Get, N>>(target);
   return target;
@@ -274,9 +284,9 @@ export function get(
   return fn(node, context);
 }
 
-export function getName(node: UnknownJSXNode): string | symbol | undefined
-export function getName(node: unknown): string | symbol | undefined
-export function getName(node: UnknownJSXNode): string | symbol | undefined{
+export function getName(node: UnknownJSXNode): string | symbol | undefined;
+export function getName(node: unknown): string | symbol | undefined;
+export function getName(node: UnknownJSXNode): string | symbol | undefined {
   const nameKey = getNameKey(node);
   const value = node[nameKey];
   if (isUnknownJSXNode(value)) {
