@@ -12,13 +12,13 @@ This project is in semver alpha stage
 
 ### Test Coverage
 
- ![89.87%25 lines covered](https://img.shields.io/badge/lines-89.87%25-brightgreen) ![89.87%25 statements covered](https://img.shields.io/badge/statements-89.87%25-brightgreen) ![86.67%25 functions covered](https://img.shields.io/badge/functions-86.67%25-brightgreen) ![80.9%25 branches covered](https://img.shields.io/badge/branches-80.9%25-brightgreen)
+ ![89.88%25 lines covered](https://img.shields.io/badge/lines-89.88%25-brightgreen) ![89.88%25 statements covered](https://img.shields.io/badge/statements-89.88%25-brightgreen) ![86.67%25 functions covered](https://img.shields.io/badge/functions-86.67%25-brightgreen) ![80.9%25 branches covered](https://img.shields.io/badge/branches-80.9%25-brightgreen)
 
 [//]: # (badges)
 
 # How to read JSX trees
 
-## The actual JSX node
+# The actual JSX node
 
 A single JSX node is something we can inspect directly without any additional resolution (that may require async)
 
@@ -26,7 +26,7 @@ This can tell us things like, what kind of node it is, for example through its t
 identifying property, this lets us tell forms from inputs, identify fragment nodes, or identify an associated class or
 function's name.
 
-### name
+## name
 
 Through focus, you can use the `name` accessor
 
@@ -38,7 +38,7 @@ node = <named />;
 ok(name(node) === "named");
 ```
 
-### properties
+## properties
 
 JSX nodes can have key value pairs associated to them, these can be used for attributes, options, or properties,
 depending on what the node will be used for!
@@ -56,7 +56,9 @@ ok(object.key === "value");
 ok(object.type === "text");
 ```
 
-# children
+# Async + Other Accessors
+
+## children
 
 JSX nodes can have children nodes associated with them, this lets us create trees and graphs with JSX
 

@@ -5,7 +5,7 @@ let tree, node, object, snapshot, rawNode, api, proxied;
 /*
 # How to read JSX trees
 
-## The actual JSX node
+# The actual JSX node
 
 A single JSX node is something we can inspect directly without any additional resolution (that may require async)
 
@@ -13,7 +13,7 @@ This can tell us things like, what kind of node it is, for example through its t
 identifying property, this lets us tell forms from inputs, identify fragment nodes, or identify an associated class or
 function's name.
 
-### name
+## name
 
 Through focus, you can use the `name` accessor
  */
@@ -24,7 +24,7 @@ node = <named />;
 ok(name(node) === "named");
 
 /*
-### properties
+## properties
 
 JSX nodes can have key value pairs associated to them, these can be used for attributes, options, or properties,
 depending on what the node will be used for!
@@ -41,7 +41,9 @@ ok(object.key === "value");
 ok(object.type === "text");
 
 /*
-# children
+# Async + Other Accessors
+
+## children
 
 JSX nodes can have children nodes associated with them, this lets us create trees and graphs with JSX
 
