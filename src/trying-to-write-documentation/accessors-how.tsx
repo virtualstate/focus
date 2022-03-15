@@ -1,6 +1,6 @@
 import {ok, h} from "@virtualstate/focus";
 
-let tree, node, object, snapshot;
+let tree, node, object, snapshot, rawNode, api, proxied;
 
 /*
 # How to read JSX trees
@@ -202,5 +202,63 @@ for await (snapshot of descendantsSettled(tree)) {
     ok(snapshot[1].status === "fulfilled");
     ok(!snapshot[2] || snapshot[2].parent === snapshot[1].value);
 }
+
+/*
+## raw
+
+The value you have access to, returned from the JSX node creation process, may not be the original representation
+used for the JSX node. This original raw representation may be helpful when creating new accessor functions, or
+what to inspect source definitions of component functions.
+
+If there is another representation available, the `raw` accessor can be used to access it, if there
+is no raw representation, then that means the passed node is a raw representation itself, which is returned by default.
+ */
+const { raw } = await import("@virtualstate/focus");
+
+node = <named />
+rawNode = raw(node);
+ok(name(rawNode) === "named");
+
+/*
+## proxy
+
+To provide a new interface for a JSX node, or provide a different object completely, while still providing support
+for the above JSX accessors, the `proxy` function can be used
+ */
+const { proxy } = await import("@virtualstate/focus");
+
+node = <named />
+
+api = { name };
+proxied = proxy(node, api);
+ok(proxied.name === "named");
+
+api = { someAccessorName: name };
+proxied = proxy(node, api);
+ok(proxied.someAccessorName === "named");
+
+/*
+If a `instance` accessor is provided, then this can be used to provide a new object completely
+ */
+
+api = {
+    instance() {
+        return { name: Math.random(), source: Math.random() }
+    }
+}
+proxied = proxy(node, api);
+
+ok(typeof proxied.name === "number");
+ok(typeof proxied.source === "number");
+ok(name(proxied) === "named");
+
+/*
+When instance is used, `raw` becomes useful:
+ */
+
+rawNode = raw(proxied);
+ok(name(rawNode) === "named");
+ok(typeof rawNode.name !== "number");
+ok(rawNode === raw(node));
 
 export default 1;

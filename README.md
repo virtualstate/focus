@@ -12,7 +12,7 @@ This project is in semver alpha stage
 
 ### Test Coverage
 
- ![89.52%25 lines covered](https://img.shields.io/badge/lines-89.52%25-brightgreen) ![89.52%25 statements covered](https://img.shields.io/badge/statements-89.52%25-brightgreen) ![86.54%25 functions covered](https://img.shields.io/badge/functions-86.54%25-brightgreen) ![80.65%25 branches covered](https://img.shields.io/badge/branches-80.65%25-brightgreen)
+ ![89.87%25 lines covered](https://img.shields.io/badge/lines-89.87%25-brightgreen) ![89.87%25 statements covered](https://img.shields.io/badge/statements-89.87%25-brightgreen) ![86.67%25 functions covered](https://img.shields.io/badge/functions-86.67%25-brightgreen) ![80.9%25 branches covered](https://img.shields.io/badge/branches-80.9%25-brightgreen)
 
 [//]: # (badges)
 
@@ -38,7 +38,7 @@ node = <named />;
 ok(name(node) === "named");
 ```
 
-### Properties
+### properties
 
 JSX nodes can have key value pairs associated to them, these can be used for attributes, options, or properties,
 depending on what the node will be used for!
@@ -56,7 +56,7 @@ ok(object.key === "value");
 ok(object.type === "text");
 ```
 
-# Children
+# children
 
 JSX nodes can have children nodes associated with them, this lets us create trees and graphs with JSX
 
@@ -142,7 +142,7 @@ for await (snapshot of childrenSettled(tree)) {
 }
 ```
 
-## Descendants
+## descendants
 
 Instead of just the direct children of a single JSX node, you may want to find out all descendants that you can reach
 
@@ -222,4 +222,64 @@ for await (snapshot of descendantsSettled(tree)) {
     ok(snapshot[1].status === "fulfilled");
     ok(!snapshot[2] || snapshot[2].parent === snapshot[1].value);
 }
+```
+
+## raw
+
+The value you have access to, returned from the JSX node creation process, may not be the original representation
+used for the JSX node. This original raw representation may be helpful when creating new accessor functions, or
+what to inspect source definitions of component functions.
+
+If there is another representation available, the `raw` accessor can be used to access it, if there
+is no raw representation, then that means the passed node is a raw representation itself, which is returned by default.
+
+```typescript jsx
+const { raw } = await import("@virtualstate/focus");
+
+node = <named />
+rawNode = raw(node);
+ok(name(rawNode) === "named");
+```
+
+## proxy
+
+To provide a new interface for a JSX node, or provide a different object completely, while still providing support
+for the above JSX accessors, the `proxy` function can be used
+
+```typescript jsx
+const { proxy } = await import("@virtualstate/focus");
+
+node = <named />
+
+api = { name };
+proxied = proxy(node, api);
+ok(proxied.name === "named");
+
+api = { someAccessorName: name };
+proxied = proxy(node, api);
+ok(proxied.someAccessorName === "named");
+```
+
+If a `instance` accessor is provided, then this can be used to provide a new object completely
+
+```typescript jsx
+api = {
+    instance() {
+        return { name: Math.random(), source: Math.random() }
+    }
+}
+proxied = proxy(node, api);
+
+ok(typeof proxied.name === "number");
+ok(typeof proxied.source === "number");
+ok(name(proxied) === "named");
+```
+
+When instance is used, `raw` becomes useful:
+
+```typescript jsx
+rawNode = raw(proxied);
+ok(name(rawNode) === "named");
+ok(typeof rawNode.name !== "number");
+ok(rawNode === raw(node));
 ```

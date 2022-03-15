@@ -89,6 +89,13 @@ export const possibleInstanceKeys = [
   Symbol.for("@virtualstate/fringe/SourceInstance"),
   ...possibleInstanceKeysStrings,
 ] as const;
+const Raw = Symbol.for("@virtualstate/fringe/tools/raw");
+export const possibleRawKeys = [
+  Symbol.for(":kdl/raw"),
+  Symbol.for(":jsx/raw"),
+  Symbol.for("@virtualstate/fringe/raw"),
+  Raw
+] as const;
 
 export type NameKeys = typeof possibleNameKeys[number];
 export type PropertiesKeys = typeof possiblePropertiesKeys[number];
@@ -96,6 +103,7 @@ export type ChildrenKeys = typeof possibleChildrenKeys[number];
 export type ValueKeys = typeof possibleValuesKeys[number];
 export type TagKeys = typeof possibleTagKeys[number];
 export type InstanceKeys = typeof possibleInstanceKeys[number];
+export type RawKeys = typeof possibleRawKeys[number];
 
 export type NameAccessors = Record<NameKeys, ReturnType<typeof name>>;
 export type PropertiesAccessors = Record<
@@ -112,13 +120,18 @@ export type InstanceAccessors = Record<
   InstanceKeys,
   ReturnType<typeof instance>
 >;
+export type RawAccessors = Record<
+  RawKeys,
+  ReturnType<typeof raw>
+>;
 
 export type GenericAccessors = NameAccessors &
   PropertiesAccessors &
   ChildrenAccessors &
   ValuesAccessors &
   TagAccessors &
-  InstanceAccessors;
+  InstanceAccessors &
+  RawAccessors;
 
 interface GenericGetFn {
   (node: UnknownJSXNode, context?: unknown): unknown;
@@ -134,11 +147,13 @@ const GenericNodeFunctions: GettersRecord = Object.fromEntries([
   ...possiblePropertiesKeys.map((key) => pair(key, properties)),
   ...possibleValuesKeys.map((key) => pair(key, values)),
   ...possibleInstanceKeys.map((key) => pair(key, instance)),
+  ...possibleRawKeys.map((key) => pair(key, raw)),
 ]);
 
 export type StaticChildNode = string | number | boolean;
-export type AnyStaticChildNode = string | number | boolean | null | undefined;
-export type ChildNode = AnyStaticChildNode | UnknownJSXNode;
+// export type AnyStaticChildNode = string | number | boolean | null | undefined;
+// export type ChildNode = AnyStaticChildNode | UnknownJSXNode;
+
 //
 // export interface GenericNode extends UnknownJSXNodeRecord {
 //     name?: string | symbol;
@@ -163,7 +178,6 @@ type GettersRecordKeys<
   K extends keyof Get = keyof Get
 > = string | symbol extends K ? never : K;
 
-const Raw = Symbol.for("@virtualstate/fringe/tools/raw");
 export type RawNode<N> = {
   __raw?: typeof Raw;
   [Raw]: N;
@@ -218,12 +232,6 @@ export function isProxyContextOptions(
   );
 }
 
-export function raw(node: UnknownJSXNode): UnknownJSXNode {
-  const value = node[Raw] ?? node;
-  ok<UnknownJSXNode>(value);
-  return value;
-}
-
 export function proxy<
   Get extends GettersRecord = GettersRecord,
   Context extends ProxyContextOptions = ProxyContextOptions,
@@ -239,10 +247,13 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
   context?: unknown
 ): ProxyNode<Get, N> {
   assertUnknownJSXNode(node);
-  const nodeInstance = instance(node);
+  const nodeInstance = (getters?.instance ?? instance)(node);
   const source = isUnknownJSXNode(nodeInstance) ? nodeInstance : node;
   const target = new Proxy(source, {
     get(target, p) {
+      if (typeof p === "symbol" && possibleRawKeys.includes(p)) {
+        return raw(node);
+      }
       if (
         isUnknownJSXNode(nodeInstance) &&
         (isKeyIn(nodeInstance, p) || isKey(nodeInstance, p))
@@ -273,12 +284,6 @@ function get(
   context?: unknown
 ): unknown {
   assertUnknownJSXNode(node);
-  if (key === Raw) {
-    if (node[Raw]) {
-      return get(key, node[Raw], getters, context);
-    }
-    return node;
-  }
   const fn = getters?.[key] ?? GenericNodeFunctions[key];
   if (!fn) {
     return undefined;
@@ -373,4 +378,15 @@ export function instance(node: UnknownJSXNode): unknown {
   const instanceKey = possibleInstanceKeys.find((key) => isKey(node, key));
   if (!instanceKey) return undefined;
   return node[instanceKey];
+}
+
+
+export function raw(node: UnknownJSXNode): UnknownJSXNode;
+export function raw(node: unknown): UnknownJSXNode;
+export function raw(node: UnknownJSXNode): UnknownJSXNode {
+  const rawKey = possibleRawKeys.find((key) => isKey(node, key));
+  if (!rawKey) return node;
+  const value = node[rawKey];
+  ok<UnknownJSXNode>(value);
+  return value;
 }
