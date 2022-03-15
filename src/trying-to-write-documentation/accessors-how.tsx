@@ -194,5 +194,13 @@ snapshot = await descendantsSettled(tree);
 ok(snapshot[1].status === "fulfilled");
 ok(snapshot[2].parent === snapshot[1].value);
 
+/*
+This can also be accessed using through the `for await` pattern:
+ */
+
+for await (snapshot of descendantsSettled(tree)) {
+    ok(snapshot[1].status === "fulfilled");
+    ok(!snapshot[2] || snapshot[2].parent === snapshot[1].value);
+}
 
 export default 1;

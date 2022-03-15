@@ -12,7 +12,7 @@ This project is in semver alpha stage
 
 ### Test Coverage
 
- ![89.47%25 lines covered](https://img.shields.io/badge/lines-89.47%25-brightgreen) ![89.47%25 statements covered](https://img.shields.io/badge/statements-89.47%25-brightgreen) ![86.54%25 functions covered](https://img.shields.io/badge/functions-86.54%25-brightgreen) ![80.49%25 branches covered](https://img.shields.io/badge/branches-80.49%25-brightgreen)
+ ![89.52%25 lines covered](https://img.shields.io/badge/lines-89.52%25-brightgreen) ![89.52%25 statements covered](https://img.shields.io/badge/statements-89.52%25-brightgreen) ![86.54%25 functions covered](https://img.shields.io/badge/functions-86.54%25-brightgreen) ![80.65%25 branches covered](https://img.shields.io/badge/branches-80.65%25-brightgreen)
 
 [//]: # (badges)
 
@@ -213,4 +213,13 @@ This is helpful when re-creating a tree from these descendants, or creating asso
 snapshot = await descendantsSettled(tree);
 ok(snapshot[1].status === "fulfilled");
 ok(snapshot[2].parent === snapshot[1].value);
+```
+
+This can also be accessed using through the `for await` pattern:
+
+```typescript
+for await (snapshot of descendantsSettled(tree)) {
+    ok(snapshot[1].status === "fulfilled");
+    ok(!snapshot[2] || snapshot[2].parent === snapshot[1].value);
+}
 ```
