@@ -97,6 +97,8 @@ for await (snapshot of children(tree)) {
 }
 
 /*
+## childrenSettled
+
 Some children may also throw errors, meaning you may want some way to observe the state of each individual
 child node, using children that are fulfilled, and deciding what to do with children that rejected
 
@@ -159,6 +161,8 @@ for await (snapshot of descendants(tree)) {
 }
 
 /*
+## descendantsSettled
+
 You may want to be able to observe the resolution state of all descendants, as with `childrenSettled`
 
 For this you can use the `descendantsSettled` accessor
