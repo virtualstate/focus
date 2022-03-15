@@ -8,6 +8,7 @@ import {
   ok,
 } from "./like";
 import {isComponentNode} from "./component";
+import {read} from "fs";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
@@ -251,8 +252,12 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
   const source = isUnknownJSXNode(nodeInstance) ? nodeInstance : node;
   const target = new Proxy(source, {
     get(target, p) {
-      if (typeof p === "symbol" && possibleRawKeys.includes(p)) {
+      if (includesKey(p, possibleRawKeys)) {
         return raw(node);
+      }
+      if (includesKey(p, possibleInstanceKeys)) {
+        // Even return if undefined, saves resolution later
+        return nodeInstance;
       }
       if (
         isUnknownJSXNode(nodeInstance) &&
@@ -275,6 +280,10 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
   });
   ok<ProxyNode<Get, N>>(target);
   return target;
+}
+
+function includesKey(key: Key, keys: readonly Key[]) {
+  return keys.includes(key);
 }
 
 function get(

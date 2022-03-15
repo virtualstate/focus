@@ -2,7 +2,7 @@ import { createFragment } from "./static-h";
 import { isAsyncIterable, isIterable } from "./is";
 import { getChildrenFromRawNode, getNameKey, properties, raw } from "./access";
 import { UnknownJSXNode } from "./node";
-import {isLike, isUnknownJSXNode} from "./like";
+import { isLike, isUnknownJSXNode } from "./like";
 
 interface ComponentFn {
   (options: Record<string | symbol, unknown>, input?: UnknownJSXNode): void;

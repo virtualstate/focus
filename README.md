@@ -12,7 +12,7 @@ This project is in semver alpha stage
 
 ### Test Coverage
 
- ![89.88%25 lines covered](https://img.shields.io/badge/lines-89.88%25-brightgreen) ![89.88%25 statements covered](https://img.shields.io/badge/statements-89.88%25-brightgreen) ![86.67%25 functions covered](https://img.shields.io/badge/functions-86.67%25-brightgreen) ![80.9%25 branches covered](https://img.shields.io/badge/branches-80.9%25-brightgreen)
+ ![90.01%25 lines covered](https://img.shields.io/badge/lines-90.01%25-brightgreen) ![90.01%25 statements covered](https://img.shields.io/badge/statements-90.01%25-brightgreen) ![86.92%25 functions covered](https://img.shields.io/badge/functions-86.92%25-brightgreen) ![81%25 branches covered](https://img.shields.io/badge/branches-81%25-brightgreen)
 
 [//]: # (badges)
 
@@ -288,4 +288,24 @@ rawNode = raw(proxied);
 ok(name(rawNode) === "named");
 ok(typeof rawNode.name !== "number");
 ok(rawNode === raw(node));
+```
+
+## instance
+
+If you need to access the original instance that is being proxied, you can use
+the `instance` accessor.
+
+```typescript jsx
+const { instance } = await import("@virtualstate/focus");
+
+staticInstance = { something: 1 }
+api = {
+    instance() {
+        return staticInstance
+    }
+}
+proxied = proxy(node, api);
+nodeInstance = instance(proxied);
+ok(typeof proxied.something === "number");
+ok(nodeInstance === staticInstance);
 ```

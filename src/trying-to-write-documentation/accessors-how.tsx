@@ -1,6 +1,6 @@
 import {ok, h} from "@virtualstate/focus";
 
-let tree, node, object, snapshot, rawNode, api, proxied;
+let tree, node, object, snapshot, rawNode, api, proxied, nodeInstance, staticInstance: unknown;
 
 /*
 # How to read JSX trees
@@ -266,5 +266,22 @@ rawNode = raw(proxied);
 ok(name(rawNode) === "named");
 ok(typeof rawNode.name !== "number");
 ok(rawNode === raw(node));
+
+/*
+If you need to access the original instance that is being proxied, you can use
+the `instance` accessor.
+ */
+const { instance } = await import("@virtualstate/focus");
+
+staticInstance = { something: 1 }
+api = {
+    instance() {
+        return staticInstance
+    }
+}
+proxied = proxy(node, api);
+nodeInstance = instance(proxied);
+ok(typeof proxied.something === "number");
+ok(nodeInstance === staticInstance);
 
 export default 1;
