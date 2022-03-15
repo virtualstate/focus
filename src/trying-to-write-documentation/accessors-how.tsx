@@ -283,5 +283,6 @@ proxied = proxy(node, api);
 nodeInstance = instance(proxied);
 ok(typeof proxied.something === "number");
 ok(nodeInstance === staticInstance);
+ok(nodeInstance !== proxied);
 
 export default 1;
