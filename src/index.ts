@@ -1,4 +1,4 @@
-export { h } from "./proxy-h";
+export * from "./proxy-h";
 export * from "./access";
 export * from "./children";
 export * from "./like";
