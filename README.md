@@ -16,6 +16,8 @@ This project is in semver alpha stage
 
 [//]: # (badges)
 
+[//]: # (src/trying-to-write-documentation/accessors-how.tsx)
+
 # How to read JSX trees
 
 # The actual JSX node
@@ -27,8 +29,6 @@ identifying property, this lets us tell forms from inputs, identify fragment nod
 function's name.
 
 ## name
-
-Through focus, you can use the `name` accessor
 
 ```typescript jsx
 const { name } = await import("@virtualstate/focus");
@@ -42,8 +42,6 @@ ok(name(node) === "named");
 
 JSX nodes can have key value pairs associated to them, these can be used for attributes, options, or properties,
 depending on what the node will be used for!
-
-You can get an object with these values using the `properties` accessor
 
 ```typescript jsx
 const { properties } = await import("@virtualstate/focus");
@@ -69,8 +67,6 @@ resolution to be freely swapped behind the scenes without changing dependent imp
 One way we can read this tree is as if each node was a parent to some children, if we need to access
 those same children's children, we just repeat the same process again, until we have explored the entire tree.
 
-To access a JSX node's children, use the `children` accessor
-
 ```typescript jsx
 const { children } = await import("@virtualstate/focus");
 
@@ -91,8 +87,6 @@ ok(name(snapshot[1]) === "second");
 
 Sometimes a JSX node may have multiple representations of what it's child state looks like,
 instead of using `await` with the result of `children`, we can instead use `for await`
-
-This may be useful where there is some delay in one of the child node's from resolving
 
 ```typescript jsx
 async function Component() {
@@ -119,7 +113,6 @@ Some children may also throw errors, meaning you may want some way to observe th
 child node, using children that are fulfilled, and deciding what to do with children that rejected
 
 For this you can use the `childrenSettled` accessor, this has both the `await` and `for await` functionality
-like `children`
 
 ```typescript jsx
 const { childrenSettled } = await import("@virtualstate/focus");
@@ -150,15 +143,13 @@ for await (snapshot of childrenSettled(tree)) {
 
 Instead of just the direct children of a single JSX node, you may want to find out all descendants that you can reach
 
-For this, you can use the `descendants` accessor
-
 ```typescript jsx
 const { descendants } = await import("@virtualstate/focus");
 
 tree = (
     <parent>
         <first />
-            <second>
+        <second>
             <third />
         </second>
     </parent>
@@ -169,7 +160,7 @@ ok(name(snapshot[1]) === "second");
 ok(name(snapshot[2]) === "third");
 ```
 
-As with `children`, `descendants` to can be accessed through `for await`
+
 
 ```typescript jsx
 for await (snapshot of descendants(tree)) {
@@ -182,8 +173,6 @@ for await (snapshot of descendants(tree)) {
 ## descendantsSettled
 
 You may want to be able to observe the resolution state of all descendants, as with `childrenSettled`
-
-For this you can use the `descendantsSettled` accessor
 
 ```typescript jsx
 const { descendantsSettled } = await import("@virtualstate/focus");
@@ -212,18 +201,15 @@ for await (snapshot of descendantsSettled(tree)) {
 Because we can expose a bit more information with `descendantsSettled`, you can also
 access the parent of an individual status object.
 
-This is helpful when re-creating a tree from these descendants, or creating associations between them.
-
-
-```typescript
+```typescript jsx
 snapshot = await descendantsSettled(tree);
 ok(snapshot[1].status === "fulfilled");
 ok(snapshot[2].parent === snapshot[1].value);
 ```
 
-This can also be accessed using through the `for await` pattern:
 
-```typescript
+
+```typescript jsx
 for await (snapshot of descendantsSettled(tree)) {
     ok(snapshot[1].status === "fulfilled");
     ok(!snapshot[2] || snapshot[2].parent === snapshot[1].value);
@@ -237,7 +223,6 @@ used for the JSX node. This original raw representation may be helpful when crea
 what to inspect source definitions of component functions.
 
 If there is another representation available, the `raw` accessor can be used to access it, if there
-is no raw representation, then that means the passed node is a raw representation itself, which is returned by default.
 
 ```typescript jsx
 const { raw } = await import("@virtualstate/focus");
@@ -250,7 +235,6 @@ ok(name(rawNode) === "named");
 ## proxy
 
 To provide a new interface for a JSX node, or provide a different object completely, while still providing support
-for the above JSX accessors, the `proxy` function can be used
 
 ```typescript jsx
 const { proxy } = await import("@virtualstate/focus");
@@ -266,7 +250,7 @@ proxied = proxy(node, api);
 ok(proxied.someAccessorName === "named");
 ```
 
-If a `instance` accessor is provided, then this can be used to provide a new object completely
+
 
 ```typescript jsx
 api = {
@@ -281,7 +265,7 @@ ok(typeof proxied.source === "number");
 ok(name(proxied) === "named");
 ```
 
-When instance is used, `raw` becomes useful:
+
 
 ```typescript jsx
 rawNode = raw(proxied);
@@ -290,10 +274,7 @@ ok(typeof rawNode.name !== "number");
 ok(rawNode === raw(node));
 ```
 
-## instance
-
 If you need to access the original instance that is being proxied, you can use
-the `instance` accessor.
 
 ```typescript jsx
 const { instance } = await import("@virtualstate/focus");
@@ -310,3 +291,5 @@ ok(typeof proxied.something === "number");
 ok(nodeInstance === staticInstance);
 ok(nodeInstance !== proxied);
 ```
+
+[//]: # (src/trying-to-write-documentation/accessors-how.tsx)
