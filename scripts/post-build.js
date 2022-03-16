@@ -6,6 +6,8 @@ import ignore from "rollup-plugin-ignore";
 import babel from "rollup-plugin-babel";
 import { dirname, resolve } from "path";
 
+await import("../esnext/trying-to-write-documentation/readme-generator.js");
+
 const { pathname } = new URL(import.meta.url);
 const cwd = resolve(dirname(pathname), "..");
 
