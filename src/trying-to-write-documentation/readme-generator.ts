@@ -58,12 +58,12 @@ function splitAndJoin(code: string, codeType: string) {
             if (endIndex === -1) {
                 throw new Error("Expected to find end of comment");
             }
-            const comment = lines.slice(index + 1, endIndex - 1).join("\n");
+            const comment = lines.slice(index + 1, endIndex).join("\n");
             blocks.push(comment.trim());
             index = endIndex;
         } else {
             const block = lines
-                .slice(index, (commentStart[0] ?? lines.length + 1) - 1)
+                .slice(index, (commentStart[0] ?? lines.length + 1))
                 .join("\n")
                 .replace(/^\s*export default 1;?\s*$/m, "")
                 .trim();
