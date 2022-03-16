@@ -44,7 +44,7 @@ function splitAndJoin(code: string, codeType: string) {
     const lines = code.split("\n");
     const indexed = Object.entries(lines);
     const commentStart = indexed
-        .filter(([,line]) => /^\s*\/\*/.test(line))
+        .filter(([,line]) => /^\s*\/\*/.test(line) && !/^\s*\/\*{2}/.test(line))
         .map(([index]) => +index);
 
     const blocks = [];

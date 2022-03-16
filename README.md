@@ -132,7 +132,11 @@ tree = (
 snapshot = await childrenSettled(tree);
 ok(snapshot[0].status === "fulfilled");
 ok(snapshot[1].status === "rejected");
+```
 
+
+
+```typescript jsx
 for await (snapshot of childrenSettled(tree)) {
     ok(snapshot[0].status === "fulfilled");
     ok(!snapshot[1] || snapshot[1].status === "rejected");
@@ -190,7 +194,11 @@ snapshot = await descendantsSettled(tree);
 ok(snapshot[0].status === "fulfilled");
 ok(snapshot[1].status === "fulfilled");
 ok(snapshot[2].status === "rejected");
+```
 
+
+
+```typescript jsx
 for await (snapshot of descendantsSettled(tree)) {
     ok(snapshot[0].status === "fulfilled");
     ok(snapshot[1].status === "fulfilled");
@@ -244,7 +252,11 @@ node = <named />
 api = { name };
 proxied = proxy(node, api);
 ok(proxied.name === "named");
+```
 
+
+
+```typescript jsx
 api = { someAccessorName: name };
 proxied = proxy(node, api);
 ok(proxied.someAccessorName === "named");

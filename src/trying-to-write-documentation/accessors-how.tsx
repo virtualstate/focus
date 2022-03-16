@@ -2,6 +2,16 @@ import {ok, h} from "@virtualstate/focus";
 
 let tree, node, object, snapshot, rawNode, api, proxied, nodeInstance, staticInstance: unknown;
 
+/**
+ * This is living documentation, change this code, and on build, README.md will be updated
+ *
+ * Comments starting with /* (and not /**) will be treated as markdown
+ * Code is treated as codeblocks
+ *
+ * To split code up, add an empty comment
+ * A comment must have its starting & ending markers on their own lines
+ */
+
 /*
 # How to read JSX trees
 
@@ -123,6 +133,9 @@ snapshot = await childrenSettled(tree);
 ok(snapshot[0].status === "fulfilled");
 ok(snapshot[1].status === "rejected");
 
+/*
+ */
+
 for await (snapshot of childrenSettled(tree)) {
     ok(snapshot[0].status === "fulfilled");
     ok(!snapshot[1] || snapshot[1].status === "rejected");
@@ -183,6 +196,9 @@ ok(snapshot[0].status === "fulfilled");
 ok(snapshot[1].status === "fulfilled");
 ok(snapshot[2].status === "rejected");
 
+/*
+ */
+
 for await (snapshot of descendantsSettled(tree)) {
     ok(snapshot[0].status === "fulfilled");
     ok(snapshot[1].status === "fulfilled");
@@ -238,6 +254,9 @@ node = <named />
 api = { name };
 proxied = proxy(node, api);
 ok(proxied.name === "named");
+
+/*
+ */
 
 api = { someAccessorName: name };
 proxied = proxy(node, api);
