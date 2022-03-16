@@ -14,6 +14,12 @@
       ],
       "tests/dom-h": [
         "./esnext/tests/dom-h.d.ts"
+      ],
+      "proxy-h": [
+        "./esnext/proxy-h.d.ts"
+      ],
+      "static-h": [
+        "./esnext/static-h.d.ts"
       ]
     }
   },
@@ -23,7 +29,9 @@
   "exports": {
     ".": "./esnext/index.js",
     "./tests": "./esnext/tests/index.js",
-    "./tests/dom-h": "./esnext/tests/dom-h.js"
+    "./tests/dom-h": "./esnext/tests/dom-h.js",
+    "./static-h": "./esnext/static-h.js",
+    "./proxy-h": "./esnext/proxy-h.js"
   },
   "repository": {
     "type": "git",

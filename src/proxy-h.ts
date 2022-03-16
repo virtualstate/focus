@@ -3,10 +3,9 @@ import {
   proxy,
   ProxyContextOptions,
   ProxyNode,
-  UnknownJSXNode,
 } from "./access";
 
-import { createFragment as createFragmentFn, h as f } from "./static-h";
+import { h as f } from "./static-h";
 import * as ChildrenAccessors from "./children";
 import * as ComponentAccessors from "./component";
 import { isLike } from "./like";
@@ -52,4 +51,10 @@ export function createFragment(
   ...children: unknown[]
 ) {
   return h(Symbol.for(":kdl/fragment"), options, ...children);
+}
+
+export function named(name: unknown, defaultOptions?: Record<string, unknown>) {
+  return (options?: Record<string, unknown>, ...children: unknown[]) => {
+    return h(name, defaultOptions ? options ? { ...defaultOptions, ...options } : defaultOptions : options, ...children);
+  }
 }

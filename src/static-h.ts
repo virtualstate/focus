@@ -18,3 +18,9 @@ export function createFragment(
 ) {
   return h(Symbol.for(":kdl/fragment"), options, ...children);
 }
+
+export function named(name: string, defaultOptions?: Record<string, unknown>) {
+  return (options?: Record<string, unknown>, ...children: unknown[]) => {
+    return h(name, defaultOptions ? options ? { ...defaultOptions, ...options } : defaultOptions : options, ...children);
+  }
+}
