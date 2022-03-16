@@ -12,7 +12,7 @@ This project is in semver alpha stage
 
 ### Test Coverage
 
- ![90.04%25 lines covered](https://img.shields.io/badge/lines-90.04%25-brightgreen) ![90.04%25 statements covered](https://img.shields.io/badge/statements-90.04%25-brightgreen) ![86.92%25 functions covered](https://img.shields.io/badge/functions-86.92%25-brightgreen) ![81%25 branches covered](https://img.shields.io/badge/branches-81%25-brightgreen)
+ ![90.06%25 lines covered](https://img.shields.io/badge/lines-90.06%25-brightgreen) ![90.06%25 statements covered](https://img.shields.io/badge/statements-90.06%25-brightgreen) ![86.92%25 functions covered](https://img.shields.io/badge/functions-86.92%25-brightgreen) ![81%25 branches covered](https://img.shields.io/badge/branches-81%25-brightgreen)
 
 [//]: # (badges)
 
@@ -50,7 +50,7 @@ You can get an object with these values using the `properties` accessor
 ```typescript jsx
 const { properties } = await import("@virtualstate/focus");
 
-node = <named key="value" type="text" />
+node = <named key="value" type="text" />;
 object = properties(node);
 
 ok<object>(object);
@@ -77,10 +77,10 @@ To access a JSX node's children, use the `children` accessor
 const { children } = await import("@virtualstate/focus");
 
 tree = (
-    <parent>
-        <first />
-        <second />
-    </parent>
+  <parent>
+    <first />
+    <second />
+  </parent>
 );
 
 snapshot = await children(tree);
@@ -98,20 +98,20 @@ This may be useful where there is some delay in one of the child node's from res
 
 ```typescript jsx
 async function Component() {
-    await new Promise<void>(resolve => setTimeout(resolve, 10));
-    return <second />
+  await new Promise<void>((resolve) => setTimeout(resolve, 10));
+  return <second />;
 }
 
 tree = (
-    <parent>
-        <first />
-        <Component />
-    </parent>
+  <parent>
+    <first />
+    <Component />
+  </parent>
 );
 
 for await (snapshot of children(tree)) {
-    ok(name(snapshot[0]) === "first");
-    ok(!snapshot[1] || name(snapshot[1]) === "second");
+  ok(name(snapshot[0]) === "first");
+  ok(!snapshot[1] || name(snapshot[1]) === "second");
 }
 ```
 
@@ -127,15 +127,15 @@ like `children`
 const { childrenSettled } = await import("@virtualstate/focus");
 
 async function ComponentThrows() {
-    await new Promise<void>(resolve => setTimeout(resolve, 10));
-    throw new Error("Some error!");
+  await new Promise<void>((resolve) => setTimeout(resolve, 10));
+  throw new Error("Some error!");
 }
 
 tree = (
-    <parent>
-        <first />
-        <ComponentThrows />
-    </parent>
+  <parent>
+    <first />
+    <ComponentThrows />
+  </parent>
 );
 
 snapshot = await childrenSettled(tree);
@@ -147,8 +147,8 @@ ok(snapshot[1].status === "rejected");
 
 ```typescript jsx
 for await (snapshot of childrenSettled(tree)) {
-    ok(snapshot[0].status === "fulfilled");
-    ok(!snapshot[1] || snapshot[1].status === "rejected");
+  ok(snapshot[0].status === "fulfilled");
+  ok(!snapshot[1] || snapshot[1].status === "rejected");
 }
 ```
 
@@ -162,12 +162,12 @@ For this, you can use the `descendants` accessor
 const { descendants } = await import("@virtualstate/focus");
 
 tree = (
-    <parent>
-        <first />
-        <second>
-            <third />
-        </second>
-    </parent>
+  <parent>
+    <first />
+    <second>
+      <third />
+    </second>
+  </parent>
 );
 snapshot = await descendants(tree);
 ok(name(snapshot[0]) === "first");
@@ -179,9 +179,9 @@ As with `children`, `descendants` to can be accessed through `for await`
 
 ```typescript jsx
 for await (snapshot of descendants(tree)) {
-    ok(name(snapshot[0]) === "first");
-    ok(name(snapshot[1]) === "second");
-    ok(!snapshot[2] || name(snapshot[2]) === "third");
+  ok(name(snapshot[0]) === "first");
+  ok(name(snapshot[1]) === "second");
+  ok(!snapshot[2] || name(snapshot[2]) === "third");
 }
 ```
 
@@ -195,12 +195,12 @@ For this you can use the `descendantsSettled` accessor
 const { descendantsSettled } = await import("@virtualstate/focus");
 
 tree = (
-    <parent>
-        <first />
-        <second>
-            <ComponentThrows />
-        </second>
-    </parent>
+  <parent>
+    <first />
+    <second>
+      <ComponentThrows />
+    </second>
+  </parent>
 );
 
 snapshot = await descendantsSettled(tree);
@@ -213,9 +213,9 @@ ok(snapshot[2].status === "rejected");
 
 ```typescript jsx
 for await (snapshot of descendantsSettled(tree)) {
-    ok(snapshot[0].status === "fulfilled");
-    ok(snapshot[1].status === "fulfilled");
-    ok(!snapshot[2] || snapshot[2].status === "rejected");
+  ok(snapshot[0].status === "fulfilled");
+  ok(snapshot[1].status === "fulfilled");
+  ok(!snapshot[2] || snapshot[2].status === "rejected");
 }
 ```
 
@@ -234,8 +234,8 @@ This can also be accessed using through the `for await` pattern:
 
 ```typescript jsx
 for await (snapshot of descendantsSettled(tree)) {
-    ok(snapshot[1].status === "fulfilled");
-    ok(!snapshot[2] || snapshot[2].parent === snapshot[1].value);
+  ok(snapshot[1].status === "fulfilled");
+  ok(!snapshot[2] || snapshot[2].parent === snapshot[1].value);
 }
 ```
 
@@ -251,7 +251,7 @@ is no raw representation, then that means the passed node is a raw representatio
 ```typescript jsx
 const { raw } = await import("@virtualstate/focus");
 
-node = <named />
+node = <named />;
 rawNode = raw(node);
 ok(name(rawNode) === "named");
 ```
@@ -264,7 +264,7 @@ for the above JSX accessors, the `proxy` function can be used
 ```typescript jsx
 const { proxy } = await import("@virtualstate/focus");
 
-node = <named />
+node = <named />;
 
 api = { name };
 proxied = proxy(node, api);
@@ -283,10 +283,10 @@ If a `instance` accessor is provided, then this can be used to provide a new obj
 
 ```typescript jsx
 api = {
-    instance() {
-        return { name: Math.random(), source: Math.random() }
-    }
-}
+  instance() {
+    return { name: Math.random(), source: Math.random() };
+  },
+};
 proxied = proxy(node, api);
 
 ok(typeof proxied.name === "number");
@@ -309,12 +309,12 @@ the `instance` accessor.
 ```typescript jsx
 const { instance } = await import("@virtualstate/focus");
 
-staticInstance = { something: 1 }
+staticInstance = { something: 1 };
 api = {
-    instance() {
-        return staticInstance
-    }
-}
+  instance() {
+    return staticInstance;
+  },
+};
 proxied = proxy(node, api);
 nodeInstance = instance(proxied);
 ok(typeof proxied.something === "number");

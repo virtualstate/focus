@@ -7,8 +7,8 @@ import {
   isUnknownJSXNode,
   ok,
 } from "./like";
-import {isComponentNode} from "./component";
-import {read} from "fs";
+import { isComponentNode } from "./component";
+import { read } from "fs";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
@@ -95,7 +95,7 @@ export const possibleRawKeys = [
   Symbol.for(":kdl/raw"),
   Symbol.for(":jsx/raw"),
   Symbol.for("@virtualstate/fringe/raw"),
-  Raw
+  Raw,
 ] as const;
 
 export type NameKeys = typeof possibleNameKeys[number];
@@ -121,10 +121,7 @@ export type InstanceAccessors = Record<
   InstanceKeys,
   ReturnType<typeof instance>
 >;
-export type RawAccessors = Record<
-  RawKeys,
-  ReturnType<typeof raw>
->;
+export type RawAccessors = Record<RawKeys, ReturnType<typeof raw>>;
 
 export type GenericAccessors = NameAccessors &
   PropertiesAccessors &
@@ -375,7 +372,6 @@ export function instance(node: UnknownJSXNode): unknown {
   if (!instanceKey) return undefined;
   return node[instanceKey];
 }
-
 
 export function raw(node: UnknownJSXNode): UnknownJSXNode;
 export function raw(node: unknown): UnknownJSXNode;

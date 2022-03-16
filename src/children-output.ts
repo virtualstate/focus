@@ -36,7 +36,7 @@ export type ChildrenArrayTupleResolution<Z, T extends unknown[]> = T extends [
       [Z, ...IsFragment<T, ChildrenArray<T>, [T]>]
     >;
 
-export type ChildrenArray<
+export type ChildrenArray0<
   N,
   C extends ChildrenOfNode<N> = ChildrenOfNode<N>
 > = C extends Readonly<[infer Z, ...infer T]>
@@ -52,6 +52,11 @@ export type ChildrenArray<
   : C extends AsyncIterable<Iterable<infer T>>
   ? FlatArray<T>
   : unknown[];
+
+export type ChildrenArray<
+  N,
+  C extends ChildrenOfNode<N> = ChildrenOfNode<N>
+> = ChildrenArray0<N, C> extends never ? unknown[] : ChildrenArray0<N, C>;
 
 type ValuesOf<A> = A[keyof A];
 
