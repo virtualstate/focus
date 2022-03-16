@@ -51,7 +51,7 @@ export type ChildrenArray<
   ? ChildrenArrayTupleResolution<Z, T>
   : C extends AsyncIterable<Iterable<infer T>>
   ? FlatArray<T>
-  : never[] & { length: 0 };
+  : unknown[];
 
 type ValuesOf<A> = A[keyof A];
 
