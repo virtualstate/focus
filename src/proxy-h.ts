@@ -50,7 +50,7 @@ export function createFragment(
   options?: Record<string | symbol, unknown>,
   ...children: unknown[]
 ) {
-  return h(Symbol.for(":kdl/fragment"), options, ...children);
+  return h(Symbol.for(":jsx/fragment"), options, ...children);
 }
 
 export function named(name: unknown, defaultOptions?: Record<string, unknown>) {
