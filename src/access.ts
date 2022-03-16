@@ -152,21 +152,8 @@ const GenericNodeFunctions: GettersRecord = Object.fromEntries([
 ]);
 
 export type StaticChildNode = string | number | boolean;
-// export type AnyStaticChildNode = string | number | boolean | null | undefined;
-// export type ChildNode = AnyStaticChildNode | UnknownJSXNode;
 
-//
-// export interface GenericNode extends UnknownJSXNodeRecord {
-//     name?: string | symbol;
-//     tag?: string | symbol;
-//     props: Record<string, unknown>;
-//     values: Iterable<AnyStaticChildNode>;
-//     children: AsyncIterable<ChildNode[]> | Iterable<ChildNode>;
-// }
-
-export interface FragmentNode extends UnknownJSXNode {}
-
-export function isFragment(node: unknown): node is FragmentNode {
+export function isFragment(node: unknown): boolean {
   if (!node) return false;
   if (!isUnknownJSXNode(node)) return false;
   if (isComponentNode(node)) return true;
