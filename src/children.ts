@@ -127,7 +127,7 @@ export async function* childrenSettledGenerator(
     input: ReturnType<typeof getChildrenFromRawNode>,
     component?: AsyncIterable<unknown>
   ): ReturnType<typeof yieldSnapshot> {
-    if (component) {
+    if (component && isAsyncIterable(component)) {
       yield* childrenSettledGeneratorInner(component);
     } else if (isIterable(input)) {
       yield* yieldSnapshot(input);
@@ -263,25 +263,35 @@ export async function* descendantsSettledGenerator(
   node: unknown,
   options?: DescendantsOptions
 ): AsyncIterable<DescendantPromiseSettledResult[]> {
-  if (!isUnknownJSXNode(node)) return;
-  const parent = node;
-  let knownLength = 0;
-  try {
-    for await (const snapshot of descendantsSettledGeneratorInner()) {
-      knownLength = snapshot.length;
-      yield snapshot;
+
+  yield * descendantsSettledGeneratorCaught(node, options);
+
+  async function *descendantsSettledGeneratorCaught(
+      node: unknown,
+      options?: DescendantsOptions) {
+    if (!isUnknownJSXNode(node)) return;
+    const parent = node;
+    let knownLength = 0;
+    try {
+      for await (const snapshot of descendantsSettledGeneratorInner(node, options)) {
+        knownLength = snapshot.length;
+        yield snapshot;
+      }
+    } catch (reason) {
+      const rejected = { reason, status: "rejected", parent } as const;
+      yield knownLength
+          ? Array.from({ length: knownLength }, () => rejected)
+          : [rejected];
     }
-  } catch (reason) {
-    const rejected = { reason, status: "rejected", parent } as const;
-    yield knownLength
-      ? Array.from({ length: knownLength }, () => rejected)
-      : [rejected];
   }
 
-  async function* descendantsSettledGeneratorInner(): AsyncIterable<
+  async function* descendantsSettledGeneratorInner(
+      node: unknown,
+      options?: DescendantsOptions): AsyncIterable<
     DescendantPromiseSettledResult[]
   > {
     if (!isUnknownJSXNode(node)) return;
+    const parent = node;
     const descendantCache = new WeakMap<
       UnknownJSXNode,
       DescendantPromiseSettledResult[]
@@ -310,7 +320,7 @@ export async function* descendantsSettledGenerator(
           if (cached) {
             return yield [index, cached];
           }
-          for await (const snapshotInput of descendantsSettledGenerator(
+          for await (const snapshotInput of descendantsSettledGeneratorCaught(
             node,
             options
           )) {
