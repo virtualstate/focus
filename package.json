@@ -98,7 +98,7 @@
     "postbuild": "mkdir -p coverage && node scripts/post-build.js",
     "generate": "yarn build && node esnext/generate.js",
     "prepublishOnly": "npm run build",
-    "test": "yarn build && export $(cat .env | xargs) && node -r source-map-support/register esnext/tests/index.js",
+    "test": "yarn build && export $(cat .env | xargs) && node --enable-source-maps esnext/tests/index.js",
     "test:deno": "yarn build && export $(cat .env | xargs) && deno run --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
     "test:deno:r": "yarn build && export $(cat .env | xargs) && deno run -r --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
     "test:inspect": "yarn build && export $(cat .env | xargs) && node --enable-source-maps --inspect-brk esnext/tests/index.js",
