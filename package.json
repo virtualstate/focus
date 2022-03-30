@@ -76,6 +76,7 @@
     "cheerio": "^1.0.0-rc.10",
     "core-js": "^3.17.2",
     "dom-lite": "^20.2.0",
+    "dotenv": "^16.0.0",
     "filehound": "^1.17.4",
     "jest": "^27.1.0",
     "jest-playwright-preset": "^1.7.0",
@@ -97,10 +98,10 @@
     "postbuild": "mkdir -p coverage && node scripts/post-build.js",
     "generate": "yarn build && node esnext/generate.js",
     "prepublishOnly": "npm run build",
-    "test": "yarn build && node -r source-map-support/register esnext/tests/index.js",
-    "test:deno": "yarn build && deno run --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
-    "test:deno:r": "yarn build && deno run -r --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
-    "test:inspect": "yarn build && node --enable-source-maps --inspect-brk esnext/tests/index.js",
-    "coverage": "yarn build && c8 node esnext/tests/index.js && yarn postbuild"
+    "test": "yarn build && export $(cat .env | xargs) && node -r source-map-support/register esnext/tests/index.js",
+    "test:deno": "yarn build && export $(cat .env | xargs) && deno run --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
+    "test:deno:r": "yarn build && export $(cat .env | xargs) && deno run -r --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
+    "test:inspect": "yarn build && export $(cat .env | xargs) && node --enable-source-maps --inspect-brk esnext/tests/index.js",
+    "coverage": "yarn build && export $(cat .env | xargs) && c8 node esnext/tests/index.js && yarn postbuild"
   }
 }
