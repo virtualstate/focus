@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NO_COVERAGE_BADGE_UPDATE: 1
+      PROMPT_NAME: test name
+      PROMPT_EMAIL: test+email@example.com
     steps:
       - uses: actions/checkout@v2
         with:

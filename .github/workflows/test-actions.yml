@@ -7,6 +7,8 @@ jobs:
     env:
       NO_COVERAGE_BADGE_UPDATE: 1
       FLAGS: FETCH_SERVICE_DISABLE,POST_CONFIGURE_TEST,PLAYWRIGHT,CONTINUE_ON_ERROR
+      PROMPT_NAME: test name
+      PROMPT_EMAIL: test+email@example.com
     steps:
       - uses: actions/checkout@v2
         with:
