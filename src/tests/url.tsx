@@ -13,6 +13,7 @@ import {
 } from "@virtualstate/focus";
 import * as jsx from "@virtualstate/focus";
 import {Prompt} from "./prompt";
+import * as change from "change-case";
 
 type OtherKeys = "searchParams";
 type ReadableKeys = "hash" | "host" | "hostname" | "href" | "password" | "pathname" | "port" | "protocol" | "search" | "username";
@@ -88,10 +89,11 @@ async function Input({ name, placeholder, ...rest }: InputOptions, input?: unkno
     const items = await children(input);
     const urlItem = items.find((item): item is GlobalURL => jsx.name(item) === "url");
     const url = urlItem ?? <URL url={`/inputs/${name}`} base="https://example.com" />;
+    ok(name, "expected name");
     return (
         <input {...rest} name={name} placeholder={placeholder}>
             {url}
-            <Prompt name={name} message={`${placeholder ?? name}:`} env={`PROMPT_${name.toUpperCase()}`} />
+            <Prompt name={name} message={`${placeholder ?? name}:`} env={`PROMPT_${change.constantCase(name)}`} />
         </input>
     );
 }
