@@ -35,8 +35,7 @@ export function children(
 ): TheAsyncThing<unknown[]>;
 export function children(
   node?: unknown,
-  options?: ChildrenOptions,
-  ...rest: unknown[]
+  options?: ChildrenOptions
 ): unknown {
   return anAsyncThing(childrenGenerator(node, options === 1 ? {} : options));
 }
