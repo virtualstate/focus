@@ -234,6 +234,10 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
   const nodeInstance = (getters?.instance ?? instance)(node);
   const source = isUnknownJSXNode(nodeInstance) ? nodeInstance : node;
   const target = new Proxy(source, {
+    getPrototypeOf() {
+      // Temp fix as per https://github.com/denoland/deno/issues/14164
+      return nodeInstance instanceof Date ? node : Object.getPrototypeOf(source);
+    },
     get(target, p) {
       if (includesKey(p, possibleRawKeys)) {
         return raw(node);

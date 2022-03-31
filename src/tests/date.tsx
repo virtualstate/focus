@@ -8,9 +8,14 @@ function Now() {
 const [now] = await children(<Now />)
 
 ok<Date>(now);
+//
+// console.log("a");
+// console.log("c", now.getTime());
+// console.log("b");
 
 console.log({ now, name: name(now), props: properties(now), time: now.getTime(), isInitial: now.getTime() === properties(now).initialTime });
 
+// console.log("next");
 now.setTime(now.getTime() + 60000);
 
 console.log({ now, name: name(now), props: properties(now), time: now.getTime(), isInitial: now.getTime() === properties(now).initialTime });
