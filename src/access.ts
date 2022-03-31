@@ -8,7 +8,6 @@ import {
   ok,
 } from "./like";
 import { isComponentNode } from "./component";
-import { read } from "fs";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
