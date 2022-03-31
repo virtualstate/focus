@@ -11,6 +11,7 @@ import {
     descendantsSettled, isFulfilled, isDescendantFulfilled,
     name
 } from "@virtualstate/focus";
+import * as jsx from "@virtualstate/focus";
 
 type OtherKeys = "searchParams";
 type ReadableKeys = "hash" | "host" | "hostname" | "href" | "password" | "pathname" | "port" | "protocol" | "search" | "username";
@@ -64,7 +65,7 @@ console.log({
     isInitial: properties(url).initial === url.toString()
 });
 
-const form = (
+let form = (
     <>
         <input name="name" value="value">
             <URL url="/input/name" base="https://example.com" search="?a=1" />
@@ -72,6 +73,36 @@ const form = (
     </>
 )
 
-const result = await descendantsSettled(form);
+let result = await descendantsSettled(form);
 console.log(result);
 console.log(result.filter(isDescendantFulfilled).find(({ value }) => name(value) === "url"));
+
+interface InputOptions {
+    name: string;
+    value?: string;
+}
+
+async function *Input({ name, ...rest }: InputOptions, input?: unknown) {
+    yield <input {...rest} name={name} />
+    const items = await children(input);
+    const urlItem = items.find((item): item is GlobalURL => jsx.name(item) === "url");
+    const url = urlItem ?? <URL url={`/inputs/${name}`} base="https://example.com" />;
+    yield (
+        <input {...rest} name={name}>
+            {url}
+        </input>
+    );
+}
+
+form = (
+    <>
+        <Input name="name" value="value">
+            <URL url="/input/name" base="https://example.com" search="?a=1" />
+        </Input>
+        <Input name="email" value="email@example.com" />
+    </>
+)
+
+result = await descendantsSettled(form);
+console.log(result);
+console.log(result.filter(isDescendantFulfilled).filter(({ value }) => name(value) === "url"));
