@@ -43,7 +43,7 @@ export function h(
   const context = isLike<ProxyContextOptions>(passedContext)
     ? passedContext
     : ({ getters, proxy } as const);
-  console.log(context);
+  // console.log(context);
   return proxy(f(source, options, ...children), context.getters, context);
 }
 
