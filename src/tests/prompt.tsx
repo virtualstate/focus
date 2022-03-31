@@ -32,15 +32,15 @@ let promptQueue: Promise<unknown> = Promise.resolve()
 export async function *Prompt(options?: PromptOptions, input?: unknown): AsyncIterable<unknown> {
     const envValue = options.env ? env[options.env] : undefined;
     if (envValue) {
-        return yield <prompt {...options}>{envValue}</prompt>
+        return yield <prompt {...options}>{envValue}{input}</prompt>
     }
-    yield <prompt {...options} />;
+    yield <prompt {...options}>{input}</prompt>;
     const promise = promptQueue.then(() => prompt())
     let resolve: () => void;
     promptQueue = promise.then(async () => {
         return new Promise<void>(fn => resolve = fn);
     })
-    yield <prompt {...options}>{await promise}</prompt>
+    yield <prompt {...options}>{await promise}{input}</prompt>
     await promise;
     resolve();
 

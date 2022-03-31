@@ -12,6 +12,7 @@ import {
     name
 } from "@virtualstate/focus";
 import * as jsx from "@virtualstate/focus";
+import {Prompt} from "./prompt";
 
 type OtherKeys = "searchParams";
 type ReadableKeys = "hash" | "host" | "hostname" | "href" | "password" | "pathname" | "port" | "protocol" | "search" | "username";
@@ -79,17 +80,18 @@ console.log(result.filter(isDescendantFulfilled).find(({ value }) => name(value)
 
 interface InputOptions {
     name: string;
+    placeholder?: string
     value?: string;
 }
 
-async function *Input({ name, ...rest }: InputOptions, input?: unknown) {
-    yield <input {...rest} name={name} />
+async function Input({ name, placeholder, ...rest }: InputOptions, input?: unknown) {
     const items = await children(input);
     const urlItem = items.find((item): item is GlobalURL => jsx.name(item) === "url");
     const url = urlItem ?? <URL url={`/inputs/${name}`} base="https://example.com" />;
-    yield (
-        <input {...rest} name={name}>
+    return (
+        <input {...rest} name={name} placeholder={placeholder}>
             {url}
+            <Prompt name={name} message={`${placeholder ?? name}:`} env={`PROMPT_${name.toUpperCase()}`} />
         </input>
     );
 }
