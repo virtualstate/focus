@@ -35,9 +35,9 @@ for await (const map of toTree(named)) {
     console.log([...map.entries()]);
 }
 
-const proxied = proxy(named, { tree: toTree });
+const proxied = proxy(named, { toTree });
 
-for await (const map of proxied.tree) {
+for await (const map of proxied.toTree) {
     console.log({ tree: [...map.entries()] });
 }
 
