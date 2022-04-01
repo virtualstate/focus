@@ -1,4 +1,4 @@
-import {h, toTree, createFragment, ok, properties} from "@virtualstate/focus";
+import {h, toTree, createFragment, ok, properties, proxy} from "@virtualstate/focus";
 import {URL} from "./url";
 import {GlobalURL} from "./global-url";
 
@@ -33,6 +33,12 @@ for await (const map of toTree(named)) {
 
 for await (const map of toTree(named)) {
     console.log([...map.entries()]);
+}
+
+const proxied = proxy(named, { tree: toTree });
+
+for await (const map of proxied.tree) {
+    console.log({ tree: [...map.entries()] });
 }
 
 for await (const empty of toTree(<>{undefined}</>)) {

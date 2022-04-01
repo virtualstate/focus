@@ -12,7 +12,7 @@ This project is in semver alpha stage
 
 ### Test Coverage
 
- ![90.71%25 lines covered](https://img.shields.io/badge/lines-90.71%25-brightgreen) ![90.71%25 statements covered](https://img.shields.io/badge/statements-90.71%25-brightgreen) ![86.23%25 functions covered](https://img.shields.io/badge/functions-86.23%25-brightgreen) ![80.71%25 branches covered](https://img.shields.io/badge/branches-80.71%25-brightgreen)
+ ![90.75%25 lines covered](https://img.shields.io/badge/lines-90.75%25-brightgreen) ![90.75%25 statements covered](https://img.shields.io/badge/statements-90.75%25-brightgreen) ![86.23%25 functions covered](https://img.shields.io/badge/functions-86.23%25-brightgreen) ![80.63%25 branches covered](https://img.shields.io/badge/branches-80.63%25-brightgreen)
 
 [//]: # (badges)
 

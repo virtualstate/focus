@@ -1,4 +1,4 @@
-import {h, toMap, createFragment, ok, properties} from "@virtualstate/focus";
+import {h, toMap, createFragment, ok, properties, proxy} from "@virtualstate/focus";
 import {URL} from "./url";
 
 const named = (
@@ -81,4 +81,10 @@ for await (const map of toMap(namedTree, { array: true })) {
     // This will include multiple urls
     // See toTree to create an associative map
     console.log([...map.entries()]);
+}
+
+const proxied = proxy(named, { map: toMap });
+
+for await (const map of proxied.map) {
+    console.log({ map: [...map.entries()] });
 }
