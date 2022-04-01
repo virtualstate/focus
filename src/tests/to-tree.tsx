@@ -22,5 +22,14 @@ for (const [parent, children] of map.entries()) {
     console.log({ url });
 }
 
+for await (const map of toTree(named)) {
+    for (const [parent, children] of map.entries()) {
+        const url = children.find((url): url is GlobalURL => url instanceof GlobalURL);
+        if (!properties(parent).name) continue;
+        ok(url.searchParams.get("h") === properties(parent).name);
+        console.log({ url });
+    }
+}
+
 
 
