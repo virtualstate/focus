@@ -10,10 +10,11 @@ export function isLike<T>(value: unknown, ...and: unknown[]): value is T {
   return !!value && and.every((value) => !!value);
 }
 
-export function ok(value: unknown, message?: string): asserts value;
-export function ok<T>(value: unknown, message?: string): asserts value is T;
-export function ok(value: unknown, message?: string): asserts value {
-  if (!value) {
+export function ok(value: unknown, message?: string, ...conditions: unknown[]): asserts value;
+export function ok<T>(value: unknown, message?: string, ...conditions: unknown[]): asserts value is T;
+export function ok(value: unknown, message?: string, ...conditions: unknown[]): asserts value {
+  if (conditions.length ? !conditions.every((value) => value) : !value) {
+    // console.log({ conditions, value })
     throw new Error(message ?? "Expected value");
   }
 }
