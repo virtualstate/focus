@@ -25,7 +25,7 @@ export interface URLOptions extends Partial<Pick<GlobalURL, UsableKeys>> {
 }
 
 export function URL({ url: urlInput, base, searchParams, ...rest }: URLOptions) {
-    const url = new GlobalURL(urlInput, base);
+    const url = new GlobalURL(urlInput, base ?? "https://url.spec.whatwg.org/");
 
     for (const [key, value] of Object.entries(rest)) {
         ok<ReadableKeys>(key);
