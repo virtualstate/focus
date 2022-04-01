@@ -1,4 +1,5 @@
 import {h, toMap, createFragment, ok, properties} from "@virtualstate/focus";
+import {URL} from "./url";
 
 const named = (
     <>
@@ -46,5 +47,38 @@ const otherOptions = properties(map.get("other"));
 ok<{ value: string }>(otherOptions, "", typeof otherOptions.value === "string");
 console.log({ otherValue: otherOptions.value });
 
+for await (const map of toMap(named)) {
+    ok(!map.has("name") || typeof map.get("name") === "object")
+    ok(!map.has("next") || typeof map.get("next") === "object")
+    ok(!map.has("other") || typeof map.get("other") === "object")
+    ok(!map.has("name") || !Array.isArray(map.get("name")))
+    ok(!map.has("next") || !Array.isArray(map.get("next")))
+    ok(!map.has("other") || !Array.isArray(map.get("other")))
 
+    console.log({
+        async: map.get("name"),
+        next: map.get("next"),
+        other: map.get("other")
+    });
+}
 
+const namedTree = (
+    <>
+        <input name="name">
+            <URL url="/example?h=name" />
+        </input>
+        <input name="email">
+            <URL url="/example?h=email" />
+        </input>
+    </>
+)
+
+for await (const map of toMap(namedTree)) {
+    // This will only include one url
+    console.log([...map.entries()]);
+}
+for await (const map of toMap(namedTree, { array: true })) {
+    // This will include multiple urls
+    // See toTree to create an associative map
+    console.log([...map.entries()]);
+}

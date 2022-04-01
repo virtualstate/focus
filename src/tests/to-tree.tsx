@@ -31,5 +31,10 @@ for await (const map of toTree(named)) {
     }
 }
 
+for await (const map of toTree(named)) {
+    console.log([...map.entries()]);
+}
 
-
+for await (const empty of toTree(<>{undefined}</>)) {
+    console.log([...empty.entries()]);
+}

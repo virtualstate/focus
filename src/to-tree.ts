@@ -1,7 +1,7 @@
 import {descendantsSettledGenerator} from "./children";
 import {anAsyncThing, TheAsyncThing} from "@virtualstate/promise/the-thing";
 import {name} from "./access";
-import {isUnknownJSXNode} from "./like";
+import {isStaticChildNode, isUnknownJSXNode} from "./like";
 
 export interface ToTreeOptions {
 
@@ -22,8 +22,10 @@ export async function *toTreeGenerator(node: unknown, options?: ToTreeOptions): 
     for await (const snapshot of descendantsSettledGenerator(node, options)) {
         const nextMap = new Map()
         for (const status of snapshot) {
+            if (!status) continue; // This can happen from a fragment that still is starting resolution
             if (status.status !== "fulfilled") throw status.reason;
             const { parent, value } = status;
+            if (!value && !isStaticChildNode(value)) continue;
             const nodeName = name(node);
             if (!nodeName) continue;
             const existing = nextMap.get(parent);
