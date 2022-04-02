@@ -118,4 +118,10 @@ for await (const value of toJSONValue(named)) {
     // the value is still a valid node, and can be read using the same functions
     console.log(await toJSON(value));
     console.log(await children(value));
+    console.log(await equal(value, named));
+}
+
+async function equal(left: unknown, right: unknown) {
+    // don't do rely on this lol, just for the example :)
+    return await toJSON(left) === await toJSON(right);
 }
