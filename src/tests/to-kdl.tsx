@@ -19,15 +19,15 @@ const named = (
 );
 
 const kdl = await toKDL(named);
-console.log({ kdl });
+console.log(kdl);
 
 for await (const kdl of toKDL(named)) {
-  console.log({ kdl });
+  console.log(kdl);
 }
 
 const proxied = proxy(named, { kdl: toKDL });
 
-console.log({ kdl: await proxied.kdl });
+console.log(await proxied.kdl);
 
 for await (const kdl of toKDL(
   <>
@@ -39,7 +39,7 @@ for await (const kdl of toKDL(
     </Wait>
   </>
 )) {
-  console.log({ kdl });
+  console.log(kdl);
 }
 
 for await (const kdl of toKDL(
@@ -56,7 +56,7 @@ for await (const kdl of toKDL(
     <d />
   </>
 )) {
-  console.log({ kdl });
+    console.log(kdl);
 }
 
 for await (const kdl of toKDL(
@@ -73,5 +73,5 @@ for await (const kdl of toKDL(
     <d />
   </>
 )) {
-  console.log({ kdl });
+    console.log(kdl);
 }

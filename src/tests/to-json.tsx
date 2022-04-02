@@ -22,10 +22,10 @@ const named = (
 );
 
 const json = await toJSON(named);
-console.log({ json });
+console.log(json);
 
 for await (const json of toJSON(named)) {
-  console.log({ json });
+  console.log(json);
 }
 
 const value = await toJSONValue(named);
@@ -64,7 +64,7 @@ for await (const json of toJSON(
     props: "properties",
   }
 )) {
-  console.log({ json });
+  console.log(json);
 }
 
 for await (const json of toJSON(
@@ -81,7 +81,7 @@ for await (const json of toJSON(
     <d />
   </>
 )) {
-  console.log({ json });
+  console.log(json);
 }
 
 export async function* WaitGenerator(
@@ -111,5 +111,5 @@ for await (const json of toJSON(
     <d />
   </>
 )) {
-  console.log({ json });
+  console.log(json);
 }
