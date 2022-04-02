@@ -9,5 +9,6 @@ await import("./date");
 await import("./url");
 await import("./to-map");
 await import("./to-tree");
+await import("./to-json");
 
 export default 1;

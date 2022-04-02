@@ -47,12 +47,14 @@ export function h(
   return proxy(f(source, options, ...children), context.getters, context);
 }
 
-export function createFragment(
-  options?: Record<string | symbol, unknown>,
-  ...children: unknown[]
+export function fragment(
+    options?: Record<string | symbol, unknown>,
+    ...children: unknown[]
 ) {
   return h(Symbol.for(":jsx/fragment"), options, ...children);
 }
+
+export const createFragment = fragment;
 
 export function named(name: unknown, defaultOptions?: Record<string, unknown>) {
   return (options?: Record<string, unknown>, ...children: unknown[]) => {
