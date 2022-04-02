@@ -37,7 +37,7 @@ for await (const value of toJSONValue(named)) {
 
 const proxied = proxy(named, { object: toJSONValue, json: toJSON });
 
-console.log({ json: await proxied.json });
+console.log(await proxied.json);
 console.log({ object: await proxied.object });
 
 export async function Wait(
