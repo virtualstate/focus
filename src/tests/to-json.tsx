@@ -33,28 +33,30 @@ const proxied = proxy(named, { object: toJSONValue, json: toJSON });
 console.log({ json: await proxied.json });
 console.log({ object: await proxied.object });
 
-async function Wait({ time }: { time: number }, input?: unknown) {
-    await new Promise(resolve => setTimeout(resolve, time));
-    return input;
-}
-
-for await (const json of toJSON(
-    <>
-        <Wait time={10}><a /></Wait>
-        <Wait time={20}><b /></Wait>
-    </>
-)) {
-    console.log({ json });
-}
 for await (const json of toJSON(
     <>
         <Wait time={10}><a /></Wait>
         <Wait time={20}><b /></Wait>
     </>,
     {
-        name: "type",
-        properties: "props"
+        type: "name",
+        props: "properties"
     }
+)) {
+    console.log({ json });
+}
+
+
+async function Wait({ time }: { time: number }, input?: unknown) {
+    await new Promise(resolve => setTimeout(resolve, time));
+    return input;
+}
+for await (const json of toJSON(
+    <>
+        <Wait time={10}><a /><Wait time={5}><c /></Wait></Wait>
+        <Wait time={20}><b /></Wait>
+        <d />
+    </>
 )) {
     console.log({ json });
 }
