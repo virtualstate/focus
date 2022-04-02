@@ -1,10 +1,10 @@
 import {
-  h,
-  toTree,
-  createFragment,
-  ok,
-  properties,
-  proxy,
+    h,
+    toTree,
+    createFragment,
+    ok,
+    properties,
+    proxy, children,
 } from "@virtualstate/focus";
 import { URL } from "./url";
 import { GlobalURL } from "./global-url";
@@ -112,4 +112,10 @@ for await (const json of toJSON(
   </>
 )) {
   console.log(json);
+}
+
+for await (const value of toJSONValue(named)) {
+    // the value is still a valid node, and can be read using the same functions
+    console.log(await toJSON(value));
+    console.log(await children(value));
 }
