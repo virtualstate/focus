@@ -29,7 +29,15 @@ export function component(
   const children = getChildrenFromRawNode(node);
   return {
     async *[Symbol.asyncIterator]() {
-      yield* resolve(name(properties(node), createFragment({}, ...(Array.isArray(children) ? children : [children]))));
+      yield* resolve(
+        name(
+          properties(node),
+          createFragment(
+            {},
+            ...(Array.isArray(children) ? children : [children])
+          )
+        )
+      );
       async function* resolve(input: unknown): AsyncIterable<unknown> {
         if (isIterable(input)) {
           return yield input;

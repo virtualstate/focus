@@ -1,31 +1,38 @@
-import {h, toTree, createFragment, ok, properties, proxy} from "@virtualstate/focus";
-import {URL} from "./url";
-import {GlobalURL} from "./global-url";
-import {toJSON, toJSONValue} from "../to-json";
+import {
+  h,
+  toTree,
+  createFragment,
+  ok,
+  properties,
+  proxy,
+} from "@virtualstate/focus";
+import { URL } from "./url";
+import { GlobalURL } from "./global-url";
+import { toJSON, toJSONValue } from "../to-json";
 
 const named = (
-    <>
-        <input name="name">
-            <URL url="/example?h=name" />
-        </input>
-        <input name="email">
-            <URL url="/example?h=email" />
-        </input>
-    </>
-)
+  <>
+    <input name="name">
+      <URL url="/example?h=name" />
+    </input>
+    <input name="email">
+      <URL url="/example?h=email" />
+    </input>
+  </>
+);
 
 const json = await toJSON(named);
 console.log({ json });
 
 for await (const json of toJSON(named)) {
-    console.log({ json });
+  console.log({ json });
 }
 
 const value = await toJSONValue(named);
 console.log({ value });
 
 for await (const value of toJSONValue(named)) {
-    console.log({ value });
+  console.log({ value });
 }
 
 const proxied = proxy(named, { object: toJSONValue, json: toJSON });
@@ -33,28 +40,75 @@ const proxied = proxy(named, { object: toJSONValue, json: toJSON });
 console.log({ json: await proxied.json });
 console.log({ object: await proxied.object });
 
+async function Wait(
+  { time, name }: { time: number; name?: string },
+  input?: unknown
+) {
+  if (name) console.log(`Starting ${name}`);
+  await new Promise((resolve) => setTimeout(resolve, time));
+  if (name) console.log(`Finished ${name}`);
+  return input;
+}
+
 for await (const json of toJSON(
-    <>
-        <Wait time={10}><a /></Wait>
-        <Wait time={20}><b /></Wait>
-    </>,
-    {
-        type: "name",
-        props: "properties"
-    }
+  <>
+    <Wait time={10}>
+      <a />
+    </Wait>
+    <Wait time={20}>
+      <b />
+    </Wait>
+  </>,
+  {
+    type: "name",
+    props: "properties",
+  }
 )) {
-    console.log({ json });
+  console.log({ json });
+}
+
+for await (const json of toJSON(
+  <>
+    <Wait time={10} name="wait a">
+      <a />
+      <Wait time={5} name="wait c">
+        <c />
+      </Wait>
+    </Wait>
+    <Wait time={20} name="wait b">
+      <b />
+    </Wait>
+    <d />
+  </>
+)) {
+  console.log({ json });
 }
 
 
-async function Wait({ time }: { time: number }, input?: unknown) {
-    await new Promise(resolve => setTimeout(resolve, time));
-    return input;
+async function *WaitGenerator(
+    { time, name }: { time: number; name?: string },
+    input?: unknown
+) {
+    if (name) console.log(`Configure ${name}`);
+    yield <wait name={name} time={time} />
+    if (name) console.log(`Starting ${name}`);
+    await new Promise((resolve) => setTimeout(resolve, time));
+    if (name) console.log(`Finished ${name}`);
+    yield input;
+    if (name) console.log(`After ${name}`);
 }
+
 for await (const json of toJSON(
     <>
-        <Wait time={10}><a /><Wait time={5}><c /></Wait></Wait>
-        <Wait time={20}><b /></Wait>
+        <WaitGenerator time={10} name="wait a">
+            <a />
+            <WaitGenerator time={5} name="wait c">
+                <c />
+            </WaitGenerator>
+        </WaitGenerator>
+        <WaitGenerator time={20} name="wait b">
+            <b />
+        </WaitGenerator>
         <d />
     </>
 )) {

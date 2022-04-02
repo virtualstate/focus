@@ -33,10 +33,7 @@ export function children(
   node: unknown,
   options?: ChildrenOptions
 ): TheAsyncThing<unknown[]>;
-export function children(
-  node?: unknown,
-  options?: ChildrenOptions
-): unknown {
+export function children(node?: unknown, options?: ChildrenOptions): unknown {
   return anAsyncThing(childrenGenerator(node, options === 1 ? {} : options));
 }
 
@@ -262,33 +259,35 @@ export async function* descendantsSettledGenerator(
   node: unknown,
   options?: DescendantsOptions
 ): AsyncIterable<DescendantPromiseSettledResult[]> {
+  yield* descendantsSettledGeneratorCaught(node, options);
 
-  yield * descendantsSettledGeneratorCaught(node, options);
-
-  async function *descendantsSettledGeneratorCaught(
-      node: unknown,
-      options?: DescendantsOptions) {
+  async function* descendantsSettledGeneratorCaught(
+    node: unknown,
+    options?: DescendantsOptions
+  ) {
     if (!isUnknownJSXNode(node)) return;
     const parent = node;
     let knownLength = 0;
     try {
-      for await (const snapshot of descendantsSettledGeneratorInner(node, options)) {
+      for await (const snapshot of descendantsSettledGeneratorInner(
+        node,
+        options
+      )) {
         knownLength = snapshot.length;
         yield snapshot;
       }
     } catch (reason) {
       const rejected = { reason, status: "rejected", parent } as const;
       yield knownLength
-          ? Array.from({ length: knownLength }, () => rejected)
-          : [rejected];
+        ? Array.from({ length: knownLength }, () => rejected)
+        : [rejected];
     }
   }
 
   async function* descendantsSettledGeneratorInner(
-      node: unknown,
-      options?: DescendantsOptions): AsyncIterable<
-    DescendantPromiseSettledResult[]
-  > {
+    node: unknown,
+    options?: DescendantsOptions
+  ): AsyncIterable<DescendantPromiseSettledResult[]> {
     if (!isUnknownJSXNode(node)) return;
     const parent = node;
     const descendantCache = new WeakMap<

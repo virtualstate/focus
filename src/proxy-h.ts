@@ -1,9 +1,4 @@
-import {
-  GettersRecord,
-  proxy,
-  ProxyContextOptions,
-  ProxyNode,
-} from "./access";
+import { GettersRecord, proxy, ProxyContextOptions, ProxyNode } from "./access";
 
 import { h as f } from "./static-h";
 import * as ChildrenAccessors from "./children";
@@ -48,8 +43,8 @@ export function h(
 }
 
 export function fragment(
-    options?: Record<string | symbol, unknown>,
-    ...children: unknown[]
+  options?: Record<string | symbol, unknown>,
+  ...children: unknown[]
 ) {
   return h(Symbol.for(":jsx/fragment"), options, ...children);
 }
@@ -58,6 +53,14 @@ export const createFragment = fragment;
 
 export function named(name: unknown, defaultOptions?: Record<string, unknown>) {
   return (options?: Record<string, unknown>, ...children: unknown[]) => {
-    return h(name, defaultOptions ? options ? { ...defaultOptions, ...options } : defaultOptions : options, ...children);
-  }
+    return h(
+      name,
+      defaultOptions
+        ? options
+          ? { ...defaultOptions, ...options }
+          : defaultOptions
+        : options,
+      ...children
+    );
+  };
 }
