@@ -40,7 +40,7 @@ const proxied = proxy(named, { object: toJSONValue, json: toJSON });
 console.log({ json: await proxied.json });
 console.log({ object: await proxied.object });
 
-async function Wait(
+export async function Wait(
   { time, name }: { time: number; name?: string },
   input?: unknown
 ) {
@@ -84,33 +84,32 @@ for await (const json of toJSON(
   console.log({ json });
 }
 
-
-async function *WaitGenerator(
-    { time, name }: { time: number; name?: string },
-    input?: unknown
+export async function* WaitGenerator(
+  { time, name }: { time: number; name?: string },
+  input?: unknown
 ) {
-    if (name) console.log(`Configure ${name}`);
-    yield <wait name={name} time={time} />
-    if (name) console.log(`Starting ${name}`);
-    await new Promise((resolve) => setTimeout(resolve, time));
-    if (name) console.log(`Finished ${name}`);
-    yield input;
-    if (name) console.log(`After ${name}`);
+  if (name) console.log(`Configure ${name}`);
+  yield <wait name={name} time={time} />;
+  if (name) console.log(`Starting ${name}`);
+  await new Promise((resolve) => setTimeout(resolve, time));
+  if (name) console.log(`Finished ${name}`);
+  yield input;
+  if (name) console.log(`After ${name}`);
 }
 
 for await (const json of toJSON(
-    <>
-        <WaitGenerator time={10} name="wait a">
-            <a />
-            <WaitGenerator time={5} name="wait c">
-                <c />
-            </WaitGenerator>
-        </WaitGenerator>
-        <WaitGenerator time={20} name="wait b">
-            <b />
-        </WaitGenerator>
-        <d />
-    </>
+  <>
+    <WaitGenerator time={10} name="wait a">
+      <a />
+      <WaitGenerator time={5} name="wait c">
+        <c />
+      </WaitGenerator>
+    </WaitGenerator>
+    <WaitGenerator time={20} name="wait b">
+      <b />
+    </WaitGenerator>
+    <d />
+  </>
 )) {
-    console.log({ json });
+  console.log({ json });
 }

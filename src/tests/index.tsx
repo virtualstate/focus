@@ -10,5 +10,6 @@ await import("./url");
 await import("./to-map");
 await import("./to-tree");
 await import("./to-json");
+await import("./to-kdl");
 
 export default 1;
