@@ -66,6 +66,8 @@ function Controller() {
         await new Promise(resolve => setTimeout(resolve, 10));
 
         push.value = [4, 5, 6];
+
+        push.done = true;
     }
 }
 
