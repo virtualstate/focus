@@ -12,5 +12,6 @@ await import("./to-tree");
 await import("./to-json");
 await import("./to-kdl");
 await import("./controller");
+await import("./data");
 
 export default 1;
