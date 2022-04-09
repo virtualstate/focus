@@ -118,6 +118,13 @@ interface WriteOptions {
     name: string;
 }
 
+interface DenoFs {
+    writeFile(path: string, input: Uint8Array): Promise<void>;
+    readFile(path: string): Promise<Uint8Array>;
+}
+
+declare const Deno: DenoFs;
+
 async function Write({ name }: WriteOptions, input?: unknown) {
     const resolved = await children(
         <Data>
@@ -130,6 +137,10 @@ async function Write({ name }: WriteOptions, input?: unknown) {
         if (typeof Buffer !== "undefined") {
             const fs = await import("fs");
             await fs.promises.writeFile(name, array);
+            return true;
+        }
+        if (typeof Deno !== "undefined") {
+            await Deno.writeFile(name, array);
             return true;
         }
         return false;
@@ -156,6 +167,9 @@ async function Read({ name }: ReadOptions) {
         if (typeof Buffer !== "undefined") {
             const fs = await import("fs");
             return fs.promises.readFile(name);
+        }
+        if (typeof Deno !== "undefined") {
+            return Deno.readFile(name);
         }
         return "";
     } catch {

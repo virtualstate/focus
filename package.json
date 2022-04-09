@@ -100,8 +100,8 @@
     "generate": "yarn build && node esnext/generate.js",
     "prepublishOnly": "npm run build",
     "test": "yarn build && export $(cat .env | xargs) && node --enable-source-maps esnext/tests/index.js",
-    "test:deno": "yarn build && export $(cat .env | xargs) && deno run --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
-    "test:deno:r": "yarn build && export $(cat .env | xargs) && deno run -r --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
+    "test:deno": "yarn build && export $(cat .env | xargs) && deno run --allow-write --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
+    "test:deno:r": "yarn build && export $(cat .env | xargs) && deno run -r --allow-write --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
     "test:inspect": "yarn build && export $(cat .env | xargs) && node --enable-source-maps --inspect-brk esnext/tests/index.js",
     "coverage": "yarn build && export $(cat .env | xargs) && c8 node esnext/tests/index.js && yarn postbuild"
   }
