@@ -111,6 +111,73 @@ const data = await children(
     </Data>
 )
 console.log({ data });
-if (typeof TextDecoder !== "undefined" && Array.isArray(data)) {
-    console.log(new TextDecoder().decode(new Uint8Array(data)));
+ok(Array.isArray(data));
+console.log(new TextDecoder().decode(new Uint8Array(data)));
+
+interface WriteOptions {
+    name: string;
 }
+
+async function Write({ name }: WriteOptions, input?: unknown) {
+    const resolved = await children(
+        <Data>
+            {input}
+        </Data>
+    );
+    ok(Array.isArray(resolved));
+    const array = new Uint8Array(resolved);
+    try {
+        if (typeof Buffer !== "undefined") {
+            const fs = await import("fs");
+            await fs.promises.writeFile(name, array);
+            return true;
+        }
+        return false;
+    } catch {
+        return false;
+    }
+}
+const name = `/tmp/virtualstate.focus.${Math.random()}`;
+
+const [success] = await descendants(
+    <Write name={name}>
+        {data}
+    </Write>
+);
+
+console.log({ name, success });
+
+interface ReadOptions {
+    name: string;
+}
+
+async function Read({ name }: ReadOptions) {
+    try {
+        if (typeof Buffer !== "undefined") {
+            const fs = await import("fs");
+            return fs.promises.readFile(name);
+        }
+        return "";
+    } catch {
+        return "";
+    }
+}
+
+async function String(options?: unknown, input?: unknown) {
+    const data = await children(
+        <Data>
+            {input}
+        </Data>
+    );
+    ok(Array.isArray(data));
+    const array = new Uint8Array(data);
+    return new TextDecoder().decode(array);
+}
+
+const [string] = await children(
+    <String>
+        <Read name={name} />
+    </String>
+)
+
+console.log({ name, string });
