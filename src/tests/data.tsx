@@ -17,17 +17,17 @@ export async function Data({ data }: DataOptions = {}, input?: unknown) {
     if (data) {
         return resolve(data);
     }
-    function resolve(data: Uint8Array | unknown[] | string | number): Uint8Array | Uint8Array[] {
+    function resolve(data: Uint8Array | unknown[] | string | number): unknown[] | Uint8Array {
         if (typeof data === "number") {
             // A single byte
-            return new Uint8Array([data]);
+            return [data];
         }
         if (data instanceof Uint8Array) {
             return data;
         }
         if (Array.isArray(data)) {
             if (isNumberArray(data)) {
-                return new Uint8Array(data);
+                return data;
             }
             return data.flatMap(resolve);
         }
