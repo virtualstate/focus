@@ -13,5 +13,6 @@ await import("./to-json");
 await import("./to-kdl");
 await import("./controller");
 await import("./data");
+await import("./match");
 
 export default 1;
