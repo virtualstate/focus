@@ -20,8 +20,13 @@ export function isComponentNode(input: unknown): boolean {
   return isComponentFn(name);
 }
 
+export interface ComponentOptions {
+  this?: unknown;
+}
+
 export function component(
-  input: UnknownJSXNode
+  input: UnknownJSXNode,
+  options?: ComponentOptions
 ): AsyncIterable<unknown> | undefined {
   const node = raw(input);
   const name = isComponentFn(node) ? node : node[getNameKey(node)];
@@ -29,8 +34,11 @@ export function component(
   const children = getChildrenFromRawNode(node);
   return {
     async *[Symbol.asyncIterator]() {
+      // treat it as a getter like function
+      const that = typeof options?.this === "function" ? options.this(name, options) : options?.this;
       yield* resolve(
-        name(
+        name.call(
+          that,
           properties(node),
           createFragment(
             {},
