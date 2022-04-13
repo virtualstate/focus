@@ -10,7 +10,7 @@ export interface JSONOptions {
   props?: string;
   children?: string;
   replacer?: Parameters<typeof JSON.stringify>[1];
-  space?: Parameters<typeof JSON.stringify>[2]
+  space?: Parameters<typeof JSON.stringify>[2];
 }
 
 export function toJSONValue(
@@ -86,7 +86,11 @@ export async function* toJSONGenerator(
   // let last = undefined;
   for await (const object of toJSONValueGenerator(node, options)) {
     // set space to "" if you want to remove tabbing
-    const current = JSON.stringify(object, options?.replacer, options?.space ?? "  ");
+    const current = JSON.stringify(
+      object,
+      options?.replacer,
+      options?.space ?? "  "
+    );
     // We achieve the same instead in toJSONValueGenerator using direct comparison
     // This means we mainly only check primitives, but if object references are also equal, then that's cool too!
     // if (last === current) continue;

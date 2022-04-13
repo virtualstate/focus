@@ -35,7 +35,10 @@ export function component(
   return {
     async *[Symbol.asyncIterator]() {
       // treat it as a getter like function
-      const that = typeof options?.this === "function" ? options.this(name, options) : options?.this;
+      const that =
+        typeof options?.this === "function"
+          ? options.this(name, options)
+          : options?.this;
       yield* resolve(
         name.call(
           that,

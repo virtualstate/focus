@@ -21,7 +21,10 @@ const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 
 export interface ChildrenOptions {
   [ThrowAtEnd]?: boolean;
-  component?(node?: unknown, options?: object): AsyncIterable<unknown> | undefined;
+  component?(
+    node?: unknown,
+    options?: object
+  ): AsyncIterable<unknown> | undefined;
 }
 
 export function children<N>(node: N): TheAsyncThing<ChildrenArray<N>>;
@@ -105,7 +108,8 @@ export async function* childrenSettledGenerator(
   if (!isUnknownJSXNode(node)) return;
   let knownLength = 0;
   try {
-    const componentFn: typeof options.component = options?.component ?? component;
+    const componentFn: typeof options.component =
+      options?.component ?? component;
     for await (const snapshot of childrenSettledGeneratorInner(
       getChildrenFromRawNode(node),
       componentFn(node, options)

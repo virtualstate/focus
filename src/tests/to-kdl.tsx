@@ -1,9 +1,5 @@
 import { toKDLString as toKDL } from "@virtualstate/kdl";
-import {
-  h,
-  createFragment,
-  proxy,
-} from "@virtualstate/focus";
+import { h, createFragment, proxy } from "@virtualstate/focus";
 import { URL } from "./url";
 import { Wait, WaitGenerator } from "./to-json";
 
@@ -56,7 +52,7 @@ for await (const kdl of toKDL(
     <d />
   </>
 )) {
-    console.log(kdl);
+  console.log(kdl);
 }
 
 for await (const kdl of toKDL(
@@ -73,5 +69,5 @@ for await (const kdl of toKDL(
     <d />
   </>
 )) {
-    console.log(kdl);
+  console.log(kdl);
 }
