@@ -65,12 +65,12 @@ export const possibleValuesKeys = [
   Symbol.for(":jsx/values"),
   ...possibleValuesKeysStrings,
 ] as const;
-export const possibleChildrenKeysStrings = ["children", "_children"] as const;
+export const possibleStringChildrenKeysStrings = ["textContent"] as const;
+export const possibleChildrenKeysStrings = ["childNodes", "children", "_children", ...possibleStringChildrenKeysStrings] as const;
 export const possibleChildrenKeys = [
   Symbol.for(":kdl/children"),
   Symbol.for(":jsx/children"),
   Symbol.for("@virtualstate/fringe/children"),
-  "children",
   ...possibleChildrenKeysStrings,
 ] as const;
 
@@ -154,7 +154,20 @@ export function isFragment(node: unknown): boolean {
   if (!isUnknownJSXNode(node)) return false;
   if (isComponentNode(node)) return true;
   const unknown: ReadonlyArray<unknown> = possibleFragmentNames;
-  return unknown.includes(name(node));
+  if (unknown.includes(name(node))) {
+    return true;
+  }
+  const isMaybeString = possibleStringChildrenKeysStrings.find(key => isKey(node, key));
+  if (!isMaybeString) return false;
+  const children = getChildrenFromRawNode(node);
+  if (typeof children !== "string") {
+    return false;
+  }
+  const string = getChildrenFromRawNode(node, possibleStringChildrenKeysStrings);
+  // If we have an object that uses a string key, and the value of the available string key
+  // is the resolved children, (aka no other childNodes, children, etc. exist)
+  // then we have a fragment for a string
+  return string === children;
 }
 
 type GettersRecordKeys<
@@ -329,10 +342,10 @@ export function values(node: UnknownJSXNode): Iterable<unknown> {
 
 /**
  * @internal
- * @param node
  */
-export function getChildrenFromRawNode(node: UnknownJSXNode) {
-  const childrenKey = possibleChildrenKeys.find((key) => isKey(node, key));
+export function getChildrenFromRawNode(node: UnknownJSXNode, keys: Key[] | readonly Key[] = possibleChildrenKeys) {
+  const resolvedKeys: (Key[] | readonly Key[]) = Array.isArray(keys) ? keys : possibleChildrenKeys;
+  const childrenKey = resolvedKeys.find((key) => isKey(node, key));
   return getSyncOrAsyncChildren(node, childrenKey);
 }
 

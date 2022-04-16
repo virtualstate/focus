@@ -11,6 +11,7 @@ export interface JSONOptions {
   children?: string;
   replacer?: Parameters<typeof JSON.stringify>[1];
   space?: Parameters<typeof JSON.stringify>[2];
+  toLowerCase?: boolean;
 }
 
 export function toJSONValue(
@@ -26,7 +27,10 @@ export async function* toJSONValueGenerator(
 ): AsyncIterable<unknown> {
   if (!isUnknownJSXNode(node)) return yield node;
   const object: UnknownJSXNode = {};
-  const name = jsx.isFragment(node) ? undefined : jsx.name(node);
+  let name = jsx.isFragment(node) ? undefined : jsx.name(node);
+  if (typeof name === "string" && options?.toLowerCase) {
+    name = name.toLowerCase();
+  }
   const props = jsx.properties(node);
   if (name) {
     object[options?.type ?? "type"] = name;
