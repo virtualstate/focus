@@ -33,6 +33,7 @@ export const possibleNameKeysStrings = [
   "reference",
   "name",
   "tagName",
+  "nodeName"
 ] as const;
 export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
@@ -65,7 +66,7 @@ export const possibleValuesKeys = [
   Symbol.for(":jsx/values"),
   ...possibleValuesKeysStrings,
 ] as const;
-export const possibleStringChildrenKeysStrings = ["textContent"] as const;
+export const possibleStringChildrenKeysStrings = ["textContent", "data", "value", "nodeValue"] as const;
 export const possibleChildrenKeysStrings = ["childNodes", "children", "_children", ...possibleStringChildrenKeysStrings] as const;
 export const possibleChildrenKeys = [
   Symbol.for(":kdl/children"),
@@ -160,14 +161,16 @@ export function isFragment(node: unknown): boolean {
   const isMaybeString = possibleStringChildrenKeysStrings.find(key => isKey(node, key));
   if (!isMaybeString) return false;
   const children = getChildrenFromRawNode(node);
-  if (typeof children !== "string") {
-    return false;
-  }
   const string = getChildrenFromRawNode(node, possibleStringChildrenKeysStrings);
-  // If we have an object that uses a string key, and the value of the available string key
-  // is the resolved children, (aka no other childNodes, children, etc. exist)
-  // then we have a fragment for a string
-  return string === children;
+  if (typeof string === "string") {
+    if (children === string) {
+      return true;
+    }
+    if (!isLike<{ length: number, [0]: unknown }>(children)) return false;
+    return children.length === 0;
+  }
+  return false;
+
 }
 
 type GettersRecordKeys<
@@ -306,7 +309,7 @@ export function name(node: UnknownJSXNode): string | symbol | undefined;
 export function name(node: unknown): string | symbol | undefined;
 export function name(node: UnknownJSXNode): string | symbol | undefined {
   const nameKey = getNameKey(node);
-  const value = node[nameKey];
+  const value = node?.[nameKey];
   if (isUnknownJSXNode(value)) {
     return name(value);
   }
@@ -335,7 +338,7 @@ export function values(node: UnknownJSXNode): Iterable<unknown>;
 export function values(node: unknown): Iterable<unknown>;
 export function values(node: UnknownJSXNode): Iterable<unknown> {
   const valuesKey = possibleValuesKeys.find((key) => isKey(node, key));
-  const value = node[valuesKey];
+  const value = node?.[valuesKey];
   if (isIterable(value)) return value;
   return [];
 }
@@ -353,15 +356,36 @@ function getSyncOrAsyncChildren(
   node: UnknownJSXNode,
   key: Key
 ): AsyncIterable<unknown> | Iterable<unknown> {
+  type Indexed = { length: number } & Record<number, unknown>;
+
   if (!key) return [];
-  const value = node[key];
+  const value = node?.[key];
   return getIterableChildren();
 
   function getIterableChildren() {
-    if (Array.isArray(value)) return value;
+    if (Array.isArray(value)) {
+      if (value.length) {
+        return value;
+      }
+      // Eliminate empty children
+      return undefined;
+    }
     if (isIterable(value)) return value;
     if (isAsyncIterable(value)) return value;
+    if (isIndexed(value)) return indexed(value);
     return [];
+  }
+
+  function indexed(value: Indexed) {
+    return {
+      *[Symbol.iterator]() {
+        yield * Array.from(value);
+      }
+    }
+  }
+
+  function isIndexed(value: unknown): value is Indexed {
+    return isLike<Indexed>(value) && typeof value.length === "number";
   }
 }
 
@@ -369,7 +393,7 @@ export type PropertiesRecord = Record<string | symbol | number, unknown>;
 
 function getPropertiesRecord(node: UnknownJSXNode, key: Key): PropertiesRecord {
   if (!key) return {};
-  const value = node[key];
+  const value = node?.[key];
   if (!isProperties(value)) return {};
   return value;
   function isProperties(value: unknown): value is PropertiesRecord {
@@ -378,7 +402,7 @@ function getPropertiesRecord(node: UnknownJSXNode, key: Key): PropertiesRecord {
 }
 
 function getStringOrSymbol(node: UnknownJSXNode, key: Key) {
-  const value = node[key];
+  const value = node?.[key];
   if (typeof value !== "string" && typeof value !== "symbol") return undefined;
   return value;
 }
@@ -388,7 +412,7 @@ export function instance(node: unknown): unknown;
 export function instance(node: UnknownJSXNode): unknown {
   const instanceKey = possibleInstanceKeys.find((key) => isKey(node, key));
   if (!instanceKey) return undefined;
-  return node[instanceKey];
+  return node?.[instanceKey];
 }
 
 export function raw(node: UnknownJSXNode): UnknownJSXNode;
@@ -396,7 +420,7 @@ export function raw(node: unknown): UnknownJSXNode;
 export function raw(node: UnknownJSXNode): UnknownJSXNode {
   const rawKey = possibleRawKeys.find((key) => isKey(node, key));
   if (!rawKey) return node;
-  const value = node[rawKey];
+  const value = node?.[rawKey];
   ok<UnknownJSXNode>(value);
   return value;
 }

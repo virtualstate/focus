@@ -39,6 +39,7 @@ export async function Data({ data }: DataOptions = {}, input?: unknown) {
       }
       return data.flatMap(resolve);
     }
+    if (!data) return [];
     ok(
       data,
       "Expected data to be an instance of Uint8Array, an Array, or a string",

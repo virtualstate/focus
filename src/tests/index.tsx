@@ -1,3 +1,5 @@
+declare var Deno: unknown;
+
 await import("./access");
 await import("./typed");
 await import("./dom");
@@ -14,7 +16,11 @@ await import("./to-kdl");
 await import("./controller");
 await import("./data");
 await import("./match");
-await import("./dom-to-json");
+
+if (typeof Deno === "undefined") {
+
+    await import("./dom-to-json");
 // await import("./dom-to-kdl");
+}
 
 export default 1;

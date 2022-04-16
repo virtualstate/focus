@@ -1,6 +1,11 @@
 import {h, document, appendDescendants} from "./dom-h";
 import {ok, toJSON} from "@virtualstate/focus";
 
+const footer =
+    <footer>
+        This is the footer
+    </footer>
+
 export const domExampleMain: HTMLElement = (
     <main>
         <title>Hello</title>
@@ -11,9 +16,7 @@ export const domExampleMain: HTMLElement = (
         <section>
             <p>This is a second section</p>
         </section>
-        <footer>
-            This is the footer
-        </footer>
+        {footer}
     </main>
 );
 
@@ -24,6 +27,8 @@ export const domExampleTree: HTMLElement = (
 );
 await appendDescendants(domExampleTree);
 
+
+console.log(footer);
 console.log(domExampleTree);
 console.log(domExampleTree.innerHTML)
 
