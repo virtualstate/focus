@@ -15,5 +15,6 @@ await import("./controller");
 await import("./data");
 await import("./match");
 await import("./dom-to-json");
+// await import("./dom-to-kdl");
 
 export default 1;
