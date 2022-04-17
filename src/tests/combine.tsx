@@ -7,6 +7,7 @@ const C = <B c={3}><A /><B /></B>;
 const D = <C d={4} a={2} />;
 const E = <D e={5} />;
 const F = <E f={6} e={6}><C/></E>;
+const G = <F g={1}>{undefined}</F>;
 
 console.log({
     A,
@@ -15,6 +16,7 @@ console.log({
     D,
     E,
     F,
+    G
 });
 
 console.log(await toKDLString(
@@ -25,5 +27,6 @@ console.log(await toKDLString(
         <D />
         <E />
         <F />
+        <G />
     </>
 ))
