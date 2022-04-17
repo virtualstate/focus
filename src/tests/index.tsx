@@ -23,4 +23,6 @@ if (typeof Deno === "undefined") {
 // await import("./dom-to-kdl");
 }
 
+await import("./combine");
+
 export default 1;

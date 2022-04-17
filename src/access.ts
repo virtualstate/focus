@@ -369,9 +369,11 @@ export function getChildrenFromRawNode(node: UnknownJSXNode, keys: Key[] | reado
   const resolvedKeys: (Key[] | readonly Key[]) = Array.isArray(keys) ? keys : possibleChildrenKeys;
   const childrenKey = resolvedKeys.find((key) => isKey(node, key));
   const children = getSyncOrAsyncChildren(node, childrenKey);
-  if (!maybeNodeChildren) return children;
+  if (!maybeNodeChildren) return children ?? [];
+  if (!children) return maybeNodeChildren ?? [];
   if (!Array.isArray(children)) return children;
   if (children.length) return children;
+  if (Array.isArray(maybeNodeChildren) && !maybeNodeChildren.length) return children;
   return maybeNodeChildren;
 }
 
@@ -386,13 +388,6 @@ function getSyncOrAsyncChildren(
   return getIterableChildren();
 
   function getIterableChildren() {
-    if (Array.isArray(value)) {
-      if (value.length) {
-        return value;
-      }
-      // Eliminate empty children
-      return undefined;
-    }
     if (isIterable(value)) return value;
     if (isAsyncIterable(value)) return value;
     if (isIndexed(value)) return indexed(value);
