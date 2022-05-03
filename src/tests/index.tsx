@@ -23,6 +23,7 @@ if (typeof Deno === "undefined") {
 
   await import("./dom-template");
 }
+await import("./dom-fragment");
 
 await import("./combine");
 

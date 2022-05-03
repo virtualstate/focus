@@ -18,6 +18,13 @@ export const JSXFragment = Symbol.for(":jsx/fragment");
 export const KDLFragment = Symbol.for(":kdl/fragment");
 export const VSXFringeFragment = Symbol.for("@virtualstate/fringe/fragment");
 
+export const possibleValueChildrenKeysStrings = [
+  "textContent",
+  "text",
+  "data",
+  "value",
+  "nodeValue",
+] as const;
 const possibleFragmentNames = [
   JSXFragment,
   KDLFragment,
@@ -69,12 +76,6 @@ export const possibleValuesKeys = [
   Symbol.for(":kdl/values"),
   Symbol.for(":jsx/values"),
   ...possibleValuesKeysStrings,
-] as const;
-export const possibleValueChildrenKeysStrings = [
-  "textContent",
-  "data",
-  "value",
-  "nodeValue",
 ] as const;
 export const possibleChildrenKeysStrings = [
   "childNodes",
@@ -168,8 +169,18 @@ export function isFragment(node: unknown): boolean {
   if (!node) return false;
   if (!isUnknownJSXNode(node)) return false;
   if (isComponentNode(node)) return true;
-  const unknown: ReadonlyArray<unknown> = possibleFragmentNames;
-  if (unknown.includes(name(node))) {
+  const unknown: ReadonlyArray<unknown> = [
+      ...possibleFragmentNames,
+      ...possibleValueChildrenKeysStrings
+  ];
+  const found = name(node);
+  const matchingName = unknown.find(value => {
+    if (found === value) return true;
+    if (typeof value !== "string") return false;
+    if (typeof found !== "string") return false;
+    return found.startsWith("#") && found.endsWith(value);
+  })
+  if (matchingName) {
     return true;
   }
   return isFragmentValue(node);
