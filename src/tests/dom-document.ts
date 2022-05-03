@@ -38,4 +38,6 @@ try {
 
 ok(exportDefault);
 
+export const document = exportDefault.document;
+
 export default exportDefault;

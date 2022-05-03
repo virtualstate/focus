@@ -158,19 +158,7 @@ export function isFragment(node: unknown): boolean {
   if (unknown.includes(name(node))) {
     return true;
   }
-  const isMaybeString = possibleStringChildrenKeysStrings.find(key => isKey(node, key));
-  if (!isMaybeString) return false;
-  const children = getChildrenFromRawNode(node);
-  const string = getChildrenFromRawNode(node, possibleStringChildrenKeysStrings);
-  if (typeof string === "string") {
-    if (children === string) {
-      return true;
-    }
-    if (!isLike<{ length: number, [0]: unknown }>(children)) return false;
-    return children.length === 0;
-  }
-  return false;
-
+  return isFragmentWithChildrenString(node);
 }
 
 type GettersRecordKeys<
@@ -360,11 +348,41 @@ export function values(node: UnknownJSXNode): Iterable<unknown> {
 /**
  * @internal
  */
-export function getChildrenFromRawNode(node: UnknownJSXNode, keys: Key[] | readonly Key[] = possibleChildrenKeys): unknown {
+export function getChildrenFromRawNode(node: UnknownJSXNode): unknown {
+  const { string, children } = getStringOrChildrenFromRawNode(node);
+  if (typeof string === "string") return string;
+  return children;
+}
+
+function getStringOrChildrenFromRawNode(node: UnknownJSXNode): { string?: string, children?: unknown } {
+  const children = getInternalChildrenFromRawNode(node);
+  const isMaybeStringKey = possibleStringChildrenKeysStrings.find(key => isKey(node, key));
+  if (!isMaybeStringKey) return { children };
+  const string = getInternalChildrenFromRawNode(node, [isMaybeStringKey]);
+  if (typeof string === "string") {
+    if (children === string || (!children && string)) {
+      return { string };
+    }
+    if (isLike<{ length: number, [0]: unknown }>(children) && children.length === 0) {
+      return { string };
+    }
+  }
+  return { children };
+}
+
+function isFragmentWithChildrenString(node: UnknownJSXNode) {
+  const { string } = getStringOrChildrenFromRawNode(node);
+  return typeof string === "string";
+}
+
+/**
+ * @internal
+ */
+function getInternalChildrenFromRawNode(node: UnknownJSXNode, keys: Key[] | readonly Key[] = possibleChildrenKeys): unknown {
   const [maybeNode] = getNameAndKeyFromRawNode(node);
   let maybeNodeChildren = undefined;
   if (isUnknownJSXNode(maybeNode)) {
-    maybeNodeChildren = getChildrenFromRawNode(maybeNode);
+    maybeNodeChildren = getInternalChildrenFromRawNode(maybeNode, keys);
   }
   const resolvedKeys: (Key[] | readonly Key[]) = Array.isArray(keys) ? keys : possibleChildrenKeys;
   const childrenKey = resolvedKeys.find((key) => isKey(node, key));

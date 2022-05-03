@@ -21,6 +21,8 @@ if (typeof Deno === "undefined") {
 
     await import("./dom-to-json");
 // await import("./dom-to-kdl");
+
+    await import("./dom-template");
 }
 
 await import("./combine");
