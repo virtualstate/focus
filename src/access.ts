@@ -3,7 +3,7 @@ import {
   assertUnknownJSXNode,
   isKey,
   isKeyIn,
-  isLike,
+  isLike, isStaticChildNode,
   isUnknownJSXNode,
   ok,
 } from "./like";
@@ -50,6 +50,9 @@ export const possiblePropertiesKeysStrings = [
   "properties",
   "props",
   "options",
+  "attributes",
+  "attrs",
+  "attribs"
 ] as const;
 export const possiblePropertiesKeys = [
   Symbol.for(":kdl/properties"),
@@ -66,8 +69,8 @@ export const possibleValuesKeys = [
   Symbol.for(":jsx/values"),
   ...possibleValuesKeysStrings,
 ] as const;
-export const possibleStringChildrenKeysStrings = ["textContent", "data", "value", "nodeValue"] as const;
-export const possibleChildrenKeysStrings = ["childNodes", "children", "_children", ...possibleStringChildrenKeysStrings] as const;
+export const possibleValueChildrenKeysStrings = ["textContent", "data", "value", "nodeValue"] as const;
+export const possibleChildrenKeysStrings = ["childNodes", "children", "_children", ...possibleValueChildrenKeysStrings] as const;
 export const possibleChildrenKeys = [
   Symbol.for(":kdl/children"),
   Symbol.for(":jsx/children"),
@@ -158,7 +161,7 @@ export function isFragment(node: unknown): boolean {
   if (unknown.includes(name(node))) {
     return true;
   }
-  return isFragmentWithChildrenString(node);
+  return isFragmentValue(node);
 }
 
 type GettersRecordKeys<
@@ -348,31 +351,32 @@ export function values(node: UnknownJSXNode): Iterable<unknown> {
 /**
  * @internal
  */
-export function getChildrenFromRawNode(node: UnknownJSXNode): unknown {
-  const { string, children } = getStringOrChildrenFromRawNode(node);
-  if (typeof string === "string") return string;
+export function getChildrenFromRawNode(node: unknown): unknown {
+  assertUnknownJSXNode(node);
+  const { value, children } = getValueOrChildrenFromRawNode(node);
+  if (value || isStaticChildNode(value)) return value;
   return children;
 }
 
-function getStringOrChildrenFromRawNode(node: UnknownJSXNode): { string?: string, children?: unknown } {
+function getValueOrChildrenFromRawNode(node: UnknownJSXNode): { value?: unknown, children?: unknown } {
   const children = getInternalChildrenFromRawNode(node);
-  const isMaybeStringKey = possibleStringChildrenKeysStrings.find(key => isKey(node, key));
-  if (!isMaybeStringKey) return { children };
-  const string = getInternalChildrenFromRawNode(node, [isMaybeStringKey]);
-  if (typeof string === "string") {
-    if (children === string || (!children && string)) {
-      return { string };
+  const isMaybeValueKey = possibleValueChildrenKeysStrings.find(key => isKey(node, key));
+  if (!isMaybeValueKey) return { children };
+  const value = getInternalChildrenFromRawNode(node, [isMaybeValueKey]);
+  if (isStaticChildNode(value)) {
+    if (children === value || (!children && value)) {
+      return { value };
     }
     if (isLike<{ length: number, [0]: unknown }>(children) && children.length === 0) {
-      return { string };
+      return { value };
     }
   }
   return { children };
 }
 
-function isFragmentWithChildrenString(node: UnknownJSXNode) {
-  const { string } = getStringOrChildrenFromRawNode(node);
-  return typeof string === "string";
+function isFragmentValue(node: UnknownJSXNode) {
+  const { value } = getValueOrChildrenFromRawNode(node);
+  return !!(value || isStaticChildNode(value));
 }
 
 /**
@@ -431,9 +435,19 @@ function getPropertiesRecord(node: UnknownJSXNode, key: Key): PropertiesRecord {
   if (!key) return {};
   const value = node?.[key];
   if (!isProperties(value)) return {};
+  if (isIterable(value)) {
+    return getIterableRecord(value);
+  }
   return value;
   function isProperties(value: unknown): value is PropertiesRecord {
     return typeof value === "object" || typeof value === "function";
+  }
+
+  function getIterableRecord(value: Iterable<unknown>): PropertiesRecord {
+    const entries = Array.from(value).map(
+        (node) => [name(node), getChildrenFromRawNode(node)]
+    );
+    return Object.fromEntries(entries);
   }
 }
 
