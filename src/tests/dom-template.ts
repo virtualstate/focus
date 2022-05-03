@@ -21,7 +21,9 @@ console.log({ descendants });
 
 jsx.ok(descendants.includes(randomValue));
 
-const spanWithIdIndex = descendants.map(jsx.properties).findIndex(props => props.id === "span-with-id");
+const spanWithIdIndex = descendants
+  .map(jsx.properties)
+  .findIndex((props) => props.id === "span-with-id");
 const spanWithId = descendants[spanWithIdIndex];
 
 console.log({ spanWithId });

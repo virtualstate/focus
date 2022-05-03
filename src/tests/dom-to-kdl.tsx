@@ -1,8 +1,7 @@
-import {h, document, appendDescendants} from "./dom-h";
-import {ok, toJSON} from "@virtualstate/focus";
+import { h, document } from "./dom-h";
+import { ok } from "@virtualstate/focus";
 import { domExampleMain, domExampleTree } from "./dom-to-json";
-import {toKDLString} from "@virtualstate/kdl";
-
+import { toKDLString } from "@virtualstate/kdl";
 
 // Reset our document
 document.body.innerHTML = domExampleTree.innerHTML;
