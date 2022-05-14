@@ -4,6 +4,7 @@ import { children } from "./children";
 import { UnknownJSXNode } from "./access";
 import { union } from "@virtualstate/union";
 import * as jsx from "./access";
+import flat from "./tests/flat";
 
 export interface JSONOptions {
   type?: string;
@@ -12,6 +13,7 @@ export interface JSONOptions {
   replacer?: Parameters<typeof JSON.stringify>[1];
   space?: Parameters<typeof JSON.stringify>[2];
   toLowerCase?: boolean;
+  flat?: boolean;
 }
 
 export function toJSONValue(
@@ -33,11 +35,16 @@ export async function* toJSONValueGenerator(
   }
   const props = jsx.properties(node);
   if (name) {
-    object[options?.type ?? "type"] = name;
+    if (options?.flat) {
+      object[name] = [];
+    } else {
+      object[options?.type ?? "type"] = name;
+    }
   }
   if (Object.keys(props).length) {
     object[options?.props ?? "props"] = props;
   }
+  const childrenKey = options?.flat ? name : (options?.children ?? "children")
   let yielded = false;
   const cache = new Map<object, unknown>();
   let last;
@@ -65,15 +72,21 @@ export async function* toJSONValueGenerator(
       ) {
         continue;
       }
+      let yielding: unknown = current;
+      if (options?.flat && Array.isArray(yielding) && yielding.length === 1 && isStaticChildNode(yielding[0])) {
+        yielding = yielding[0];
+      }
       yield {
         ...object,
-        children: current,
+        [childrenKey]: yielding,
       };
       last = current;
       yielded = true;
     }
   }
-  if (!yielded && name) yield object;
+  if (!yielded && name) {
+    yield object;
+  }
 }
 
 export function toJSON(
