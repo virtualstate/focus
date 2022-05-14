@@ -162,8 +162,11 @@ const GenericNodeFunctions: GettersRecord = Object.fromEntries([
   ...possibleInstanceKeys.map((key) => pair(key, instance)),
   ...possibleRawKeys.map((key) => pair(key, raw)),
 ]);
+const allPossibleKeys = Object.keys(GenericNodeFunctions);
 
 export type StaticChildNode = string | number | boolean;
+
+
 
 export function isFragment(node: unknown): boolean {
   if (!node) return false;
@@ -322,6 +325,12 @@ export function name(node: UnknownJSXNode): string | symbol | undefined;
 export function name(node: unknown): string | symbol | undefined;
 export function name(node: UnknownJSXNode): string | symbol | undefined {
   const [maybeNode, nameKey] = getNameAndKeyFromRawNode(node);
+  if (!nameKey) {
+    const flatKey = getFlatNodeKey(node);
+    if (flatKey) {
+      return flatKey;
+    }
+  }
   if (isUnknownJSXNode(maybeNode)) {
     return name(maybeNode);
   }
@@ -425,13 +434,32 @@ function getInternalChildrenFromRawNode(
     ? keys
     : possibleChildrenKeys;
   const childrenKey = resolvedKeys.find((key) => isKey(node, key));
-  const children = getSyncOrAsyncChildren(node, childrenKey);
-  if (!maybeNodeChildren) return children ?? [];
-  if (!children) return maybeNodeChildren ?? [];
-  if (!Array.isArray(children)) return children;
-  if (children.length) return children;
-  if (Array.isArray(maybeNodeChildren) && !maybeNodeChildren.length)
+  let children;
+  if (childrenKey) {
+    children = getSyncOrAsyncChildren(node, childrenKey);
+  } else {
+    const flatKey = getFlatNodeKey(node);
+    if (!flatKey) {
+      return [];
+    }
+    children = getSyncOrAsyncChildren(node, flatKey);
+  }
+  if (!maybeNodeChildren) {
+    return children ?? [];
+  }
+  if (!children) {
+    return maybeNodeChildren ?? [];
+  }
+  if (!Array.isArray(children)) {
     return children;
+  }
+  if (children.length) {
+    return children;
+  }
+  if (Array.isArray(maybeNodeChildren) && !maybeNodeChildren.length) {
+
+    return children;
+  }
   return maybeNodeChildren;
 }
 
@@ -449,6 +477,7 @@ function getSyncOrAsyncChildren(
     if (isIterable(value)) return value;
     if (isAsyncIterable(value)) return value;
     if (isIndexed(value)) return indexed(value);
+    if (isUnknownJSXNode(value)) return [value];
     return undefined;
   }
 
@@ -510,4 +539,21 @@ export function raw(node: UnknownJSXNode): UnknownJSXNode {
   const value = node?.[rawKey];
   ok<UnknownJSXNode>(value);
   return value;
+}
+
+function getFlatNodeKey(node: UnknownJSXNode): Key {
+  const keys = Object.keys(node);
+  if (!keys.length) return undefined;
+  if (keys.length === 1) return keys[0];
+  const possible = keys.filter(key => !isPossibleKey(key, possibleNameKeys));
+  return possible.length === 1 ? possible[0] : undefined;
+
+  function isPossibleKey(key: Key, excluding: readonly Key[] = []) {
+    return !!allPossibleKeys.find(possible => !excluding.includes(possible) && key === possible);
+  }
+}
+
+export function isFlatNode(node: unknown): boolean {
+  if (!isUnknownJSXNode(node)) return false;
+  return !!getFlatNodeKey(node);
 }

@@ -27,4 +27,6 @@ await import("./dom-fragment");
 
 await import("./combine");
 
+await import("./flat");
+
 export default 1;
