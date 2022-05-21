@@ -28,5 +28,6 @@ await import("./dom-fragment");
 await import("./combine");
 
 await import("./flat");
+await import("./class");
 
 export default 1;

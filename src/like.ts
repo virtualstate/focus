@@ -2,7 +2,7 @@ import {
   DescendantPromiseFulfilledResult,
   DescendantPromiseSettledResult,
 } from "./children";
-import { Key, StaticChildNode, UnknownJSXNode } from "./access";
+import {getNameKey, Key, raw, StaticChildNode, UnknownJSXNode} from "./access";
 import { GenericNode } from "./node";
 
 export function isLike<T>(value: unknown, ...and: unknown[]): value is T {
@@ -92,4 +92,22 @@ export function assertUnknownJSXNode(
 
 export function isGenericChildNode(node: unknown): node is GenericNode {
   return !isStaticChildNode(node);
+}
+
+export interface ComponentFn {
+  (options: Record<string | symbol, unknown>, input?: UnknownJSXNode): void;
+  new (options: Record<string | symbol, unknown>, input?: UnknownJSXNode): unknown;
+}
+
+export function isComponentFn(node: unknown): node is ComponentFn {
+  return isLike(node, typeof node === "function");
+}
+
+
+export function isComponentNode(input: unknown): boolean {
+  if (!isUnknownJSXNode(input)) return false;
+  const node = raw(input);
+  if (isComponentFn(node)) return true;
+  const name = node[getNameKey(node)];
+  return isComponentFn(name);
 }

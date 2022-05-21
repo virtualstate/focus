@@ -1,24 +1,8 @@
 import { createFragment } from "./static-h";
 import { isAsyncIterable, isIterable } from "./is";
-import { getChildrenFromRawNode, getNameKey, properties, raw } from "./access";
+import {getChildrenFragmentFromRawNode, getChildrenFromRawNode, getNameKey, instance, properties, raw} from "./access";
 import { UnknownJSXNode } from "./node";
-import { isLike, isUnknownJSXNode } from "./like";
-
-interface ComponentFn {
-  (options: Record<string | symbol, unknown>, input?: UnknownJSXNode): void;
-}
-
-export function isComponentFn(node: unknown): node is ComponentFn {
-  return isLike(node, typeof node === "function");
-}
-
-export function isComponentNode(input: unknown): boolean {
-  if (!isUnknownJSXNode(input)) return false;
-  const node = raw(input);
-  if (isComponentFn(node)) return true;
-  const name = node[getNameKey(node)];
-  return isComponentFn(name);
-}
+import {isComponentFn} from "./like";
 
 export interface ComponentOptions {
   this?: unknown;
@@ -31,9 +15,16 @@ export function component(
   const node = raw(input);
   const name = isComponentFn(node) ? node : node[getNameKey(node)];
   if (!isComponentFn(name)) return undefined;
-  const children = getChildrenFromRawNode(node);
+  const nodeInstance = instance(name);
+  if (isAsyncIterable(nodeInstance)) {
+    return nodeInstance;
+  }
+  const children = getChildrenFragmentFromRawNode(node);
   return {
     async *[Symbol.asyncIterator]() {
+      if (nodeInstance && nodeInstance instanceof name) {
+        return yield* resolve(children);
+      }
       // treat it as a getter like function
       const that =
         typeof options?.this === "function"
@@ -43,10 +34,7 @@ export function component(
         name.call(
           that,
           properties(node),
-          createFragment(
-            {},
-            ...(Array.isArray(children) ? children : [children])
-          )
+          children
         )
       );
       async function* resolve(input: unknown): AsyncIterable<unknown> {

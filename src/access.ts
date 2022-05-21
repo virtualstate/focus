@@ -1,6 +1,6 @@
 import { isAsyncIterable, isIterable } from "./is";
 import {
-  assertUnknownJSXNode,
+  assertUnknownJSXNode, isComponentFn, isComponentNode,
   isKey,
   isKeyIn,
   isLike,
@@ -8,15 +8,12 @@ import {
   isUnknownJSXNode,
   ok,
 } from "./like";
-import { isComponentNode } from "./component";
+import {createFragment} from "./static-h";
+import {read} from "fs";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
 export type UnknownJSXNode = UnknownJSXNodeRecord;
-
-export const JSXFragment = Symbol.for(":jsx/fragment");
-export const KDLFragment = Symbol.for(":kdl/fragment");
-export const VSXFringeFragment = Symbol.for("@virtualstate/fringe/fragment");
 
 export const possibleValueChildrenKeysStrings = [
   "textContent",
@@ -26,9 +23,10 @@ export const possibleValueChildrenKeysStrings = [
   "nodeValue",
 ] as const;
 const possibleFragmentNames = [
-  JSXFragment,
-  KDLFragment,
-  VSXFringeFragment,
+  Symbol.for(":jsx/fragment"),
+  Symbol.for(":kdl/fragment"),
+  Symbol.for("@virtualstate/fringe/fragment"),
+  Symbol.for("@virtualstate/focus/fragment"),
   "Fragment",
   "fragment",
 ] as const;
@@ -47,6 +45,7 @@ export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
   Symbol.for(":jsx/type"),
   Symbol.for("@virtualstate/fringe/source"),
+  Symbol.for("@virtualstate/focus/source"),
   ...possibleNameKeysStrings,
 ] as const;
 export const possibleTagKeysStrings = ["tag"] as const;
@@ -69,6 +68,7 @@ export const possiblePropertiesKeys = [
   Symbol.for(":jsx/properties"),
   Symbol.for(":jsx/options"),
   Symbol.for("@virtualstate/fringe/options"),
+  Symbol.for("@virtualstate/focus/options"),
   ...possiblePropertiesKeysStrings,
 ] as const;
 export const possibleValuesKeysStrings = ["values"] as const;
@@ -87,6 +87,7 @@ export const possibleChildrenKeys = [
   Symbol.for(":kdl/children"),
   Symbol.for(":jsx/children"),
   Symbol.for("@virtualstate/fringe/children"),
+  Symbol.for("@virtualstate/focus/children"),
   ...possibleChildrenKeysStrings,
 ] as const;
 
@@ -98,18 +99,22 @@ export const possibleInstanceKeysStrings = [
   "referenceInstance",
   "nameInstance",
 ] as const;
+const Instance = Symbol.for("@virtualstate/focus/instance");
 export const possibleInstanceKeys = [
   Symbol.for(":kdl/instance"),
   Symbol.for(":jsx/instance"),
   Symbol.for("@virtualstate/fringe/instance"),
   Symbol.for("@virtualstate/fringe/SourceInstance"),
+  Instance,
+  Symbol.for("@virtualstate/focus/SourceInstance"),
   ...possibleInstanceKeysStrings,
 ] as const;
-const Raw = Symbol.for("@virtualstate/fringe/tools/raw");
+const Raw = Symbol.for("@virtualstate/focus/tools/raw");
 export const possibleRawKeys = [
   Symbol.for(":kdl/raw"),
   Symbol.for(":jsx/raw"),
   Symbol.for("@virtualstate/fringe/raw"),
+  Symbol.for("@virtualstate/fringe/tools/raw"),
   Raw,
 ] as const;
 
@@ -147,7 +152,7 @@ export type GenericAccessors = NameAccessors &
   RawAccessors;
 
 interface GenericGetFn {
-  (node: UnknownJSXNode, context?: unknown): unknown;
+  (node: UnknownJSXNode, context?: unknown, instance?: unknown): unknown;
 }
 function pair<A, B>(a: A, b: B): [A, B] {
   return [a, b];
@@ -165,8 +170,6 @@ const GenericNodeFunctions: GettersRecord = Object.fromEntries([
 const allPossibleKeys = Object.keys(GenericNodeFunctions);
 
 export type StaticChildNode = string | number | boolean;
-
-
 
 export function isFragment(node: unknown): boolean {
   if (!node) return false;
@@ -265,24 +268,23 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
   assertUnknownJSXNode(node);
   const nodeInstance = (getters?.instance ?? instance)(node);
   const source = isUnknownJSXNode(nodeInstance) ? nodeInstance : node;
-  const target = new Proxy(source, {
+  const handler: ProxyHandler<object> = {
     getPrototypeOf() {
       // Temp fix as per https://github.com/denoland/deno/issues/14164
       return nodeInstance instanceof Date
-        ? node
-        : Object.getPrototypeOf(source);
+          ? node
+          : Object.getPrototypeOf(source);
     },
     get(target, p) {
       if (includesKey(p, possibleRawKeys)) {
         return raw(node);
       }
-      if (includesKey(p, possibleInstanceKeys)) {
-        // Even return if undefined, saves resolution later
+      if (p === Instance && (nodeInstance || isStaticChildNode(nodeInstance))) {
         return nodeInstance;
       }
       if (
-        isUnknownJSXNode(nodeInstance) &&
-        (isKeyIn(nodeInstance, p) || isKey(nodeInstance, p))
+          isUnknownJSXNode(nodeInstance) &&
+          (isKeyIn(nodeInstance, p) || isKey(nodeInstance, p))
       ) {
         const value = nodeInstance[p];
         if (typeof value === "function") {
@@ -290,7 +292,7 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
         }
         return value;
       }
-      return get(p, node, getters, context);
+      return get(p, node, getters, context, nodeInstance);
     },
     set(target, p, value): boolean {
       if (isUnknownJSXNode(nodeInstance)) {
@@ -298,7 +300,8 @@ export function proxy<Get extends GettersRecord = GettersRecord, N = unknown>(
       }
       return true;
     },
-  });
+  };
+  const target = new Proxy(source, handler);
   ok<ProxyNode<Get, N>>(target);
   return target;
 }
@@ -311,19 +314,23 @@ function get(
   key: string | symbol,
   node: unknown,
   getters?: GettersRecord,
-  context?: unknown
+  context?: unknown,
+  instance?: unknown
 ): unknown {
   assertUnknownJSXNode(node);
   const fn = getters?.[key] ?? GenericNodeFunctions[key];
   if (!fn) {
     return undefined;
   }
-  return fn(node, context);
+  return fn(node, context, instance);
 }
 
 export function name(node: UnknownJSXNode): string | symbol | undefined;
 export function name(node: unknown): string | symbol | undefined;
 export function name(node: UnknownJSXNode): string | symbol | undefined {
+  if (typeof node === "string" || typeof node === "symbol") {
+    return node;
+  }
   const [maybeNode, nameKey] = getNameAndKeyFromRawNode(node);
   if (!nameKey) {
     const flatKey = getFlatNodeKey(node);
@@ -382,11 +389,30 @@ export function values(node: UnknownJSXNode): Iterable<unknown> {
 /**
  * @internal
  */
-export function getChildrenFromRawNode(node: unknown): unknown {
-  assertUnknownJSXNode(node);
+export function getChildrenFromRawNode(node: unknown, options?: unknown, instance?: unknown): unknown {
+  // if (isUnknownJSXNode(instance)) {
+  //   if (isAsyncIterable(instance) || isIterable(instance)) {
+  //     return instance;
+  //   }
+  // }
+  if (!isUnknownJSXNode(node)) return [];
   const { value, children } = getValueOrChildrenFromRawNode(node);
   if (value || isStaticChildNode(value)) return value;
   return children;
+}
+
+function getChildrenValueKey(node: UnknownJSXNode) {
+  return getKey(node, possibleValueChildrenKeysStrings);
+}
+
+function getChildrenKey(node: UnknownJSXNode, keys: readonly Key[] = possibleChildrenKeys) {
+  return getKey(node, keys);
+}
+
+function getKey(node: UnknownJSXNode, keys: readonly Key[] = possibleChildrenKeys) {
+  return keys.find((key) =>
+      isKey(node, key)
+  );
 }
 
 function getValueOrChildrenFromRawNode(node: UnknownJSXNode): {
@@ -394,9 +420,7 @@ function getValueOrChildrenFromRawNode(node: UnknownJSXNode): {
   children?: unknown;
 } {
   const children = getInternalChildrenFromRawNode(node);
-  const isMaybeValueKey = possibleValueChildrenKeysStrings.find((key) =>
-    isKey(node, key)
-  );
+  const isMaybeValueKey = getChildrenValueKey(node);
   if (!isMaybeValueKey) return { children };
   const value = getInternalChildrenFromRawNode(node, [isMaybeValueKey]);
   if (isStaticChildNode(value)) {
@@ -433,7 +457,7 @@ function getInternalChildrenFromRawNode(
   const resolvedKeys: Key[] | readonly Key[] = Array.isArray(keys)
     ? keys
     : possibleChildrenKeys;
-  const childrenKey = resolvedKeys.find((key) => isKey(node, key));
+  const childrenKey = getKey(node, resolvedKeys);
   let children;
   if (childrenKey) {
     children = getSyncOrAsyncChildren(node, childrenKey);
@@ -457,7 +481,6 @@ function getInternalChildrenFromRawNode(
     return children;
   }
   if (Array.isArray(maybeNodeChildren) && !maybeNodeChildren.length) {
-
     return children;
   }
   return maybeNodeChildren;
@@ -523,12 +546,69 @@ function getStringOrSymbol(node: UnknownJSXNode, key: Key) {
   return value;
 }
 
-export function instance(node: UnknownJSXNode): unknown;
-export function instance(node: unknown): unknown;
-export function instance(node: UnknownJSXNode): unknown {
-  const instanceKey = possibleInstanceKeys.find((key) => isKey(node, key));
-  if (!instanceKey) return undefined;
-  return node?.[instanceKey];
+export function getChildrenFragmentFromRawNode(node: UnknownJSXNode) {
+  const children = getChildrenFromRawNode(node);
+ return createFragment(
+      {},
+      ...(Array.isArray(children) ? children : [children])
+  );
+}
+
+export interface InstanceOptions {
+  properties?: PropertiesRecord
+  children?: unknown
+}
+
+export function instance(node: UnknownJSXNode, options?: InstanceOptions, existingInstance?: unknown): unknown;
+export function instance(node: unknown, options?: InstanceOptions, existingInstance?: unknown): unknown;
+export function instance(node: UnknownJSXNode, options?: InstanceOptions, existingInstance?: unknown): unknown {
+  if (existingInstance) {
+    // delete this next line and a new instance will be constructed each time ;)
+    return existingInstance;
+  }
+  const instanceKey = getKey(node, possibleInstanceKeys);
+  if (instanceKey) {
+    return node?.[instanceKey];
+  }
+  const MaybeClass = isComponentFn(node) ? node : node[getNameKey(node)];
+  if (!isComponentFn(MaybeClass)) {
+    if (isUnknownJSXNode(MaybeClass)) {
+      const rawNode = raw(MaybeClass);
+      if (rawNode === node) {
+        return undefined;
+      }
+      return instance(rawNode, {
+        properties: buildProperties(),
+        children: buildChildren()
+      });
+    }
+    return undefined;
+  }
+  try {
+    return new MaybeClass(buildProperties(), buildChildren());
+  } catch {
+    return undefined;
+  }
+
+  function buildChildren(): UnknownJSXNode {
+    if (isUnknownJSXNode(options)) {
+      const childrenKey = getChildrenKey(options);
+      if (childrenKey) {
+        const maybe = isUnknownJSXNode(options[childrenKey]);
+        if (isUnknownJSXNode(maybe)) {
+          return maybe;
+        }
+      }
+    }
+    return getChildrenFragmentFromRawNode(node);
+  }
+
+  function buildProperties() {
+    return {
+      ...properties(node),
+      ...properties(options ?? {})
+    };
+  }
 }
 
 export function raw(node: UnknownJSXNode): UnknownJSXNode;

@@ -2,7 +2,7 @@ import dom from "./dom-document";
 import {
   isDescendantFulfilled,
   isKeyIn,
-  isLike,
+  isLike, name,
   proxy,
 } from "@virtualstate/focus";
 import { descendantsSettled } from "@virtualstate/focus";
@@ -21,6 +21,8 @@ export function createElement(
   options?: unknown,
   ...children: unknown[]
 ): HTMLElement {
+  const resolvedTagName = name(tagName);
+  tagName = typeof resolvedTagName === "string" ? resolvedTagName : tagName;
   let instance: HTMLElement;
   const proxied = proxy({
     tagName,
