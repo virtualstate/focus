@@ -44,17 +44,13 @@
   "author": "Fabian Cook <hello@fabiancook.dev>",
   "license": "MIT",
   "peerDependencies": {
-    "@virtualstate/promise": "^1.1.2",
+    "@virtualstate/promise": "^1.1.5-alpha.3",
     "abort-controller": "^3.0.0",
     "uuid": "^8.3.2",
     "whatwg-url": "^9.1.0"
   },
   "dependencies": {},
   "devDependencies": {
-    "@virtualstate/promise": "^1.1.2",
-    "abort-controller": "^3.0.0",
-    "uuid": "^8.3.2",
-    "whatwg-url": "^9.1.0",
     "@babel/cli": "^7.15.4",
     "@babel/core": "^7.15.4",
     "@babel/preset-env": "^7.15.4",
@@ -75,8 +71,10 @@
     "@virtualstate/hooks": "^2.46.0",
     "@virtualstate/hooks-extended": "^2.46.0",
     "@virtualstate/kdl": "^1.0.1-alpha.29",
+    "@virtualstate/promise": "^1.1.5-alpha.3",
     "@virtualstate/union": "^2.46.0",
     "@virtualstate/x": "^2.46.0",
+    "abort-controller": "^3.0.0",
     "c8": "^7.10.0",
     "chance": "^1.1.8",
     "change-case": "^4.1.2",
@@ -98,7 +96,9 @@
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3",
     "urlpattern-polyfill": "^1.0.0-rc2",
-    "v8-to-istanbul": "^8.1.0"
+    "uuid": "^8.3.2",
+    "v8-to-istanbul": "^8.1.0",
+    "whatwg-url": "^9.1.0"
   },
   "scripts": {
     "build": "rm -rf esnext && tsc",
