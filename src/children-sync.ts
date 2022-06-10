@@ -1,9 +1,18 @@
 import {aSyncThing} from "@virtualstate/promise/the-sync-thing";
-import {DescendantPromiseRejectedResult} from "./children";
+import {DescendantPromiseRejectedResult, DescendantPromiseSettledResult, DescendantsOptions} from "./children";
 import {isArray, isIterable} from "./is";
-import {assertFulfilled, isRejected, isStaticChildNode, isUnknownJSXNode} from "./like";
+import {
+    assertFulfilled,
+    isDescendantFulfilled,
+    isFulfilled,
+    isRejected,
+    isStaticChildNode,
+    isUnknownJSXNode
+} from "./like";
 import {component, ComponentIterable} from "./component";
 import {getChildrenFromRawNode, isFragment, isProxyContextOptions} from "./access";
+import {UnknownJSXNode} from "./node";
+import {union} from "@virtualstate/union";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 
@@ -129,4 +138,98 @@ function flat(value: unknown): unknown[] {
         return [...value].flatMap(flat);
     }
     return [value];
+}
+
+
+export interface DescendantsSyncOptions {
+    [ThrowAtEnd]?: boolean;
+}
+
+export function descendantsSync(
+    node: unknown,
+    options?: DescendantsSyncOptions
+) {
+    return aSyncThing({
+        *[Symbol.iterator]() {
+            yield * descendantsGeneratorSync(node, options)
+        }
+    });
+}
+
+export function *descendantsGeneratorSync(node?: unknown, options?: ChildrenSyncOptions) {
+    const rejected: PromiseRejectedResult[] = [];
+    for (const status of descendantsSettledGeneratorSync(node, options)) {
+        if (options?.[ThrowAtEnd]) {
+            if (isRejected(status)) {
+                rejected.push(status);
+                yield undefined;
+            } else {
+                yield status.value;
+            }
+        } else {
+            assertFulfilled(status);
+            yield status.value;
+        }
+    }
+    throwIfRejected(rejected);
+}
+
+export function descendantsSettledSync(
+    node: unknown,
+    options?: DescendantsSyncOptions
+) {
+    return aSyncThing({
+        *[Symbol.iterator]() {
+            yield * descendantsSettledGeneratorSync(node, options)
+        }
+    });
+}
+
+export function* descendantsSettledGeneratorSync(
+    node: unknown,
+    options?: DescendantsSyncOptions
+): Iterable<DescendantPromiseSettledResult> {
+    yield* descendantsSettledGeneratorCaught(node, options);
+
+    function* descendantsSettledGeneratorCaught(
+        node: unknown,
+        options?: DescendantsSyncOptions
+    ): Iterable<DescendantPromiseSettledResult> {
+        if (!isUnknownJSXNode(node)) return;
+        yield * descendantsSettledGeneratorInner(
+            node,
+            options
+        )
+    }
+
+    function* descendantsSettledGeneratorInner(
+        node: unknown,
+        options?: DescendantsSyncOptions
+    ): Iterable<DescendantPromiseSettledResult> {
+        if (!isUnknownJSXNode(node)) return;
+        const parent = node;
+        const descendantCache = new WeakMap<
+            UnknownJSXNode,
+            DescendantPromiseSettledResult[]
+            >();
+
+        for (const snapshot of childrenSettledGeneratorSync(node, options)) {
+            yield {
+                ...snapshot,
+                parent
+            };
+
+            if (!isFulfilled(snapshot)) {
+                continue;
+            }
+
+            const { value } = snapshot;
+
+            if (!isUnknownJSXNode(value)) {
+                continue;
+            }
+
+            yield * descendantsSettledGeneratorSync(value, options);
+        }
+    }
 }

@@ -43,7 +43,7 @@ export function assertFulfilled<T>(status: PromiseSettledResult<T>): asserts sta
 }
 
 export function isFulfilled<T>(
-  value: PromiseSettledResult<T>
+    value: PromiseSettledResult<T>
 ): value is PromiseFulfilledResult<T> {
   return value?.status === "fulfilled";
 }

@@ -11,7 +11,7 @@ import { proxy } from "../access";
 import { all } from "@virtualstate/promise";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
 import { isNode } from "../like";
-import {childrenSync} from "@virtualstate/focus";
+import {childrenSync, descendantsSync} from "@virtualstate/focus";
 
 const multiTree = {
   source: "name",
@@ -56,6 +56,7 @@ const multiTree = {
 
 console.log([...childrenSync(multiTree)]);
 console.log([...childrenSync(multiTree)].map(node => [...childrenSync(node)]));
+console.log([...descendantsSync(multiTree)]);
 
 console.log(await stack(multiTree));
 
