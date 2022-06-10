@@ -37,6 +37,11 @@ export function isRejected<R extends PromiseRejectedResult>(
   return value?.status === "rejected";
 }
 
+export function assertFulfilled<T>(status: PromiseSettledResult<T>): asserts status is PromiseFulfilledResult<T> {
+  if (isFulfilled(status)) return;
+  throw status.reason;
+}
+
 export function isFulfilled<T>(
   value: PromiseSettledResult<T>
 ): value is PromiseFulfilledResult<T> {

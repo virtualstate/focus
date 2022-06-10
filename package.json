@@ -71,7 +71,7 @@
     "@virtualstate/hooks": "^2.46.0",
     "@virtualstate/hooks-extended": "^2.46.0",
     "@virtualstate/kdl": "^1.0.1-alpha.29",
-    "@virtualstate/promise": "^1.1.5-alpha.3",
+    "@virtualstate/promise": "^1.1.5-alpha.8",
     "@virtualstate/union": "^2.46.0",
     "@virtualstate/x": "^2.46.0",
     "abort-controller": "^3.0.0",

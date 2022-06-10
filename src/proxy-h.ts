@@ -2,11 +2,13 @@ import { GettersRecord, proxy, ProxyContextOptions, ProxyNode } from "./access";
 
 import { h as f } from "./static-h";
 import * as ChildrenAccessors from "./children";
+import * as ChildrenSyncAccessors from "./children-sync";
 import * as ComponentAccessors from "./component";
 import { isLike } from "./like";
 
 export const getters = {
   ...ChildrenAccessors,
+  ...ChildrenSyncAccessors,
   ...ComponentAccessors,
 } as const;
 

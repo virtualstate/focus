@@ -9,7 +9,6 @@ import {
   ok,
 } from "./like";
 import {createFragment} from "./static-h";
-import {read} from "fs";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;

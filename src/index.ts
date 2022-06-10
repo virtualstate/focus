@@ -1,6 +1,7 @@
 export * from "./proxy-h";
 export * from "./access";
 export * from "./children";
+export * from "./children-sync";
 export * from "./like";
 export * from "./to-string";
 export * from "./to-map";

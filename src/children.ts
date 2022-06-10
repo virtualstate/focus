@@ -7,7 +7,7 @@ import {
 import { isArray, isAsyncIterable, isIterable } from "./is";
 import { union } from "@virtualstate/union";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
-import { component } from "./component";
+import {component, ComponentIterable} from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
 import { all } from "@virtualstate/promise";
 import {
@@ -22,9 +22,9 @@ const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 export interface ChildrenOptions {
   [ThrowAtEnd]?: boolean;
   component?(
-    node?: unknown,
-    options?: object
-  ): AsyncIterable<unknown> | undefined;
+      node?: unknown,
+      options?: object
+  ): ComponentIterable | undefined;
 }
 
 export function children<N>(node: N): TheAsyncThing<ChildrenArray<N>>;
@@ -37,7 +37,11 @@ export function children(
   options?: ChildrenOptions
 ): TheAsyncThing<unknown[]>;
 export function children(node?: unknown, options?: ChildrenOptions): unknown {
-  return anAsyncThing(childrenGenerator(node, options ?? {}));
+  return anAsyncThing({
+    async * [Symbol.asyncIterator]() {
+      yield * childrenGenerator(node, options ?? {});
+    }
+  });
 }
 
 export function childrenGenerator<N>(
@@ -90,7 +94,11 @@ export function childrenSettled(
   node: unknown,
   options?: ChildrenOptions
 ): TheAsyncThing<PromiseSettledResult<unknown>[]> {
-  return anAsyncThing(childrenSettledGenerator(node, options));
+  return anAsyncThing({
+    async * [Symbol.asyncIterator]() {
+      yield * childrenSettledGenerator(node, options);
+    }
+  });
 }
 
 export function childrenSettledGenerator<N>(
@@ -126,16 +134,16 @@ export async function* childrenSettledGenerator(
 
   async function* childrenSettledGeneratorInner(
     input: ReturnType<typeof getChildrenFromRawNode>,
-    component?: AsyncIterable<unknown>
+    component?: ComponentIterable
   ): ReturnType<typeof yieldSnapshot> {
     if (component && isAsyncIterable(component)) {
       yield* childrenSettledGeneratorInner(component);
-    } else if (isIterable(input)) {
-      yield* yieldSnapshot(input);
     } else if (isAsyncIterable(input)) {
       for await (const next of input) {
         yield* yieldSnapshot(next);
       }
+    } else if (isIterable(input)) {
+      yield* yieldSnapshot(input);
     }
   }
 
@@ -219,14 +227,22 @@ export interface DescendantsOptions {
 }
 
 export function descendants(node: unknown, options?: DescendantsOptions) {
-  return anAsyncThing(descendantsGenerator(node, options));
+  return anAsyncThing({
+    async *[Symbol.asyncIterator]() {
+      yield * descendantsGenerator(node, options);
+    }
+  });
 }
 
 export function descendantsSettled(
   node: unknown,
   options?: DescendantsOptions
 ) {
-  return anAsyncThing(descendantsSettledGenerator(node, options));
+  return anAsyncThing({
+    async *[Symbol.asyncIterator]() {
+      yield * descendantsSettledGenerator(node, options);
+    }
+  });
 }
 
 export async function* descendantsGenerator(

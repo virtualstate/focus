@@ -12,6 +12,7 @@
     "@virtualstate/kdl": "https://cdn.skypack.dev/@virtualstate/kdl",
     "@virtualstate/promise": "https://cdn.skypack.dev/@virtualstate/promise",
     "@virtualstate/promise/the-thing": "https://cdn.skypack.dev/@virtualstate/promise/the-thing",
+    "@virtualstate/promise/the-sync-thing": "https://cdn.skypack.dev/@virtualstate/promise/the-sync-thing",
     "@virtualstate/app-history": "./src/app-history.ts",
     "@virtualstate/app-history/polyfill": "./src/polyfill.ts",
     "@virtualstate/app-history/event-target/sync": "./src/event-target/sync-event-target.ts",
