@@ -1,4 +1,4 @@
-import {aSyncThing} from "@virtualstate/promise/the-sync-thing";
+import {aSyncThing, TheSyncThing} from "@virtualstate/promise/the-sync-thing";
 import {DescendantPromiseRejectedResult, DescendantPromiseSettledResult, DescendantsOptions} from "./children";
 import {isArray, isIterable} from "./is";
 import {
@@ -12,7 +12,6 @@ import {
 import {component, ComponentIterable} from "./component";
 import {getChildrenFromRawNode, isFragment, isProxyContextOptions} from "./access";
 import {UnknownJSXNode} from "./node";
-import {union} from "@virtualstate/union";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 
@@ -148,7 +147,7 @@ export interface DescendantsSyncOptions {
 export function descendantsSync(
     node: unknown,
     options?: DescendantsSyncOptions
-) {
+): TheSyncThing {
     return aSyncThing({
         *[Symbol.iterator]() {
             yield * descendantsGeneratorSync(node, options)
@@ -177,7 +176,7 @@ export function *descendantsGeneratorSync(node?: unknown, options?: ChildrenSync
 export function descendantsSettledSync(
     node: unknown,
     options?: DescendantsSyncOptions
-) {
+): TheSyncThing<DescendantPromiseSettledResult> {
     return aSyncThing({
         *[Symbol.iterator]() {
             yield * descendantsSettledGeneratorSync(node, options)

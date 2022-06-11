@@ -10,8 +10,9 @@ import {
 import { proxy } from "../access";
 import { all } from "@virtualstate/promise";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
-import { isNode } from "../like";
+import {isNode, ok} from "../like";
 import {childrenSync, descendantsSettledSync, descendantsSync} from "@virtualstate/focus";
+import {isIterable} from "../is";
 
 const multiTree = {
   source: "name",
@@ -55,9 +56,29 @@ const multiTree = {
 };
 
 console.log([...childrenSync(multiTree)]);
+console.log([...await childrenSync(multiTree)]);
 console.log([...childrenSync(multiTree)].reduce((all: unknown[], node) => [...all, ...childrenSync(node)], []));
 console.log([...descendantsSync(multiTree)]);
+console.log([...await descendantsSync(multiTree)]);
 console.log([...descendantsSettledSync(multiTree)]);
+console.log([...await descendantsSettledSync(multiTree)]);
+
+console.log("for await")
+const thingChildren = childrenSync(multiTree);
+const iterator = thingChildren[Symbol.asyncIterator]();
+await iterator.next();
+for await (const snapshot of thingChildren) {
+  ok(isIterable(snapshot));
+  console.log([...snapshot]);
+}
+for await (const snapshot of descendantsSync(multiTree)) {
+  ok(isIterable(snapshot));
+  console.log([...snapshot]);
+}
+for await (const snapshot of descendantsSettledSync(multiTree)) {
+  ok(isIterable(snapshot));
+  console.log([...snapshot]);
+}
 
 console.log(await stack(multiTree));
 
