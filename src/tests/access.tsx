@@ -55,7 +55,7 @@ const multiTree = {
 };
 
 console.log([...childrenSync(multiTree)]);
-console.log([...childrenSync(multiTree)].map(node => [...childrenSync(node)]));
+console.log([...childrenSync(multiTree)].reduce((all: unknown[], node) => [...all, ...childrenSync(node)], []));
 console.log([...descendantsSync(multiTree)]);
 
 console.log(await stack(multiTree));
