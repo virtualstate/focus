@@ -64,19 +64,16 @@ console.log([...descendantsSettledSync(multiTree)]);
 console.log([...await descendantsSettledSync(multiTree)]);
 
 console.log("for await")
-const thingChildren = childrenSync(multiTree);
-const iterator = thingChildren[Symbol.asyncIterator]();
-await iterator.next();
-for await (const snapshot of thingChildren) {
-  ok(isIterable(snapshot));
+for await (const snapshot of childrenSync(multiTree).async()) {
+  // ok(isIterable(snapshot));
   console.log([...snapshot]);
 }
-for await (const snapshot of descendantsSync(multiTree)) {
-  ok(isIterable(snapshot));
+for await (const snapshot of descendantsSync(multiTree).async()) {
+  // ok(isIterable(snapshot));
   console.log([...snapshot]);
 }
-for await (const snapshot of descendantsSettledSync(multiTree)) {
-  ok(isIterable(snapshot));
+for await (const snapshot of descendantsSettledSync(multiTree).async()) {
+  // ok(isIterable(snapshot));
   console.log([...snapshot]);
 }
 
