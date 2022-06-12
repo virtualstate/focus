@@ -91,6 +91,18 @@ export const possibleChildrenKeys = [
   Symbol.for("@virtualstate/focus/children"),
   ...possibleChildrenKeysStrings,
 ] as const;
+export const possiblePropertiesChildrenKeysStrings = [
+  "childNodes",
+  "children",
+  "_children",
+] as const;
+export const possiblePropertiesChildrenKeys = [
+  Symbol.for(":kdl/children"),
+  Symbol.for(":jsx/children"),
+  Symbol.for("@virtualstate/fringe/children"),
+  Symbol.for("@virtualstate/focus/children"),
+    ...possiblePropertiesChildrenKeysStrings
+]
 
 export const possibleInstanceKeysStrings = [
   "instance",
@@ -366,7 +378,7 @@ export function properties(node: unknown): PropertiesRecord;
 export function properties(node: UnknownJSXNode): PropertiesRecord {
   const [maybeNode] = getNameAndKeyFromRawNode(node);
   let maybeNodeProperties = undefined;
-  if (isUnknownJSXNode(maybeNode)) {
+  if (isUnknownJSXNode(maybeNode) && maybeNode !== node) {
     maybeNodeProperties = properties(maybeNode);
   }
   const propertiesKey = possiblePropertiesKeys.find((key) => isKey(node, key));
@@ -464,11 +476,15 @@ function getInternalChildrenFromRawNode(
     maybeNodeChildren = getInternalChildrenFromRawNode(maybeNode, keys);
   }
   const resolvedKeys: Key[] | readonly Key[] = Array.isArray(keys)
-    ? keys
-    : possibleChildrenKeys;
+      ? keys
+      : possibleChildrenKeys;
+  const maybePropertiesNode = properties(node);
   const childrenKey = getKey(node, resolvedKeys);
+  const propertiesChildrenKey = getKey(maybePropertiesNode, resolvedKeys.filter(key => includesKey(key, possiblePropertiesChildrenKeys)));
   let children;
-  if (childrenKey) {
+  if (propertiesChildrenKey) {
+    children = getSyncOrAsyncChildren(maybePropertiesNode, propertiesChildrenKey);
+  } else if (childrenKey) {
     children = getSyncOrAsyncChildren(node, childrenKey);
   } else {
     const flatKey = getFlatNodeKey(node);
@@ -643,6 +659,7 @@ export function raw(node: UnknownJSXNode): UnknownJSXNode {
 }
 
 function getFlatNodeKey(node: UnknownJSXNode): Key {
+  if (!node) return undefined;
   const keys = Object.keys(node);
   if (!keys.length) return undefined;
   if (keys.length === 1) return keys[0];

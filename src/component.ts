@@ -9,7 +9,7 @@ import {
   raw,
 } from "./access";
 import { UnknownJSXNode } from "./node";
-import { isComponentFn } from "./like";
+import {ComponentFn, isComponentFn} from "./like";
 import { aSyncThing } from "@virtualstate/promise/the-sync-thing";
 
 export interface ComponentOptions {
@@ -24,9 +24,17 @@ export function component(
   input: UnknownJSXNode,
   options?: ComponentOptions
 ): ComponentIterable | undefined {
+
+  function getName(input: unknown): ComponentFn {
+    const node = raw(input);
+    const name = isComponentFn(node) ? node : node[getNameKey(node)];
+    if (!isComponentFn(name)) return undefined;
+    return name;
+  }
+
   const node = raw(input);
-  const name = isComponentFn(node) ? node : node[getNameKey(node)];
-  if (!isComponentFn(name)) return undefined;
+  const name = getName(input);
+  if (!name) return undefined;
   const nodeInstance = instance(name);
   if (isAsyncIterable(nodeInstance)) {
     return nodeInstance;
@@ -44,7 +52,8 @@ export function component(
         typeof options?.this === "function"
           ? options.this(name, options)
           : options?.this;
-      const result = name.call(that, properties(node), children);
+      const nodeProperties = properties(node);
+      const result = name.call(that, nodeProperties, children);
       yield* flatIterable(result);
     },
     async *[Symbol.asyncIterator]() {
@@ -56,7 +65,8 @@ export function component(
         typeof options?.this === "function"
           ? options.this(name, options)
           : options?.this;
-      yield* resolve(name.call(that, properties(node), children));
+      const nodeProperties = properties(node);
+      yield* resolve(name.call(that, nodeProperties, children));
       async function* resolve(input: unknown): AsyncIterable<unknown> {
         if (isIterable(input)) {
           return yield* flatIterable(input);

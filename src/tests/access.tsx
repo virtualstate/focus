@@ -7,7 +7,7 @@ import {
   descendants,
   descendantsSettled,
 } from "../children";
-import { proxy } from "../access";
+import {name, properties, proxy} from "../access";
 import { all } from "@virtualstate/promise";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
 import { isNode, ok } from "../like";
@@ -19,7 +19,7 @@ import {
 import { isIterable } from "../is";
 
 const multiTree = {
-  source: "name",
+  source: "body",
   options: {
     attribute: "value",
     value: 1,
@@ -59,68 +59,76 @@ const multiTree = {
   ],
 };
 
-const childrenSyncIterable = childrenSync(multiTree);
-ok(isIterable(childrenSyncIterable));
-console.log([...childrenSyncIterable]);
-console.log([...(await childrenSync(multiTree))]);
-console.log([...(await children(multiTree))]);
-console.log(
-  [...childrenSyncIterable].reduce((all: unknown[], node) => {
-    const nodeChildren = childrenSync(node);
-    ok(isIterable(nodeChildren));
-    return [...all, ...nodeChildren];
-  }, [])
-);
-console.log(
-  await [...(await childrenSync(multiTree))].reduce(
-    (all: Promise<unknown[]>, node) => {
-      return all.then(async (all) => {
-        return [...all, ...(await childrenSync(node))];
-      });
-    },
-    Promise.resolve([])
-  )
-);
-console.log(
-  await [...(await children(multiTree))].reduce(
-    (all: Promise<unknown[]>, node) => {
-      return all.then(async (all) => {
-        return [...all, ...(await children(node))];
-      });
-    },
-    Promise.resolve([])
-  )
-);
-const descendantsSyncIterable = descendantsSync(multiTree);
-ok(isIterable(descendantsSyncIterable));
-console.log([...descendantsSyncIterable]);
-console.log([...(await descendantsSync(multiTree))]);
-console.log([...(await descendants(multiTree))]);
-const descendantsSettledSyncIterable = descendantsSettledSync(multiTree);
-ok(isIterable(descendantsSettledSyncIterable));
-console.log([...descendantsSettledSyncIterable]);
-console.log([...(await descendantsSettledSync(multiTree))]);
-console.log([...(await descendantsSettled(multiTree))]);
+export async function accessors(multiTree: unknown) {
+  const childrenSyncIterable = childrenSync(multiTree);
+  ok(isIterable(childrenSyncIterable));
+  console.log([...childrenSyncIterable]);
+  console.log([...(await childrenSync(multiTree))]);
+  console.log([...(await children(multiTree))]);
+  console.log(
+      [...childrenSyncIterable].reduce((all: unknown[], node) => {
+        const nodeChildren = childrenSync(node);
+        ok(isIterable(nodeChildren));
+        return [...all, ...nodeChildren];
+      }, [])
+  );
+  console.log(
+      await [...(await childrenSync(multiTree))].reduce(
+          (all: Promise<unknown[]>, node) => {
+            return all.then(async (all) => {
+              return [...all, ...(await childrenSync(node))];
+            });
+          },
+          Promise.resolve([])
+      )
+  );
+  console.log(
+      await [...(await children(multiTree))].reduce(
+          (all: Promise<unknown[]>, node) => {
+            return all.then(async (all) => {
+              return [...all, ...(await children(node))];
+            });
+          },
+          Promise.resolve([])
+      )
+  );
+  const descendantsSyncIterable = descendantsSync(multiTree);
+  ok(isIterable(descendantsSyncIterable));
+  console.log([...descendantsSyncIterable]);
+  console.log([...(await descendantsSync(multiTree))]);
+  console.log([...(await descendants(multiTree))]);
+  const descendantsSettledSyncIterable = descendantsSettledSync(multiTree);
+  ok(isIterable(descendantsSettledSyncIterable));
+  console.log([...descendantsSettledSyncIterable]);
+  console.log([...(await descendantsSettledSync(multiTree))]);
+  console.log([...(await descendantsSettled(multiTree))]);
 
-console.log("for await");
-for await (const snapshot of childrenSync(multiTree)) {
-  console.log([...snapshot]);
+  console.log("for await");
+  for await (const snapshot of childrenSync(multiTree)) {
+    console.log([...snapshot]);
+    console.log(Object.fromEntries([...snapshot].map(node => [name(node), properties(node)])));
+  }
+  for await (const snapshot of children(multiTree)) {
+    console.log([...snapshot]);
+    console.log(Object.fromEntries([...snapshot].map(node => [name(node), properties(node)])));
+  }
+  for await (const snapshot of descendantsSync(multiTree)) {
+    console.log([...snapshot]);
+    console.log(Object.fromEntries([...snapshot].map(node => [name(node), properties(node)])));
+  }
+  for await (const snapshot of descendants(multiTree)) {
+    console.log([...snapshot]);
+    console.log(Object.fromEntries([...snapshot].map(node => [name(node), properties(node)])));
+  }
+  for await (const snapshot of descendantsSettledSync(multiTree)) {
+    console.log([...snapshot]);
+  }
+  for await (const snapshot of descendantsSettled(multiTree)) {
+    console.log([...snapshot]);
+  }
 }
-for await (const snapshot of children(multiTree)) {
-  console.log([...snapshot]);
-}
-for await (const snapshot of descendantsSync(multiTree)) {
-  console.log([...snapshot]);
-}
-for await (const snapshot of descendants(multiTree)) {
-  console.log([...snapshot]);
-}
-for await (const snapshot of descendantsSettledSync(multiTree)) {
-  console.log([...snapshot]);
-}
-for await (const snapshot of descendantsSettled(multiTree)) {
-  console.log([...snapshot]);
-}
+
+await accessors(multiTree);
 
 console.log(await stack(multiTree));
 

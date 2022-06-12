@@ -132,8 +132,8 @@ export function* childrenSettledGeneratorSync(
     }
 
     for (const value of snapshot) {
-      if (isUnknownJSXNode(node) && isFragment(node)) {
-        yield* childrenSettledGeneratorSync(node, options);
+      if (isUnknownJSXNode(value) && isFragment(value)) {
+        yield* childrenSettledGeneratorSync(value, options);
       } else {
         yield { value, status: "fulfilled" };
       }

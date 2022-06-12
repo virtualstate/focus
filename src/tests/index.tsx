@@ -1,6 +1,8 @@
 declare var Deno: unknown;
 
 await import("./access");
+await import("./preact-jsx");
+await import("./react-jsx");
 await import("./typed");
 await import("./dom");
 await import("./throw");
