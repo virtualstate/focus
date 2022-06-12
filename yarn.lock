@@ -1515,10 +1515,10 @@
   resolved "https://registry.npmjs.org/@virtualstate/promise/-/promise-1.1.4.tgz#9513ab3dfe8a9e5d3ad674daaac9556893de6673"
   integrity sha512-Ar48Y+89sY6e+UmfxHZrC+gfrbE9fXqPAL7I+tXuwm4pOpPxEFRYPkyo5nWWir9y91tIiGO4Psb+9opwqe8N7Q==
 
-"@virtualstate/promise@^1.1.5-alpha.13":
-  version "1.1.5-alpha.13"
-  resolved "https://registry.npmjs.org/@virtualstate/promise/-/promise-1.1.5-alpha.13.tgz#c13a70c2e3d13bf57730bc994ffa3eb8088bc438"
-  integrity sha512-Kriok0yu1nOKxWH2/YRdDmf+9gcjALgA6FbOt6bI2KC1+hNEWWxYjZEqfpalSpOJa334v57YOxML5W2f72vDXQ==
+"@virtualstate/promise@^1.1.5-alpha.14":
+  version "1.1.5-alpha.14"
+  resolved "https://registry.npmjs.org/@virtualstate/promise/-/promise-1.1.5-alpha.14.tgz#fe296919938e83f1b8e16010bbb9d1607d066b02"
+  integrity sha512-ZECIzJ4sjx1a3ctcffNAztZsPIxtvKDS4wQWwf8C1GsUATRfCSgEWcUFbu+pSZVyrtsutEZ3NZFPmNVHpK00mA==
 
 "@virtualstate/union@^2.46.0", "@virtualstate/union@^2.48.1":
   version "2.48.1"

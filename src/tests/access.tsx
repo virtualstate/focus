@@ -55,25 +55,32 @@ const multiTree = {
   ],
 };
 
-console.log([...childrenSync(multiTree)]);
+const childrenSyncIterable = childrenSync(multiTree);
+ok(isIterable(childrenSyncIterable));
+console.log([...childrenSyncIterable]);
 console.log([...await childrenSync(multiTree)]);
-console.log([...childrenSync(multiTree)].reduce((all: unknown[], node) => [...all, ...childrenSync(node)], []));
-console.log([...descendantsSync(multiTree)]);
+console.log([...childrenSyncIterable].reduce((all: unknown[], node) => {
+  const nodeChildren = childrenSync(node);
+  ok(isIterable(nodeChildren));
+  return [...all, ...nodeChildren]
+}, []));
+const descendantsSyncIterable = descendantsSync(multiTree);
+ok(isIterable(descendantsSyncIterable))
+console.log([...descendantsSyncIterable]);
 console.log([...await descendantsSync(multiTree)]);
-console.log([...descendantsSettledSync(multiTree)]);
+const descendantsSettledSyncIterable = descendantsSettledSync(multiTree);
+ok(isIterable(descendantsSettledSyncIterable))
+console.log([...descendantsSettledSyncIterable]);
 console.log([...await descendantsSettledSync(multiTree)]);
 
 console.log("for await")
-for await (const snapshot of childrenSync(multiTree).async()) {
-  // ok(isIterable(snapshot));
+for await (const snapshot of childrenSync(multiTree)) {
   console.log([...snapshot]);
 }
-for await (const snapshot of descendantsSync(multiTree).async()) {
-  // ok(isIterable(snapshot));
+for await (const snapshot of descendantsSync(multiTree)) {
   console.log([...snapshot]);
 }
-for await (const snapshot of descendantsSettledSync(multiTree).async()) {
-  // ok(isIterable(snapshot));
+for await (const snapshot of descendantsSettledSync(multiTree)) {
   console.log([...snapshot]);
 }
 
