@@ -64,6 +64,11 @@ console.log([...childrenSyncIterable].reduce((all: unknown[], node) => {
   ok(isIterable(nodeChildren));
   return [...all, ...nodeChildren]
 }, []));
+console.log([...await childrenSync(multiTree)].reduce((all: Promise<unknown[]>, node) => {
+  return all.then(async all => {
+    return [...all, ...await childrenSync(node)]
+  })
+}, Promise.resolve([])));
 const descendantsSyncIterable = descendantsSync(multiTree);
 ok(isIterable(descendantsSyncIterable))
 console.log([...descendantsSyncIterable]);
