@@ -7,7 +7,7 @@ import {
 import { isArray, isAsyncIterable, isIterable } from "./is";
 import { union } from "@virtualstate/union";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
-import {component, ComponentIterable} from "./component";
+import { component, ComponentIterable } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
 import { all } from "@virtualstate/promise";
 import {
@@ -21,10 +21,7 @@ const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 
 export interface ChildrenOptions {
   [ThrowAtEnd]?: boolean;
-  component?(
-      node?: unknown,
-      options?: object
-  ): ComponentIterable | undefined;
+  component?(node?: unknown, options?: object): ComponentIterable | undefined;
 }
 
 export function children<N>(node: N): TheAsyncThing<ChildrenArray<N>>;
@@ -38,9 +35,9 @@ export function children(
 ): TheAsyncThing<unknown[]>;
 export function children(node?: unknown, options?: ChildrenOptions): unknown {
   return anAsyncThing({
-    async * [Symbol.asyncIterator]() {
-      yield * childrenGenerator(node, options ?? {});
-    }
+    async *[Symbol.asyncIterator]() {
+      yield* childrenGenerator(node, options ?? {});
+    },
   });
 }
 
@@ -95,9 +92,9 @@ export function childrenSettled(
   options?: ChildrenOptions
 ): TheAsyncThing<PromiseSettledResult<unknown>[]> {
   return anAsyncThing({
-    async * [Symbol.asyncIterator]() {
-      yield * childrenSettledGenerator(node, options);
-    }
+    async *[Symbol.asyncIterator]() {
+      yield* childrenSettledGenerator(node, options);
+    },
   });
 }
 
@@ -229,8 +226,8 @@ export interface DescendantsOptions {
 export function descendants(node: unknown, options?: DescendantsOptions) {
   return anAsyncThing({
     async *[Symbol.asyncIterator]() {
-      yield * descendantsGenerator(node, options);
-    }
+      yield* descendantsGenerator(node, options);
+    },
   });
 }
 
@@ -240,8 +237,8 @@ export function descendantsSettled(
 ) {
   return anAsyncThing({
     async *[Symbol.asyncIterator]() {
-      yield * descendantsSettledGenerator(node, options);
-    }
+      yield* descendantsSettledGenerator(node, options);
+    },
   });
 }
 

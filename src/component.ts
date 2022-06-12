@@ -1,15 +1,24 @@
 import { createFragment } from "./static-h";
 import { isAsyncIterable, isIterable } from "./is";
-import {getChildrenFragmentFromRawNode, getChildrenFromRawNode, getNameKey, instance, properties, raw} from "./access";
+import {
+  getChildrenFragmentFromRawNode,
+  getChildrenFromRawNode,
+  getNameKey,
+  instance,
+  properties,
+  raw,
+} from "./access";
 import { UnknownJSXNode } from "./node";
-import {isComponentFn} from "./like";
-import {aSyncThing} from "@virtualstate/promise/the-sync-thing";
+import { isComponentFn } from "./like";
+import { aSyncThing } from "@virtualstate/promise/the-sync-thing";
 
 export interface ComponentOptions {
   this?: unknown;
 }
 
-export type ComponentIterable = (AsyncIterable<unknown> | Iterable<unknown>) | (AsyncIterable<unknown> & Iterable<unknown>);
+export type ComponentIterable =
+  | (AsyncIterable<unknown> | Iterable<unknown>)
+  | (AsyncIterable<unknown> & Iterable<unknown>);
 
 export function component(
   input: UnknownJSXNode,
@@ -32,15 +41,11 @@ export function component(
         return yield flatIterable(nodeInstance);
       }
       const that =
-          typeof options?.this === "function"
-              ? options.this(name, options)
-              : options?.this;
-      const result = name.call(
-          that,
-          properties(node),
-          children
-      );
-      yield * flatIterable(result);
+        typeof options?.this === "function"
+          ? options.this(name, options)
+          : options?.this;
+      const result = name.call(that, properties(node), children);
+      yield* flatIterable(result);
     },
     async *[Symbol.asyncIterator]() {
       if (nodeInstance && nodeInstance instanceof name) {
@@ -51,16 +56,10 @@ export function component(
         typeof options?.this === "function"
           ? options.this(name, options)
           : options?.this;
-      yield* resolve(
-        name.call(
-          that,
-          properties(node),
-          children
-        )
-      );
+      yield* resolve(name.call(that, properties(node), children));
       async function* resolve(input: unknown): AsyncIterable<unknown> {
         if (isIterable(input)) {
-          return yield * flatIterable(input);
+          return yield* flatIterable(input);
         } else if (isAsyncIterable(input)) {
           return yield* input;
         }
@@ -70,11 +69,10 @@ export function component(
   };
 }
 
-
-function *flatIterable(input: unknown): Iterable<unknown> {
+function* flatIterable(input: unknown): Iterable<unknown> {
   if (isIterable(input)) {
     for (const value of input) {
-      yield * flatIterable(value);
+      yield* flatIterable(value);
     }
   } else {
     yield input;

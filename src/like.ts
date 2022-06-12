@@ -2,7 +2,13 @@ import {
   DescendantPromiseFulfilledResult,
   DescendantPromiseSettledResult,
 } from "./children";
-import {getNameKey, Key, raw, StaticChildNode, UnknownJSXNode} from "./access";
+import {
+  getNameKey,
+  Key,
+  raw,
+  StaticChildNode,
+  UnknownJSXNode,
+} from "./access";
 import { GenericNode } from "./node";
 
 export function isLike<T>(value: unknown, ...and: unknown[]): value is T {
@@ -37,13 +43,15 @@ export function isRejected<R extends PromiseRejectedResult>(
   return value?.status === "rejected";
 }
 
-export function assertFulfilled<T>(status: PromiseSettledResult<T>): asserts status is PromiseFulfilledResult<T> {
+export function assertFulfilled<T>(
+  status: PromiseSettledResult<T>
+): asserts status is PromiseFulfilledResult<T> {
   if (isFulfilled(status)) return;
   throw status.reason;
 }
 
 export function isFulfilled<T>(
-    value: PromiseSettledResult<T>
+  value: PromiseSettledResult<T>
 ): value is PromiseFulfilledResult<T> {
   return value?.status === "fulfilled";
 }
@@ -101,13 +109,15 @@ export function isGenericChildNode(node: unknown): node is GenericNode {
 
 export interface ComponentFn {
   (options: Record<string | symbol, unknown>, input?: UnknownJSXNode): void;
-  new (options: Record<string | symbol, unknown>, input?: UnknownJSXNode): unknown;
+  new (
+    options: Record<string | symbol, unknown>,
+    input?: UnknownJSXNode
+  ): unknown;
 }
 
 export function isComponentFn(node: unknown): node is ComponentFn {
   return isLike(node, typeof node === "function");
 }
-
 
 export function isComponentNode(input: unknown): boolean {
   if (!isUnknownJSXNode(input)) return false;

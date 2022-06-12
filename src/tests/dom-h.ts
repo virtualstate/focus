@@ -2,7 +2,8 @@ import dom from "./dom-document";
 import {
   isDescendantFulfilled,
   isKeyIn,
-  isLike, name,
+  isLike,
+  name,
   proxy,
 } from "@virtualstate/focus";
 import { descendantsSettled } from "@virtualstate/focus";

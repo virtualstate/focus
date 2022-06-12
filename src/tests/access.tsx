@@ -10,9 +10,13 @@ import {
 import { proxy } from "../access";
 import { all } from "@virtualstate/promise";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
-import {isNode, ok} from "../like";
-import {childrenSync, descendantsSettledSync, descendantsSync} from "@virtualstate/focus";
-import {isIterable} from "../is";
+import { isNode, ok } from "../like";
+import {
+  childrenSync,
+  descendantsSettledSync,
+  descendantsSync,
+} from "@virtualstate/focus";
+import { isIterable } from "../is";
 
 const multiTree = {
   source: "name",
@@ -58,27 +62,34 @@ const multiTree = {
 const childrenSyncIterable = childrenSync(multiTree);
 ok(isIterable(childrenSyncIterable));
 console.log([...childrenSyncIterable]);
-console.log([...await childrenSync(multiTree)]);
-console.log([...childrenSyncIterable].reduce((all: unknown[], node) => {
-  const nodeChildren = childrenSync(node);
-  ok(isIterable(nodeChildren));
-  return [...all, ...nodeChildren]
-}, []));
-console.log([...await childrenSync(multiTree)].reduce((all: Promise<unknown[]>, node) => {
-  return all.then(async all => {
-    return [...all, ...await childrenSync(node)]
-  })
-}, Promise.resolve([])));
+console.log([...(await childrenSync(multiTree))]);
+console.log(
+  [...childrenSyncIterable].reduce((all: unknown[], node) => {
+    const nodeChildren = childrenSync(node);
+    ok(isIterable(nodeChildren));
+    return [...all, ...nodeChildren];
+  }, [])
+);
+console.log(
+  [...(await childrenSync(multiTree))].reduce(
+    (all: Promise<unknown[]>, node) => {
+      return all.then(async (all) => {
+        return [...all, ...(await childrenSync(node))];
+      });
+    },
+    Promise.resolve([])
+  )
+);
 const descendantsSyncIterable = descendantsSync(multiTree);
-ok(isIterable(descendantsSyncIterable))
+ok(isIterable(descendantsSyncIterable));
 console.log([...descendantsSyncIterable]);
-console.log([...await descendantsSync(multiTree)]);
+console.log([...(await descendantsSync(multiTree))]);
 const descendantsSettledSyncIterable = descendantsSettledSync(multiTree);
-ok(isIterable(descendantsSettledSyncIterable))
+ok(isIterable(descendantsSettledSyncIterable));
 console.log([...descendantsSettledSyncIterable]);
-console.log([...await descendantsSettledSync(multiTree)]);
+console.log([...(await descendantsSettledSync(multiTree))]);
 
-console.log("for await")
+console.log("for await");
 for await (const snapshot of childrenSync(multiTree)) {
   console.log([...snapshot]);
 }

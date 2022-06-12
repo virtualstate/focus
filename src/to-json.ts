@@ -44,7 +44,7 @@ export async function* toJSONValueGenerator(
   if (Object.keys(props).length) {
     object[options?.props ?? "props"] = props;
   }
-  const childrenKey = options?.flat ? name : (options?.children ?? "children")
+  const childrenKey = options?.flat ? name : options?.children ?? "children";
   let yielded = false;
   const cache = new Map<object, unknown>();
   let last;
@@ -73,7 +73,12 @@ export async function* toJSONValueGenerator(
         continue;
       }
       let yielding: unknown = current;
-      if (options?.flat && Array.isArray(yielding) && yielding.length === 1 && isStaticChildNode(yielding[0])) {
+      if (
+        options?.flat &&
+        Array.isArray(yielding) &&
+        yielding.length === 1 &&
+        isStaticChildNode(yielding[0])
+      ) {
         yielding = yielding[0];
       }
       yield {
