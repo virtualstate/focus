@@ -63,6 +63,7 @@ const childrenSyncIterable = childrenSync(multiTree);
 ok(isIterable(childrenSyncIterable));
 console.log([...childrenSyncIterable]);
 console.log([...(await childrenSync(multiTree))]);
+console.log([...(await children(multiTree))]);
 console.log(
   [...childrenSyncIterable].reduce((all: unknown[], node) => {
     const nodeChildren = childrenSync(node);
@@ -71,10 +72,20 @@ console.log(
   }, [])
 );
 console.log(
-  [...(await childrenSync(multiTree))].reduce(
+  await [...(await childrenSync(multiTree))].reduce(
     (all: Promise<unknown[]>, node) => {
       return all.then(async (all) => {
         return [...all, ...(await childrenSync(node))];
+      });
+    },
+    Promise.resolve([])
+  )
+);
+console.log(
+  await [...(await children(multiTree))].reduce(
+    (all: Promise<unknown[]>, node) => {
+      return all.then(async (all) => {
+        return [...all, ...(await children(node))];
       });
     },
     Promise.resolve([])
@@ -84,19 +95,30 @@ const descendantsSyncIterable = descendantsSync(multiTree);
 ok(isIterable(descendantsSyncIterable));
 console.log([...descendantsSyncIterable]);
 console.log([...(await descendantsSync(multiTree))]);
+console.log([...(await descendants(multiTree))]);
 const descendantsSettledSyncIterable = descendantsSettledSync(multiTree);
 ok(isIterable(descendantsSettledSyncIterable));
 console.log([...descendantsSettledSyncIterable]);
 console.log([...(await descendantsSettledSync(multiTree))]);
+console.log([...(await descendantsSettled(multiTree))]);
 
 console.log("for await");
 for await (const snapshot of childrenSync(multiTree)) {
   console.log([...snapshot]);
 }
+for await (const snapshot of children(multiTree)) {
+  console.log([...snapshot]);
+}
 for await (const snapshot of descendantsSync(multiTree)) {
   console.log([...snapshot]);
 }
+for await (const snapshot of descendants(multiTree)) {
+  console.log([...snapshot]);
+}
 for await (const snapshot of descendantsSettledSync(multiTree)) {
+  console.log([...snapshot]);
+}
+for await (const snapshot of descendantsSettled(multiTree)) {
   console.log([...snapshot]);
 }
 
