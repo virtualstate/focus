@@ -63,3 +63,13 @@ const asyncIterablePromise = await children({
 console.log(asyncIterablePromise);
 ok(asyncIterablePromise.length === 1);
 ok(asyncIterablePromise[0] === asyncIterablePromiseInput);
+
+const asyncIterablePromiseArrayInput = Math.random();
+const asyncIterablePromiseArray = await children({
+    async *[Symbol.asyncIterator]() {
+        yield [Promise.resolve([asyncIterablePromiseArrayInput])];
+    }
+});
+console.log(asyncIterablePromiseArray);
+ok(asyncIterablePromiseArray.length === 1);
+ok(asyncIterablePromiseArray[0] === asyncIterablePromiseArrayInput);
