@@ -5,7 +5,7 @@ import {
   isComponentNode,
   isKey,
   isKeyIn,
-  isLike,
+  isLike, isPromise,
   isStaticChildNode,
   isUnknownJSXNode,
   ok,
@@ -48,6 +48,7 @@ export const possibleNameKeys = [
   Symbol.for("@virtualstate/fringe/source"),
   Symbol.for("@virtualstate/focus/source"),
   ...possibleNameKeysStrings,
+  Symbol.toStringTag
 ] as const;
 export const possibleTagKeysStrings = ["tag"] as const;
 export const possibleTagKeys = [
@@ -190,6 +191,7 @@ export function isFragment(node: unknown): boolean {
   if (isAsyncIterable(node)) return true;
   if (isIterable(node)) return true;
   if (isComponentNode(node)) return true;
+  if (isPromise(node)) return true;
   const unknown: ReadonlyArray<unknown> = [
     ...possibleFragmentNames,
     ...possibleValueChildrenKeysStrings,
@@ -513,6 +515,8 @@ function getInternalChildrenFromRawNode(
   return maybeNodeChildren;
 }
 
+const promiseChildrenCache = new WeakMap<Promise<unknown>, AsyncIterable<unknown>>();
+
 function getSyncOrAsyncChildren(
   node: UnknownJSXNode,
   key: Key
@@ -522,6 +526,19 @@ function getSyncOrAsyncChildren(
   if (!key) return [];
   if (isAsyncIterable(node)) return node;
   if (isIterable(node)) return node;
+  if (isPromise(node)){
+    const existing = promiseChildrenCache.get(node);
+    if (existing) {
+      return existing;
+    }
+    const promiseIterable = {
+      async *[Symbol.asyncIterator]() {
+        yield node;
+      }
+    };
+    promiseChildrenCache.set(node, promiseIterable);
+    return promiseIterable;
+  }
 
   const value = node?.[key];
   return getIterableChildren();

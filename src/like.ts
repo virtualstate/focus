@@ -126,3 +126,7 @@ export function isComponentNode(input: unknown): boolean {
   const name = node[getNameKey(node)];
   return isComponentFn(name);
 }
+
+export function isPromise(input: unknown): input is Promise<unknown> {
+  return isUnknownJSXNode(input) && typeof input.then === "function";
+}
