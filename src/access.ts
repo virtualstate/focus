@@ -41,6 +41,8 @@ export const possibleNameKeysStrings = [
   "name",
   "tagName",
   "nodeName",
+  "url",
+  "id",
 ] as const;
 export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
@@ -61,6 +63,8 @@ export const possiblePropertiesKeysStrings = [
   "attributes",
   "attrs",
   "attribs",
+  "fields",
+  "headers"
 ] as const;
 export const possiblePropertiesKeys = [
   Symbol.for(":kdl/properties"),
