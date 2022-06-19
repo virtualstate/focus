@@ -187,6 +187,8 @@ export type StaticChildNode = string | number | boolean;
 export function isFragment(node: unknown): boolean {
   if (!node) return false;
   if (!isUnknownJSXNode(node)) return false;
+  if (isAsyncIterable(node)) return true;
+  if (isIterable(node)) return true;
   if (isComponentNode(node)) return true;
   const unknown: ReadonlyArray<unknown> = [
     ...possibleFragmentNames,
@@ -518,6 +520,9 @@ function getSyncOrAsyncChildren(
   type Indexed = { length: number } & Record<number, unknown>;
 
   if (!key) return [];
+  if (isAsyncIterable(node)) return node;
+  if (isIterable(node)) return node;
+
   const value = node?.[key];
   return getIterableChildren();
 
