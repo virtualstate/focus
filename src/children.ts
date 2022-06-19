@@ -11,10 +11,10 @@ import { component, ComponentIterable } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
 import { all } from "@virtualstate/promise";
 import {
-  isFulfilled,
+  isFulfilled, isGenericChildNode, isLike,
   isRejected,
   isStaticChildNode,
-  isUnknownJSXNode,
+  isUnknownJSXNode, ok,
 } from "./like";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
@@ -181,14 +181,16 @@ export async function* childrenSettledGenerator(
     }
 
     if (fragments.length !== snapshot.length) {
-      yield workingSet.flatMap((value) => value);
+      yield workingSet
+          .flatMap((value) => value)
+          .filter(node => isUnknownJSXNode(node) || isStaticChildNode(node))
     }
 
     for await (const fragmentUpdates of all(
       fragments.map(async function* ([index, fragment]): AsyncIterable<
         [string, PromiseSettledResult<unknown>[]]
       > {
-        if (!isFragment(fragment)) return;
+        ok(isFragment(fragment));
         try {
           for await (const snapshot of childrenSettledGenerator(
             fragment,
@@ -204,7 +206,9 @@ export async function* childrenSettledGenerator(
       for (const [index, snapshot] of fragmentUpdates.filter(Boolean)) {
         workingSet[+index] = snapshot;
       }
-      yield workingSet.flatMap((value) => value);
+      yield workingSet
+          .flatMap((value) => value)
+          .filter(node => isUnknownJSXNode(node) || isStaticChildNode(node));
     }
   }
 }
@@ -352,7 +356,9 @@ export async function* descendantsSettledGenerator(
         for (const [index, nodeSnapshot] of childUpdates.filter(Boolean)) {
           workingSet[+index] = [snapshot[+index], ...nodeSnapshot];
         }
-        yield workingSet.flatMap((value) => value);
+        yield workingSet
+            .flatMap((value) => value)
+            .filter(result => !!result)
       }
     }
   }

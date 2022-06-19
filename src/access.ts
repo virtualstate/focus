@@ -191,10 +191,14 @@ export type StaticChildNode = string | number | boolean;
 export function isFragment(node: unknown): boolean {
   if (!node) return false;
   if (!isUnknownJSXNode(node)) return false;
+  if (isComponentNode(node)) return true;
   if (isAsyncIterable(node)) return true;
   if (isIterable(node)) return true;
-  if (isComponentNode(node)) return true;
   if (isPromise(node)) return true;
+  const rawNode = raw(node);
+  if (isAsyncIterable(rawNode)) return true;
+  if (isIterable(rawNode)) return true;
+  if (isPromise(rawNode)) return true;
   const unknown: ReadonlyArray<unknown> = [
     ...possibleFragmentNames,
     ...possibleValueChildrenKeysStrings,
@@ -470,6 +474,8 @@ function isFragmentValue(node: UnknownJSXNode) {
   return !!(value || isStaticChildNode(value));
 }
 
+const promiseChildrenCache = new WeakMap<Promise<unknown>, AsyncIterable<unknown>>();
+
 /**
  * @internal
  */
@@ -482,6 +488,23 @@ function getInternalChildrenFromRawNode(
   if (isUnknownJSXNode(maybeNode)) {
     maybeNodeChildren = getInternalChildrenFromRawNode(maybeNode, keys);
   }
+
+  if (isAsyncIterable(node)) return node;
+  if (isPromise(node)){
+    const existing = promiseChildrenCache.get(node);
+    if (existing) {
+      return existing;
+    }
+    const promiseIterable = {
+      async *[Symbol.asyncIterator]() {
+        yield await node;
+      }
+    };
+    promiseChildrenCache.set(node, promiseIterable);
+    return promiseIterable;
+  }
+  if (isIterable(node)) return node;
+
   const resolvedKeys: Key[] | readonly Key[] = Array.isArray(keys)
       ? keys
       : possibleChildrenKeys;
@@ -518,31 +541,12 @@ function getInternalChildrenFromRawNode(
   return maybeNodeChildren;
 }
 
-const promiseChildrenCache = new WeakMap<Promise<unknown>, AsyncIterable<unknown>>();
-
 function getSyncOrAsyncChildren(
   node: UnknownJSXNode,
   key: Key
 ): AsyncIterable<unknown> | Iterable<unknown> {
   type Indexed = { length: number } & Record<number, unknown>;
-
   if (!key) return [];
-  if (isAsyncIterable(node)) return node;
-  if (isIterable(node)) return node;
-  if (isPromise(node)){
-    const existing = promiseChildrenCache.get(node);
-    if (existing) {
-      return existing;
-    }
-    const promiseIterable = {
-      async *[Symbol.asyncIterator]() {
-        yield node;
-      }
-    };
-    promiseChildrenCache.set(node, promiseIterable);
-    return promiseIterable;
-  }
-
   const value = node?.[key];
   return getIterableChildren();
 

@@ -31,5 +31,6 @@ await import("./combine");
 
 await import("./flat");
 await import("./class");
+await import("./raw-fragments");
 
 export default 1;
