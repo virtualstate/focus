@@ -47,8 +47,7 @@ export const possibleNameKeys = [
   Symbol.for(":jsx/type"),
   Symbol.for("@virtualstate/fringe/source"),
   Symbol.for("@virtualstate/focus/source"),
-  ...possibleNameKeysStrings,
-  Symbol.toStringTag
+  ...possibleNameKeysStrings
 ] as const;
 export const possibleTagKeysStrings = ["tag"] as const;
 export const possibleTagKeys = [
