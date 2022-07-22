@@ -43,6 +43,7 @@ export const possibleNameKeysStrings = [
   "nodeName",
   "url",
   "id",
+  "node"
 ] as const;
 export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
