@@ -1474,7 +1474,7 @@
     iterable "^5.6.0"
     microtask-collector "^3.1.0"
 
-"@virtualstate/focus@^1.0.1-alpha.85", "@virtualstate/focus@^1.0.1-alpha.87":
+"@virtualstate/focus@^1.0.1-alpha.85":
   version "1.0.1-alpha.87"
   resolved "https://registry.npmjs.org/@virtualstate/focus/-/focus-1.0.1-alpha.87.tgz#389bb0b5498d2f9375da6e2a320d870370a9131f"
   integrity sha512-IuOlqKiq0woZpnJSEhvkUSKJeCnNcpf3rYX07vPVAsFiTqQNKTHSOL+J1xO65wtriOb5F6I12LgjsJGfS3SRQg==

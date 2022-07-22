@@ -8,7 +8,7 @@ import {
   properties,
   raw,
 } from "./access";
-import { UnknownJSXNode } from "./node";
+import { UnknownJSXNode } from "./access";
 import {ComponentFn, isComponentFn} from "./like";
 import { aSyncThing } from "@virtualstate/promise/the-sync-thing";
 

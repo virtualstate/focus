@@ -2,27 +2,29 @@ import {h} from "@virtualstate/focus";
 
 interface RelationContext {
     node: unknown;
+    options?: Record<string, unknown>;
     children: RelationDesigner[];
 }
 
-interface RelationDesigner extends Iterable<unknown> {
+interface RelationDesigner extends AsyncIterable<unknown> {
     readonly context: Readonly<RelationContext>;
 
-    add(node: unknown): RelationDesigner;
+    add(node: unknown, options?: unknown): RelationDesigner;
     delete(nodeOrDesigner: unknown): void;
     clear(): void;
     has(nodeOrDesigner: unknown): boolean;
 }
 
-export function design(parent?: unknown): RelationDesigner {
-    function createContext(node?: unknown): RelationContext {
+export function design(parent?: unknown, options?: Record<string, unknown>): RelationDesigner {
+    function createContext(node?: unknown, options?: Record<string, unknown>): RelationContext {
         return {
             node,
+            options,
             children: []
         }
     }
-    function createRelation(node: unknown, ...parents: RelationContext[]): RelationDesigner {
-        const context = createContext(node);
+    function createRelation(node: unknown, options: Record<string, unknown>, ...parents: RelationContext[]): RelationDesigner {
+        const context = createContext(node, options);
 
         function findIndex(nodeOrDesigner: unknown) {
             return context.children.findIndex(
@@ -31,12 +33,14 @@ export function design(parent?: unknown): RelationDesigner {
         }
 
         return {
+            [Symbol.for(":jsx/type")]: Symbol.for(":jsx/fragment"),
             get context() {
                 return Object.freeze(context);
             },
-            add(node: unknown) {
+            add(node: unknown, options?: Record<string, unknown>) {
                 const relation = createRelation(
                     node,
+                    options,
                     context,
                     ...parents
                 );
@@ -54,16 +58,16 @@ export function design(parent?: unknown): RelationDesigner {
             clear() {
                 context.children = [];
             },
-            *[Symbol.iterator]() {
-                const { node } = context;
+            async *[Symbol.asyncIterator]() {
+                const { node, options } = context;
                 if (typeof node === "undefined") {
-                    yield [...context.children];
+                    yield h("fragment", options, ...context.children);
                 } else {
-                    yield h(node, {}, ...context.children);
+                    yield h(node, options, ...context.children);
                 }
             }
         };
     }
 
-    return createRelation(parent);
+    return createRelation(parent, options);
 }

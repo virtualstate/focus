@@ -2,7 +2,7 @@ import { descendants } from "./children";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
 import { name } from "./access";
 import { isStaticChildNode, isUnknownJSXNode, ok } from "./like";
-import { isFragment } from "./node";
+import { isFragment } from "./access";
 
 type GeneratorFunction = (
   node: unknown,

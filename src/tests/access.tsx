@@ -1,6 +1,5 @@
 import { getters, h, h as proxyH } from "../proxy-h";
 import { h as staticH } from "../static-h";
-import { stack } from "../stack";
 import {
   children,
   childrenSettled,
@@ -129,8 +128,6 @@ export async function accessors(multiTree: unknown) {
 }
 
 await accessors(multiTree);
-
-console.log(await stack(multiTree));
 
 console.log(await children(multiTree));
 

@@ -47,6 +47,7 @@ export const possibleNameKeysStrings = [
 ] as const;
 export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
+  Symbol.for(":jsx/name"),
   Symbol.for(":jsx/type"),
   Symbol.for("@virtualstate/fringe/source"),
   Symbol.for("@virtualstate/focus/source"),
@@ -448,7 +449,10 @@ function getKey(
   return keys.find((key) => isKey(node, key));
 }
 
-function getValueOrChildrenFromRawNode(node: UnknownJSXNode): {
+/**
+ * @internal
+ */
+export function getValueOrChildrenFromRawNode(node: UnknownJSXNode): {
   value?: unknown;
   children?: unknown;
 } {
@@ -473,6 +477,11 @@ function getValueOrChildrenFromRawNode(node: UnknownJSXNode): {
 function isFragmentValue(node: UnknownJSXNode) {
   const { value } = getValueOrChildrenFromRawNode(node);
   return !!(value || isStaticChildNode(value));
+}
+
+function isChildren(node: UnknownJSXNode) {
+  const { children } = getValueOrChildrenFromRawNode(node);
+  return !!(children || isStaticChildNode(children));
 }
 
 const promiseChildrenCache = new WeakMap<Promise<unknown>, AsyncIterable<unknown>>();

@@ -9,7 +9,8 @@ import {
   StaticChildNode,
   UnknownJSXNode,
 } from "./access";
-import { GenericNode } from "./node";
+
+export type GenericNode = unknown;
 
 export function isLike<T>(value: unknown, ...and: unknown[]): value is T {
   if (!and.length) return !!value;

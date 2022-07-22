@@ -19,7 +19,7 @@ import {
   isFragment,
   isProxyContextOptions,
 } from "./access";
-import { UnknownJSXNode } from "./node";
+import { UnknownJSXNode } from "./access";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
 

@@ -1,4 +1,4 @@
-import { UnknownJSXNode } from "./node";
+import { UnknownJSXNode } from "./access";
 import {
   getChildrenFromRawNode,
   isFragment,
