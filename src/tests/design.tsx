@@ -4,7 +4,7 @@ import {split} from "@virtualstate/promise";
 async function Parent(options: unknown, input?: unknown) {
 
     const {
-        a: [a], b: [b], c: [c]
+        a: [a, a2], b: [b], c: [c]
     } = split(
         children(input)
     )
@@ -13,15 +13,25 @@ async function Parent(options: unknown, input?: unknown) {
 
     const two = properties(await a).value;
     const three = properties(await b).value;
+
+    console.log({ two, three });
+
+    ok(two === 2, "Expected two");
+    ok(three === 3, "Expected three");
+
     const four = properties(await c).value;
+    const two2 = properties(await a2).value;
+    console.log({ four, two2 });
 
-    console.log({ two, three, four });
+    ok(!four || four === 4, "Expected four");
+    ok(!two2 || two2 === 2, "Expected two");
 
-    ok(two === 2);
-    ok(three === 3);
-    ok(!four || four === 4);
-
-    return two + three + (typeof four === "number" ? four : 0);
+    return (
+        two +
+        three +
+        (typeof four === "number" ? four : 0) +
+        (typeof two2 === "number" ? two2 : 0)
+    );
 }
 
 const designer = design();
@@ -50,7 +60,8 @@ ok(result === 5);
 
 root.clear();
 
-const error = await children(designer).catch(error => error);
+let error = await children(designer).catch(error => error);
+console.log({ error });
 
 ok(error instanceof Error, "expected error to be returned");
 
@@ -58,9 +69,9 @@ root.add(<a value={3} />);
 root.add(<b value={4} />);
 root.add(<c value={5} />);
 
-const errorNumbers = await children(designer).catch(error => error);
-
-ok(errorNumbers instanceof Error, "expected error to be returned");
+error = await children(designer).catch(error => error);
+console.log({ error });
+ok(error instanceof Error, "expected error to be returned");
 
 root.clear();
 
@@ -71,5 +82,12 @@ root.add(c);
 [result] = await children(designer);
 console.log({ result });
 ok(result === 9);
+
+root.add(<a value={2} />);
+
+[result] = await children(designer);
+console.log({ result });
+ok(result === 11);
+
 
 
