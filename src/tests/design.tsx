@@ -10,7 +10,7 @@ import {
     isFragment,
     getChildrenFromRawNode,
     getValueOrChildrenFromRawNode,
-    isUnknownJSXNode, descendants
+    isUnknownJSXNode, descendants, isDescendantRejected, logDescendantPromiseSettledResult
 } from "@virtualstate/focus";
 import {split} from "@virtualstate/promise";
 
@@ -125,7 +125,7 @@ let h: unknown = f;
         return <edge {...props}>{input}</edge>
     }
 
-    const root = design(Node);
+    const root = design(Node, { name: "root" });
 
     ok(isFragment(root));
 
@@ -156,43 +156,37 @@ let h: unknown = f;
     swap.add(b);
     swap.add(d);
 
-    aEdge1.add(e);
-    bEdge1.add(d);
-    cEdge1.add(c);
-    dEdge1.add(b);
+    aEdge1.add(b);
+    bEdge1.add(c);
+    cEdge1.add(d);
+    dEdge1.add(e);
     eEdge1.add(swap);
+    eEdge1.add(a);
 
     let count = 0;
 
-    const log: string[] = [];
+    // const log: string[] = [];
 
-    const TARGET = 100;
+    const TARGET = 10;
 
     for await (const snapshot of descendantsSettled(root)) {
-        for (const state of snapshot) {
-            if (!isDescendantFulfilled(state)) {
-                console.log({ count, state });
-                break;
-            }
-            // const { parent, value } = state;
-            // console.log(`${isFragment(parent) ? ":" : String(name(parent))} > ${String(name(value))}`, properties(value));
-            await new Promise<void>(queueMicrotask);
-            // console.log(`isFragment: ${isFragment(value)}`);
-            // console.log(`name: ${String(name(value))}`);
-            // console.log("Children:", getChildrenFromRawNode(value));
-            // console.log("Raw Children:", isUnknownJSXNode(value) ? getValueOrChildrenFromRawNode(value) : undefined);
-            // console.log(value);
+        const error = snapshot.find(isDescendantRejected);
+        if (error) {
+            console.log({ count, error });
+            break;
         }
-
 
         count += 1;
 
         if (count > TARGET) {
+            logDescendantPromiseSettledResult(...snapshot);
             break;
+        } else {
+            await new Promise<void>(queueMicrotask);
         }
     }
 
-    console.log(log.join("\n"));
+    // console.log(log.join("\n"));
     ok(count > TARGET);
 
 }
@@ -285,6 +279,18 @@ let h: unknown = f;
     ok(names.length === 1);
 
 
+    parent.add(b);
+
+
+    result = await descendants(parent)
+
+    names = result.map(name);
+
+    console.log({ names });
+
+    ok(names.includes("parent"));
+    ok(names.includes("b"));
+    ok(names.length === 2);
 
 
 

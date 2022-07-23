@@ -1,5 +1,5 @@
 import {
-  DescendantPromiseFulfilledResult,
+  DescendantPromiseFulfilledResult, DescendantPromiseRejectedResult,
   DescendantPromiseSettledResult,
 } from "./children";
 import {
@@ -58,9 +58,15 @@ export function isFulfilled<T>(
 }
 
 export function isDescendantFulfilled(
-  result: DescendantPromiseSettledResult
+    result: DescendantPromiseSettledResult
 ): result is DescendantPromiseFulfilledResult {
   return isFulfilled(result);
+}
+
+export function isDescendantRejected(
+    result: DescendantPromiseSettledResult
+): result is DescendantPromiseRejectedResult {
+  return isRejected(result);
 }
 
 export function isKeyIn<U, K extends string | symbol | number>(

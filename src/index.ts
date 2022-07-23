@@ -8,3 +8,4 @@ export * from "./to-map";
 export * from "./to-tree";
 export * from "./to-json";
 export * from "./design";
+export * from "./log";
