@@ -222,4 +222,7 @@ const sectionPropsSymbol: Record<string | symbol, unknown> =
 console.log({ sectionProps });
 console.log({ sectionPropsSymbol });
 
+console.log("Tree:");
+await multiTreeProxy.logDescendantsSettled;
+
 export default 1;

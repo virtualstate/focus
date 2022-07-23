@@ -2,18 +2,26 @@ import {DescendantPromiseSettledResult, descendantsSettled} from "./children";
 import {isDescendantFulfilled} from "./like";
 import {isFragment, name, properties} from "./access";
 
-
-export async function logDescendantsSettled(node: unknown) {
-    return logDescendantsSettledIterable(descendantsSettled(node));
+export const LogAccessors = {
+    logDescendantsSettled,
+    logDescendantsSettledIterable
 }
 
-export async function logDescendantsSettledIterable(iterable: AsyncIterable<DescendantPromiseSettledResult[]>) {
+export async function logDescendantsSettled(node: unknown) {
+    return logDescendantsSettledFromPromise(descendantsSettled(node));
+}
+
+export async function logDescendantsSettledIterable(node: unknown) {
+    return logDescendantsSettledFromIterable(descendantsSettled(node));
+}
+
+export async function logDescendantsSettledFromIterable(iterable: AsyncIterable<DescendantPromiseSettledResult[]>) {
     for await (const states of iterable) {
         logDescendantPromiseSettledResult(...states);
     }
 }
 
-export async function logDescendantsSettledPromise(promise: Promise<DescendantPromiseSettledResult[]>) {
+export async function logDescendantsSettledFromPromise(promise: Promise<DescendantPromiseSettledResult[]>) {
     const states = await promise;
     logDescendantPromiseSettledResult(...states);
 }

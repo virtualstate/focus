@@ -8,7 +8,7 @@ import {
     descendantsSettled,
     isFragment,
     descendants,
-    logDescendantsSettledPromise
+    logDescendantsSettled, logDescendantsSettledFromPromise
 } from "@virtualstate/focus";
 import {split} from "@virtualstate/promise";
 
@@ -165,7 +165,7 @@ let h: unknown = f;
 
     const TARGET = 10;
 
-    await logDescendantsSettledPromise(
+    await logDescendantsSettledFromPromise(
         split(
             descendantsSettled(root)
         ).take(TARGET)

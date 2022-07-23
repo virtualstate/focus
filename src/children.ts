@@ -11,10 +11,11 @@ import { component, ComponentIterable } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
 import { all } from "@virtualstate/promise";
 import {
-  isFulfilled, isGenericChildNode, isLike,
+  isFulfilled,
   isRejected,
   isStaticChildNode,
-  isUnknownJSXNode, ok,
+  isUnknownJSXNode,
+  ok,
 } from "./like";
 
 const ThrowAtEnd = Symbol.for("@virtualstate/focus/access/throwAtEnd");
