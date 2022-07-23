@@ -155,6 +155,20 @@ export async function accessors(
       c: await c
     });
   }
+
+  {
+    const [main] = await children(multiTree);
+    const {
+      section: [section],
+      footer: [footer],
+      "test-proxy": [testProxy]
+    } = children(main).group(name)
+    log({
+      section: await section,
+      footer: await footer,
+      "test-proxy": await testProxy
+    });
+  }
 }
 
 await accessors(multiTree);
