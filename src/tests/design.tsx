@@ -1,7 +1,7 @@
 import {
     children,
     name,
-    h,
+    h as f,
     properties,
     design,
     ok,
@@ -10,11 +10,15 @@ import {
     isFragment,
     getChildrenFromRawNode,
     getValueOrChildrenFromRawNode,
-    isUnknownJSXNode
+    isUnknownJSXNode, descendants
 } from "@virtualstate/focus";
 import {split} from "@virtualstate/promise";
 
+
+let h: unknown = f;
+
 {
+    h = f;
 
     async function Parent(options: unknown, input?: unknown) {
 
@@ -110,6 +114,7 @@ import {split} from "@virtualstate/promise";
 
 
 {
+    h = f;
     type Props = Record<string, unknown>;
 
     async function Node(props: Props, input?: unknown) {
@@ -190,4 +195,102 @@ import {split} from "@virtualstate/promise";
     console.log(log.join("\n"));
     ok(count > TARGET);
 
+}
+
+{
+    h = f;
+
+    h = design().add
+
+    const b = <b value={2} />;
+
+    const parent = (
+        <parent>
+            <a value={1} />
+            {b}
+        </parent>
+    )
+
+    console.log({ parent });
+
+    h = parent.add;
+
+    const c = <c value={3} />;
+
+    const d = <d value={4} />;
+
+    let result = await descendants(parent)
+
+    let names = result.map(name);
+
+    console.log({ names });
+
+    ok(names.includes("parent"));
+    ok(names.includes("a"));
+    ok(names.includes("b"));
+    ok(names.includes("c"));
+    ok(names.includes("d"));
+
+    parent.delete(c);
+
+    result = await descendants(parent)
+
+    names = result.map(name);
+
+    console.log({ names });
+
+    ok(names.includes("parent"));
+    ok(names.includes("a"));
+    ok(names.includes("b"));
+    ok(!names.includes("c"));
+    ok(names.includes("d"));
+
+    parent.delete(d);
+
+    result = await descendants(parent)
+
+    names = result.map(name);
+
+    console.log({ names });
+
+    ok(names.includes("parent"));
+    ok(names.includes("a"));
+    ok(names.includes("b"));
+    ok(!names.includes("c"));
+    ok(!names.includes("d"))
+
+    parent.add(c);
+
+    result = await descendants(parent)
+
+    names = result.map(name);
+
+    console.log({ names });
+
+    ok(names.includes("parent"));
+    ok(names.includes("a"));
+    ok(names.includes("b"));
+    ok(names.includes("c"));
+    ok(!names.includes("d"))
+
+    parent.clear();
+
+    result = await descendants(parent)
+
+    names = result.map(name);
+
+    console.log({ names });
+
+    ok(names.includes("parent"));
+    ok(names.length === 1);
+
+
+
+
+
+
+
+
+
+    h = f;
 }

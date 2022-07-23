@@ -9,13 +9,13 @@ interface RelationContext {
 interface RelationDesigner extends AsyncIterable<unknown> {
     readonly context: Readonly<RelationContext>;
 
-    add(node: unknown, options?: unknown): RelationDesigner;
+    add(node: unknown, options?: unknown, ...children: unknown[]): RelationDesigner;
     delete(nodeOrDesigner: unknown): void;
     clear(): void;
     has(nodeOrDesigner: unknown): boolean;
 }
 
-export function design(parent?: unknown, options?: Record<string, unknown>): RelationDesigner {
+export function design(parent?: unknown, options?: Record<string, unknown>, ...children: unknown[]): RelationDesigner {
     function createContext(node?: unknown, options?: Record<string, unknown>): RelationContext {
         return {
             node,
@@ -23,9 +23,8 @@ export function design(parent?: unknown, options?: Record<string, unknown>): Rel
             children: []
         }
     }
-    function createRelation(node: unknown, options: Record<string, unknown>, ...parents: RelationContext[]): RelationDesigner {
-        const context = createContext(node, options);
 
+    function createDesigner(context: RelationContext, ...parents: RelationContext[]): RelationDesigner {
         function findIndex(nodeOrDesigner: unknown) {
             return context.children.findIndex(
                 designer => designer === nodeOrDesigner || designer.context.node === nodeOrDesigner
@@ -37,10 +36,11 @@ export function design(parent?: unknown, options?: Record<string, unknown>): Rel
             get context() {
                 return Object.freeze(context);
             },
-            add(node: unknown, options?: Record<string, unknown>) {
+            add(node: unknown, options?: Record<string, unknown>, ...children: unknown[]) {
                 const relation = createRelation(
                     node,
                     options,
+                    children,
                     context,
                     ...parents
                 );
@@ -53,7 +53,7 @@ export function design(parent?: unknown, options?: Record<string, unknown>): Rel
                 context.children.splice(index, 1);
             },
             has(nodeOrDesigner: unknown) {
-               return findIndex(nodeOrDesigner) > -1;
+                return findIndex(nodeOrDesigner) > -1;
             },
             clear() {
                 context.children = [];
@@ -69,5 +69,16 @@ export function design(parent?: unknown, options?: Record<string, unknown>): Rel
         };
     }
 
-    return createRelation(parent, options);
+    function createRelation(node: unknown, options: Record<string, unknown>, children: unknown[], ...parents: RelationContext[]): RelationDesigner {
+        const context = createContext(node, options);
+        const designer = createDesigner(context, ...parents);
+
+        for (const child of children) {
+            designer.add(child);
+        }
+
+        return designer;
+    }
+
+    return createRelation(parent, options, children);
 }
