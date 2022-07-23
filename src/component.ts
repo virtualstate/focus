@@ -9,7 +9,7 @@ import {
   raw,
 } from "./access";
 import { UnknownJSXNode } from "./access";
-import {ComponentFn, isComponentFn} from "./like";
+import { ComponentFn, isComponentFn } from "./like";
 import { aSyncThing } from "@virtualstate/promise/the-sync-thing";
 
 export interface ComponentOptions {
@@ -24,7 +24,6 @@ export function component(
   input: UnknownJSXNode,
   options?: ComponentOptions
 ): ComponentIterable | undefined {
-
   function getName(input: unknown): ComponentFn {
     const node = raw(input);
     const name = isComponentFn(node) ? node : node[getNameKey(node)];

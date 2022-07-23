@@ -1,5 +1,6 @@
 import {
-  DescendantPromiseFulfilledResult, DescendantPromiseRejectedResult,
+  DescendantPromiseFulfilledResult,
+  DescendantPromiseRejectedResult,
   DescendantPromiseSettledResult,
 } from "./children";
 import {
@@ -58,13 +59,13 @@ export function isFulfilled<T>(
 }
 
 export function isDescendantFulfilled(
-    result: DescendantPromiseSettledResult
+  result: DescendantPromiseSettledResult
 ): result is DescendantPromiseFulfilledResult {
   return isFulfilled(result);
 }
 
 export function isDescendantRejected(
-    result: DescendantPromiseSettledResult
+  result: DescendantPromiseSettledResult
 ): result is DescendantPromiseRejectedResult {
   return isRejected(result);
 }

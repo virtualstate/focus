@@ -1,264 +1,263 @@
 import {
-    children,
-    name,
-    h as f,
-    properties,
-    design,
-    ok,
-    descendantsSettled,
-    isFragment,
-    descendants,
-    logDescendantsSettled, logDescendantsSettledFromPromise
+  children,
+  name,
+  h as f,
+  properties,
+  design,
+  ok,
+  descendantsSettled,
+  isFragment,
+  descendants,
+  logDescendantsSettled,
+  logDescendantsSettledFromPromise,
 } from "@virtualstate/focus";
-import {split} from "@virtualstate/promise";
-
+import { split } from "@virtualstate/promise";
 
 let h: unknown = f;
 
 {
-    h = f;
+  h = f;
 
-    async function Parent(options: unknown, input?: unknown) {
+  async function Parent(options: unknown, input?: unknown) {
+    const snapshot = children(input);
+    const {
+      a: [a, a2],
+      b: [b],
+      c: [c],
+    } = snapshot.group(name);
 
-        const {
-            a: [a, a2], b: [b], c: [c]
-        } = children(input).group(name);
+    const two = properties(await a).value;
+    const three = properties(await b).value;
 
-        const two = properties(await a).value;
-        const three = properties(await b).value;
+    console.log({ two, three });
 
-        console.log({ two, three });
+    ok(two === 2, "Expected two");
+    ok(three === 3, "Expected three");
 
-        ok(two === 2, "Expected two");
-        ok(three === 3, "Expected three");
+    const four = properties(await c).value;
+    const two2 = properties(await a2).value;
+    console.log({ four, two2 });
 
-        const four = properties(await c).value;
-        const two2 = properties(await a2).value;
-        console.log({ four, two2 });
+    ok(!four || four === 4, "Expected four");
+    ok(!two2 || two2 === 2, "Expected two");
 
-        ok(!four || four === 4, "Expected four");
-        ok(!two2 || two2 === 2, "Expected two");
+    const { number } = snapshot
+      .map(properties)
+      .map((props) => props.value)
+      .group((value) => typeof value);
 
-        return (
-            two +
-            three +
-            (typeof four === "number" ? four : 0) +
-            (typeof two2 === "number" ? two2 : 0)
-        );
-    }
+    const [first, second] = await number;
 
-    const designer = design();
+    console.log({ first, second });
 
-    const root = designer.add(Parent);
+    ok(typeof first === "number");
+    ok(typeof second === "number");
 
-    root.add(<a value={2} />);
-    root.add(<b value={3} />);
-
-    let [result] = await children(designer);
-    console.log({ result });
-    ok(result === 5);
-
-    const c = <c value={4} />;
-    root.add(c);
-
-    [result] = await children(designer);
-    console.log({ result });
-    ok(result === 9);
-
-    root.delete(c);
-
-    [result] = await children(designer);
-    console.log({ result });
-    ok(result === 5);
-
-    root.clear();
-
-    let error = await children(designer).catch(error => error);
-    console.log({ error });
-
-    ok(error instanceof Error, "expected error to be returned");
-
-    root.add(<a value={3} />);
-    root.add(<b value={4} />);
-    root.add(<c value={5} />);
-
-    error = await children(designer).catch(error => error);
-    console.log({ error });
-    ok(error instanceof Error, "expected error to be returned");
-
-    root.clear();
-
-    root.add(<a value={2} />);
-    root.add(<b value={3} />);
-    root.add(c);
-
-    [result] = await children(designer);
-    console.log({ result });
-    ok(result === 9);
-
-    root.add(<a value={2} />);
-
-    [result] = await children(designer);
-    console.log({ result });
-    ok(result === 11);
-}
-
-
-
-
-
-{
-    h = f;
-    type Props = Record<string, unknown>;
-
-    async function Node(props: Props, input?: unknown) {
-        return <node {...props}>{input}</node>
-    }
-
-    async function Edge(props: Props, input?: unknown) {
-        return <edge {...props}>{input}</edge>
-    }
-
-    const root = design(Node, { name: "root" });
-
-    ok(isFragment(root));
-
-    const a = root.add(Node, { name: "a" })
-    const aEdge1 = a.add(Edge, { name: "a" });
-
-    const b = root.add(Node, { name: "b" });
-    const bEdge1 = b.add(Edge, { name: "b" });
-
-    const c = root.add(Node, { name: "c" });
-    const cEdge1 = c.add(Edge, { name: "c" });
-
-    const d = root.add(Node, { name: "d" });
-    const dEdge1 = d.add(Edge, { name: "d" });
-
-    const e = root.add(Node, { name: "e" });
-    const eEdge1 = e.add(Edge, { name: "e" });
-
-    async function Random(props: Props, input?: unknown) {
-        const snapshot = await children(input)
-        const index = Math.round(Math.random() * (snapshot.length - 1));
-        return snapshot[index];
-    }
-
-    const swap = root.add(Random);
-
-    swap.add(a);
-    swap.add(b);
-    swap.add(d);
-
-    aEdge1.add(b);
-    bEdge1.add(c);
-    cEdge1.add(d);
-    dEdge1.add(e);
-    eEdge1.add(swap);
-    eEdge1.add(a);
-
-    // const log: string[] = [];
-
-    const TARGET = 10;
-
-    await logDescendantsSettledFromPromise(
-        descendantsSettled(root).take(TARGET)
+    return (
+      two +
+      three +
+      (typeof four === "number" ? four : 0) +
+      (typeof two2 === "number" ? two2 : 0)
     );
+  }
 
+  const designer = design();
+
+  const root = designer.add(Parent);
+
+  root.add(<a value={2} />);
+  root.add(<b value={3} />);
+
+  let [result] = await children(designer);
+  console.log({ result });
+  ok(result === 5);
+
+  const c = <c value={4} />;
+  root.add(c);
+
+  [result] = await children(designer);
+  console.log({ result });
+  ok(result === 9);
+
+  root.delete(c);
+
+  [result] = await children(designer);
+  console.log({ result });
+  ok(result === 5);
+
+  root.clear();
+
+  let error = await children(designer).catch((error) => error);
+  console.log({ error });
+
+  ok(error instanceof Error, "expected error to be returned");
+
+  root.add(<a value={3} />);
+  root.add(<b value={4} />);
+  root.add(<c value={5} />);
+
+  error = await children(designer).catch((error) => error);
+  console.log({ error });
+  ok(error instanceof Error, "expected error to be returned");
+
+  root.clear();
+
+  root.add(<a value={2} />);
+  root.add(<b value={3} />);
+  root.add(c);
+
+  [result] = await children(designer);
+  console.log({ result });
+  ok(result === 9);
+
+  root.add(<a value={2} />);
+
+  [result] = await children(designer);
+  console.log({ result });
+  ok(result === 11);
 }
 
 {
-    h = f;
+  h = f;
+  type Props = Record<string, unknown>;
 
-    h = design().add
+  async function Node(props: Props, input?: unknown) {
+    return <node {...props}>{input}</node>;
+  }
 
-    const b = <b value={2} />;
+  async function Edge(props: Props, input?: unknown) {
+    return <edge {...props}>{input}</edge>;
+  }
 
-    const parent = (
-        <parent>
-            <a value={1} />
-            {b}
-        </parent>
-    )
+  const root = design(Node, { name: "root" });
 
-    console.log({ parent });
+  ok(isFragment(root));
 
-    h = parent.add;
-    const c = <c value={3} />;
-    const d = <d value={4} />;
+  const a = root.add(Node, { name: "a" });
+  const aEdge1 = a.add(Edge, { name: "a" });
 
-    let names = await descendants(parent).map(name);
+  const b = root.add(Node, { name: "b" });
+  const bEdge1 = b.add(Edge, { name: "b" });
 
-    console.log({ names });
+  const c = root.add(Node, { name: "c" });
+  const cEdge1 = c.add(Edge, { name: "c" });
 
-    ok(names.includes("parent"));
-    ok(names.includes("a"));
-    ok(names.includes("b"));
-    ok(names.includes("c"));
-    ok(names.includes("d"));
+  const d = root.add(Node, { name: "d" });
+  const dEdge1 = d.add(Edge, { name: "d" });
 
-    parent.delete(c);
+  const e = root.add(Node, { name: "e" });
+  const eEdge1 = e.add(Edge, { name: "e" });
 
-    names = await descendants(parent).map(name);
+  async function Random(props: Props, input?: unknown) {
+    const snapshot = await children(input);
+    const index = Math.round(Math.random() * (snapshot.length - 1));
+    return snapshot[index];
+  }
 
-    console.log({ names });
+  const swap = root.add(Random);
 
-    ok(names.includes("parent"));
-    ok(names.includes("a"));
-    ok(names.includes("b"));
-    ok(!names.includes("c"));
-    ok(names.includes("d"));
+  swap.add(a);
+  swap.add(b);
+  swap.add(d);
 
-    parent.delete(d);
+  aEdge1.add(b);
+  bEdge1.add(c);
+  cEdge1.add(d);
+  dEdge1.add(e);
+  eEdge1.add(swap);
+  eEdge1.add(a);
 
-    names = await descendants(parent).map(name);
+  // const log: string[] = [];
 
-    console.log({ names });
+  const TARGET = 10;
 
-    ok(names.includes("parent"));
-    ok(names.includes("a"));
-    ok(names.includes("b"));
-    ok(!names.includes("c"));
-    ok(!names.includes("d"))
+  await logDescendantsSettledFromPromise(descendantsSettled(root).take(TARGET));
+}
 
-    parent.add(c);
+{
+  h = f;
 
-    names = await descendants(parent).map(name);
+  h = design().add;
 
-    console.log({ names });
+  const b = <b value={2} />;
 
-    ok(names.includes("parent"));
-    ok(names.includes("a"));
-    ok(names.includes("b"));
-    ok(names.includes("c"));
-    ok(!names.includes("d"))
+  const parent = (
+    <parent>
+      <a value={1} />
+      {b}
+    </parent>
+  );
 
-    parent.clear();
+  console.log({ parent });
 
-    names = await descendants(parent).map(name)
+  h = parent.add;
+  const c = <c value={3} />;
+  const d = <d value={4} />;
 
-    console.log({ names });
+  let names = await descendants(parent).map(name);
 
-    ok(names.includes("parent"));
-    ok(names.length === 1);
+  console.log({ names });
 
+  ok(names.includes("parent"));
+  ok(names.includes("a"));
+  ok(names.includes("b"));
+  ok(names.includes("c"));
+  ok(names.includes("d"));
 
-    parent.add(b);
+  parent.delete(c);
 
+  names = await descendants(parent).map(name);
 
-    names = await descendants(parent).map(name)
+  console.log({ names });
 
-    console.log({ names });
+  ok(names.includes("parent"));
+  ok(names.includes("a"));
+  ok(names.includes("b"));
+  ok(!names.includes("c"));
+  ok(names.includes("d"));
 
-    ok(names.includes("parent"));
-    ok(names.includes("b"));
-    ok(names.length === 2);
+  parent.delete(d);
 
+  names = await descendants(parent).map(name);
 
+  console.log({ names });
 
+  ok(names.includes("parent"));
+  ok(names.includes("a"));
+  ok(names.includes("b"));
+  ok(!names.includes("c"));
+  ok(!names.includes("d"));
 
+  parent.add(c);
 
+  names = await descendants(parent).map(name);
 
+  console.log({ names });
 
-    h = f;
+  ok(names.includes("parent"));
+  ok(names.includes("a"));
+  ok(names.includes("b"));
+  ok(names.includes("c"));
+  ok(!names.includes("d"));
+
+  parent.clear();
+
+  names = await descendants(parent).map(name);
+
+  console.log({ names });
+
+  ok(names.includes("parent"));
+  ok(names.length === 1);
+
+  parent.add(b);
+
+  names = await descendants(parent).map(name);
+
+  console.log({ names });
+
+  ok(names.includes("parent"));
+  ok(names.includes("b"));
+  ok(names.length === 2);
+
+  h = f;
 }

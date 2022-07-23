@@ -5,7 +5,8 @@ import {
   isComponentNode,
   isKey,
   isKeyIn,
-  isLike, isPromise,
+  isLike,
+  isPromise,
   isStaticChildNode,
   isUnknownJSXNode,
   ok,
@@ -43,7 +44,7 @@ export const possibleNameKeysStrings = [
   "nodeName",
   "url",
   "id",
-  "node"
+  "node",
 ] as const;
 export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
@@ -51,7 +52,7 @@ export const possibleNameKeys = [
   Symbol.for(":jsx/type"),
   Symbol.for("@virtualstate/fringe/source"),
   Symbol.for("@virtualstate/focus/source"),
-  ...possibleNameKeysStrings
+  ...possibleNameKeysStrings,
 ] as const;
 export const possibleTagKeysStrings = ["tag"] as const;
 export const possibleTagKeys = [
@@ -66,7 +67,7 @@ export const possiblePropertiesKeysStrings = [
   "attrs",
   "attribs",
   "fields",
-  "headers"
+  "headers",
 ] as const;
 export const possiblePropertiesKeys = [
   Symbol.for(":kdl/properties"),
@@ -107,8 +108,8 @@ export const possiblePropertiesChildrenKeys = [
   Symbol.for(":jsx/children"),
   Symbol.for("@virtualstate/fringe/children"),
   Symbol.for("@virtualstate/focus/children"),
-    ...possiblePropertiesChildrenKeysStrings
-]
+  ...possiblePropertiesChildrenKeysStrings,
+];
 
 export const possibleInstanceKeysStrings = [
   "instance",
@@ -484,7 +485,10 @@ function isChildren(node: UnknownJSXNode) {
   return !!(children || isStaticChildNode(children));
 }
 
-const promiseChildrenCache = new WeakMap<Promise<unknown>, AsyncIterable<unknown>>();
+const promiseChildrenCache = new WeakMap<
+  Promise<unknown>,
+  AsyncIterable<unknown>
+>();
 
 /**
  * @internal
@@ -500,7 +504,7 @@ function getInternalChildrenFromRawNode(
   }
 
   if (isAsyncIterable(node)) return node;
-  if (isPromise(node)){
+  if (isPromise(node)) {
     const existing = promiseChildrenCache.get(node);
     if (existing) {
       return existing;
@@ -508,7 +512,7 @@ function getInternalChildrenFromRawNode(
     const promiseIterable = {
       async *[Symbol.asyncIterator]() {
         yield await node;
-      }
+      },
     };
     promiseChildrenCache.set(node, promiseIterable);
     return promiseIterable;
@@ -516,14 +520,22 @@ function getInternalChildrenFromRawNode(
   if (isIterable(node)) return node;
 
   const resolvedKeys: Key[] | readonly Key[] = Array.isArray(keys)
-      ? keys
-      : possibleChildrenKeys;
+    ? keys
+    : possibleChildrenKeys;
   const maybePropertiesNode = properties(node);
   const childrenKey = getKey(node, resolvedKeys);
-  const propertiesChildrenKey = getKey(maybePropertiesNode, resolvedKeys.filter(key => includesKey(key, possiblePropertiesChildrenKeys)));
+  const propertiesChildrenKey = getKey(
+    maybePropertiesNode,
+    resolvedKeys.filter((key) =>
+      includesKey(key, possiblePropertiesChildrenKeys)
+    )
+  );
   let children;
   if (propertiesChildrenKey) {
-    children = getSyncOrAsyncChildren(maybePropertiesNode, propertiesChildrenKey);
+    children = getSyncOrAsyncChildren(
+      maybePropertiesNode,
+      propertiesChildrenKey
+    );
   } else if (childrenKey) {
     children = getSyncOrAsyncChildren(node, childrenKey);
   } else {

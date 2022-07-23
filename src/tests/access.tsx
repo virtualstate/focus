@@ -6,7 +6,7 @@ import {
   descendants,
   descendantsSettled,
 } from "../children";
-import {name, properties, proxy} from "../access";
+import { name, properties, proxy } from "../access";
 import { all } from "@virtualstate/promise";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
 import { isNode, ok } from "../like";
@@ -58,38 +58,41 @@ const multiTree = {
   ],
 };
 
-export async function accessors(multiTree: unknown, log = console.log.bind(console)) {
+export async function accessors(
+  multiTree: unknown,
+  log = console.log.bind(console)
+) {
   const childrenSyncIterable = childrenSync(multiTree);
   ok(isIterable(childrenSyncIterable));
   log([...childrenSyncIterable]);
   log([...(await childrenSync(multiTree))]);
   log([...(await children(multiTree))]);
   log(
-      [...childrenSyncIterable].reduce((all: unknown[], node) => {
-        const nodeChildren = childrenSync(node);
-        ok(isIterable(nodeChildren));
-        return [...all, ...nodeChildren];
-      }, [])
+    [...childrenSyncIterable].reduce((all: unknown[], node) => {
+      const nodeChildren = childrenSync(node);
+      ok(isIterable(nodeChildren));
+      return [...all, ...nodeChildren];
+    }, [])
   );
   log(
-      await [...(await childrenSync(multiTree))].reduce(
-          (all: Promise<unknown[]>, node) => {
-            return all.then(async (all) => {
-              return [...all, ...(await childrenSync(node))];
-            });
-          },
-          Promise.resolve([])
-      )
+    await [...(await childrenSync(multiTree))].reduce(
+      (all: Promise<unknown[]>, node) => {
+        return all.then(async (all) => {
+          return [...all, ...(await childrenSync(node))];
+        });
+      },
+      Promise.resolve([])
+    )
   );
   log(
-      await [...(await children(multiTree))].reduce(
-          (all: Promise<unknown[]>, node) => {
-            return all.then(async (all) => {
-              return [...all, ...(await children(node))];
-            });
-          },
-          Promise.resolve([])
-      )
+    await [...(await children(multiTree))].reduce(
+      (all: Promise<unknown[]>, node) => {
+        return all.then(async (all) => {
+          return [...all, ...(await children(node))];
+        });
+      },
+      Promise.resolve([])
+    )
   );
   const descendantsSyncIterable = descendantsSync(multiTree);
   ok(isIterable(descendantsSyncIterable));
@@ -105,19 +108,35 @@ export async function accessors(multiTree: unknown, log = console.log.bind(conso
   log("for await");
   for await (const snapshot of childrenSync(multiTree)) {
     log([...snapshot]);
-    log(Object.fromEntries([...snapshot].map(node => [name(node), properties(node)])));
+    log(
+      Object.fromEntries(
+        [...snapshot].map((node) => [name(node), properties(node)])
+      )
+    );
   }
   for await (const snapshot of children(multiTree)) {
     log([...snapshot]);
-    log(Object.fromEntries([...snapshot].map(node => [name(node), properties(node)])));
+    log(
+      Object.fromEntries(
+        [...snapshot].map((node) => [name(node), properties(node)])
+      )
+    );
   }
   for await (const snapshot of descendantsSync(multiTree)) {
     log([...snapshot]);
-    log(Object.fromEntries([...snapshot].map(node => [name(node), properties(node)])));
+    log(
+      Object.fromEntries(
+        [...snapshot].map((node) => [name(node), properties(node)])
+      )
+    );
   }
   for await (const snapshot of descendants(multiTree)) {
     log([...snapshot]);
-    log(Object.fromEntries([...snapshot].map(node => [name(node), properties(node)])));
+    log(
+      Object.fromEntries(
+        [...snapshot].map((node) => [name(node), properties(node)])
+      )
+    );
   }
   for await (const snapshot of descendantsSettledSync(multiTree)) {
     log([...snapshot]);
