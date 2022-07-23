@@ -195,9 +195,7 @@ let h: unknown = f;
 
     const d = <d value={4} />;
 
-    let result = await descendants(parent)
-
-    let names = result.map(name);
+    let names = await descendants(parent).map(name);
 
     console.log({ names });
 
@@ -209,9 +207,7 @@ let h: unknown = f;
 
     parent.delete(c);
 
-    result = await descendants(parent)
-
-    names = result.map(name);
+    names = await descendants(parent).map(name);
 
     console.log({ names });
 
@@ -223,9 +219,7 @@ let h: unknown = f;
 
     parent.delete(d);
 
-    result = await descendants(parent)
-
-    names = result.map(name);
+    names = await descendants(parent).map(name);
 
     console.log({ names });
 
@@ -237,9 +231,7 @@ let h: unknown = f;
 
     parent.add(c);
 
-    result = await descendants(parent)
-
-    names = result.map(name);
+    names = await descendants(parent).map(name);
 
     console.log({ names });
 
@@ -251,9 +243,7 @@ let h: unknown = f;
 
     parent.clear();
 
-    result = await descendants(parent)
-
-    names = result.map(name);
+    names = await descendants(parent).map(name)
 
     console.log({ names });
 
@@ -264,9 +254,7 @@ let h: unknown = f;
     parent.add(b);
 
 
-    result = await descendants(parent)
-
-    names = result.map(name);
+    names = await descendants(parent).map(name)
 
     console.log({ names });
 

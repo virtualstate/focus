@@ -9,7 +9,7 @@ import { union } from "@virtualstate/union";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
 import { component, ComponentIterable } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
-import { all } from "@virtualstate/promise";
+import {all, split} from "@virtualstate/promise";
 import {
   isFulfilled,
   isRejected,
@@ -229,7 +229,7 @@ export interface DescendantsOptions {
 }
 
 export function descendants(node: unknown, options?: DescendantsOptions) {
-  return anAsyncThing({
+  return split({
     async *[Symbol.asyncIterator]() {
       yield* descendantsGenerator(node, options);
     },
@@ -240,7 +240,7 @@ export function descendantsSettled(
   node: unknown,
   options?: DescendantsOptions
 ) {
-  return anAsyncThing({
+  return split({
     async *[Symbol.asyncIterator]() {
       yield* descendantsSettledGenerator(node, options);
     },
