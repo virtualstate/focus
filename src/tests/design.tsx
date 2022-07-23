@@ -6,11 +6,9 @@ import {
     design,
     ok,
     descendantsSettled,
-    isDescendantFulfilled,
     isFragment,
-    getChildrenFromRawNode,
-    getValueOrChildrenFromRawNode,
-    isUnknownJSXNode, descendants, isDescendantRejected, logDescendantPromiseSettledResult
+    descendants,
+    logDescendantsSettledPromise
 } from "@virtualstate/focus";
 import {split} from "@virtualstate/promise";
 
@@ -163,31 +161,15 @@ let h: unknown = f;
     eEdge1.add(swap);
     eEdge1.add(a);
 
-    let count = 0;
-
     // const log: string[] = [];
 
     const TARGET = 10;
 
-    for await (const snapshot of descendantsSettled(root)) {
-        const error = snapshot.find(isDescendantRejected);
-        if (error) {
-            console.log({ count, error });
-            break;
-        }
-
-        count += 1;
-
-        if (count > TARGET) {
-            logDescendantPromiseSettledResult(...snapshot);
-            break;
-        } else {
-            await new Promise<void>(queueMicrotask);
-        }
-    }
-
-    // console.log(log.join("\n"));
-    ok(count > TARGET);
+    await logDescendantsSettledPromise(
+        split(
+            descendantsSettled(root)
+        ).take(TARGET)
+    );
 
 }
 
