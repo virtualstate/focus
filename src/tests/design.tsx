@@ -184,9 +184,7 @@ let h: unknown = f;
     console.log({ parent });
 
     h = parent.add;
-
     const c = <c value={3} />;
-
     const d = <d value={4} />;
 
     let names = await descendants(parent).map(name);
