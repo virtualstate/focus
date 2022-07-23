@@ -7,7 +7,7 @@ import {
   descendantsSettled,
 } from "../children";
 import { name, properties, proxy } from "../access";
-import { all } from "@virtualstate/promise";
+import {all, split} from "@virtualstate/promise";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
 import { isNode, ok } from "../like";
 import {
@@ -114,6 +114,7 @@ export async function accessors(
       )
     );
   }
+
   for await (const snapshot of children(multiTree)) {
     log([...snapshot]);
     log(
@@ -143,6 +144,16 @@ export async function accessors(
   }
   for await (const snapshot of descendantsSettled(multiTree)) {
     log([...snapshot]);
+  }
+
+  {
+    const [main] = await children(multiTree);
+    const [a, b, c] = children(main);
+    log({
+      a: await a,
+      b: await b,
+      c: await c
+    });
   }
 }
 
