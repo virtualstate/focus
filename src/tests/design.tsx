@@ -22,11 +22,7 @@ let h: unknown = f;
 
         const {
             a: [a, a2], b: [b], c: [c]
-        } = split(
-            children(input)
-        )
-            .group(name)
-
+        } = children(input).group(name);
 
         const two = properties(await a).value;
         const three = properties(await b).value;
@@ -166,9 +162,7 @@ let h: unknown = f;
     const TARGET = 10;
 
     await logDescendantsSettledFromPromise(
-        split(
-            descendantsSettled(root)
-        ).take(TARGET)
+        descendantsSettled(root).take(TARGET)
     );
 
 }

@@ -24,10 +24,10 @@ const multiTree = (
     </body>
 )
 
-console.group("React:\n");
+// console.group("React:\n");
 
 console.log(multiTree);
 
-await accessors(multiTree);
+await accessors(multiTree, () => {});
 
 console.groupEnd();

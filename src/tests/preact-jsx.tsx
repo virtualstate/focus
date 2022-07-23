@@ -20,8 +20,8 @@ const multiTree = (
 
 console.group("Preact:\n");
 
-console.log(multiTree);
+// console.log(multiTree);
 
-await accessors(multiTree);
+await accessors(multiTree, () => {});
 
 console.groupEnd();

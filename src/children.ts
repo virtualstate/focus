@@ -9,7 +9,7 @@ import { union } from "@virtualstate/union";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
 import { component, ComponentIterable } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
-import {all, split} from "@virtualstate/promise";
+import {all, Split, split} from "@virtualstate/promise";
 import {
   isFulfilled,
   isRejected,
@@ -25,31 +25,14 @@ export interface ChildrenOptions {
   component?(node?: unknown, options?: object): ComponentIterable | undefined;
 }
 
-export function children<N>(node: N): TheAsyncThing<ChildrenArray<N>>;
-export function children<N>(
-  node: N,
-  options?: ChildrenOptions
-): TheAsyncThing<ChildrenArray<N>>;
-export function children(
-  node: unknown,
-  options?: ChildrenOptions
-): TheAsyncThing<unknown[]>;
-export function children(node?: unknown, options?: ChildrenOptions): unknown {
-  return anAsyncThing({
+export function children(node?: unknown, options?: ChildrenOptions) {
+  return split({
     async *[Symbol.asyncIterator]() {
       yield* childrenGenerator(node, options ?? {});
     },
   });
 }
 
-export function childrenGenerator<N>(
-  node: unknown,
-  options?: ChildrenOptions
-): AsyncIterable<ChildrenArray<N>>;
-export function childrenGenerator(
-  node: unknown,
-  options?: ChildrenOptions
-): AsyncIterable<unknown[]>;
 export async function* childrenGenerator(
   node: unknown,
   options?: ChildrenOptions
@@ -80,33 +63,17 @@ async function throwIfRejected(
   }
 }
 
-export function childrenSettled<N>(
-  node: N,
-  options?: ChildrenOptions
-): TheAsyncThing<ChildrenSettledArray<N>>;
 export function childrenSettled(
   node: unknown,
   options?: ChildrenOptions
-): TheAsyncThing<PromiseSettledResult<unknown>[]>;
-export function childrenSettled(
-  node: unknown,
-  options?: ChildrenOptions
-): TheAsyncThing<PromiseSettledResult<unknown>[]> {
-  return anAsyncThing({
+): Split<PromiseSettledResult<unknown>> {
+  return split({
     async *[Symbol.asyncIterator]() {
       yield* childrenSettledGenerator(node, options);
     },
   });
 }
 
-export function childrenSettledGenerator<N>(
-  node: N,
-  options?: ChildrenOptions
-): AsyncIterable<ChildrenSettledArray<N>>;
-export function childrenSettledGenerator(
-  node: unknown,
-  options?: ChildrenOptions
-): AsyncIterable<PromiseSettledResult<unknown>[]>;
 export async function* childrenSettledGenerator(
   node: unknown,
   options?: ChildrenOptions
