@@ -43,7 +43,6 @@ export function result<T>(input: AsyncIterable<T | T[]> | T | T[]): Split<T> {
       },
       options
   );
-  console.log(value[fragment], Object.keys(Object.getPrototypeOf(value)));
   ok(options[fragment] === result);
   ok(value[fragment] === result);
   return value;

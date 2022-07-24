@@ -34,7 +34,6 @@ export function ok(
   ...conditions: unknown[]
 ): asserts value {
   if (conditions.length ? !conditions.every((value) => value) : !value) {
-    // console.log({ conditions, value })
     throw new Error(message ?? "Expected value");
   }
 }

@@ -20,6 +20,9 @@
       ],
       "static-h": [
         "./esnext/static-h.d.ts"
+      ],
+      "h": [
+        "./esnext/h.d.ts"
       ]
     }
   },
@@ -31,7 +34,8 @@
     "./tests": "./esnext/tests/index.js",
     "./tests/dom-h": "./esnext/tests/dom-h.js",
     "./static-h": "./esnext/static-h.js",
-    "./proxy-h": "./esnext/proxy-h.js"
+    "./proxy-h": "./esnext/proxy-h.js",
+    "./h": "./esnext/h.js"
   },
   "repository": {
     "type": "git",

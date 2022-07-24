@@ -2,6 +2,7 @@ import {
   children,
   name,
   h as f,
+  createFragment as ff,
   properties,
   design,
   ok,
@@ -13,7 +14,8 @@ import {
 } from "@virtualstate/focus";
 import { split } from "@virtualstate/promise";
 
-let h: unknown = f;
+let h: unknown = f,
+    createFragment: unknown = ff
 
 {
   h = f;
@@ -176,8 +178,9 @@ let h: unknown = f;
 
 {
   h = f;
+  createFragment = ff;
 
-  h = design().add;
+  ({ h, createFragment } = design());
 
   const b = <b value={2} />;
 
@@ -188,9 +191,8 @@ let h: unknown = f;
     </parent>
   );
 
-  console.log({ parent });
+  ({ h, createFragment } = parent);
 
-  h = parent.add;
   const c = <c value={3} />;
   const d = <d value={4} />;
 
@@ -259,5 +261,24 @@ let h: unknown = f;
   ok(names.includes("b"));
   ok(names.length === 2);
 
+  <>
+    {1}
+    {2}
+    {3}
+  </>;
+
+  let values = await descendants(parent);
+
+  console.log({ values });
+
+  ok(name(values[0]) === "parent");
+  ok(name(values[1]) === "b");
+  ok(values.includes(1));
+  ok(values.includes(2));
+  ok(values.includes(3));
+  ok(values.length === 5);
+
+
   h = f;
+  createFragment = ff;
 }
