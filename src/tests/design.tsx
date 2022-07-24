@@ -11,8 +11,8 @@ import {
   descendants,
   logDescendantsSettled,
   logDescendantsSettledFromPromise,
+  isUnknownJSXNode,
 } from "@virtualstate/focus";
-import { split } from "@virtualstate/promise";
 
 let h: unknown = f,
     createFragment: unknown = ff
@@ -131,7 +131,7 @@ let h: unknown = f,
     return <edge {...props}>{input}</edge>;
   }
 
-  const root = design(Node, { name: "root" });
+  const root = design({ });
 
   ok(isFragment(root));
 
@@ -281,4 +281,55 @@ let h: unknown = f,
 
   h = f;
   createFragment = ff;
+}
+
+{
+
+  const root = design({
+    async: true
+  });
+
+  async function watching() {
+    console.log("watching");
+    const seen = new Set();
+    for await (const snapshot of descendants(root)) {
+      console.log({ snapshot });
+      ok(Array.isArray(snapshot));
+      for (const value of snapshot) {
+        seen.add(value);
+      }
+    }
+    console.log({ seen });
+    const nodes = [...seen]
+        .filter(isUnknownJSXNode)
+        .map(name);
+    ok(seen.size === 5);
+    ok(nodes.includes("a"));
+    ok(nodes.includes("b"));
+    ok(seen.has(1));
+    ok(seen.has(2));
+    ok(seen.has(3));
+    return seen;
+  }
+
+  const promise = watching();
+
+  ({ h, createFragment } = root);
+
+  <a />;
+  <b />;
+
+  <>
+    {1}
+    {2}
+    {3}
+  </>;
+
+  root.close();
+  console.log("waiting");
+  await promise;
+
+  h = f;
+  createFragment = ff;
+
 }
