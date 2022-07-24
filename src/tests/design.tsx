@@ -431,7 +431,17 @@ let h: unknown = f,
     </>;
     <>
       {random}
+    </>;
+
+
+    // This adds a new fragment to the end of
+    ({ h, createFragment } = root.get(a).add());
+
+    <>
+      New Fragment!
     </>
+
+
   }
 
   asA();
@@ -447,6 +457,7 @@ let h: unknown = f,
   ok(snapshot.includes(3));
   ok(snapshot.includes(4));
   ok(snapshot.includes(random));
+  ok(snapshot.includes("New Fragment!"));
 
   h = f;
   createFragment = ff;
