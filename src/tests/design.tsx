@@ -11,7 +11,7 @@ import {
   descendants,
   logDescendantsSettled,
   logDescendantsSettledFromPromise,
-  isUnknownJSXNode,
+  isUnknownJSXNode, isRelationDesigner,
 } from "@virtualstate/focus";
 
 let h: unknown = f,
@@ -441,7 +441,7 @@ let h: unknown = f,
 
   console.log({ snapshot, names });
 
-  ok(root.get(a));
+  ok(isRelationDesigner(root.get(a)));
   ok(snapshot.includes(1));
   ok(snapshot.includes(2));
   ok(snapshot.includes(3));

@@ -39,7 +39,7 @@ interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncIterable<unk
   close(): void;
 }
 
-function isRelationDesigner(value: unknown): value is RelationDesigner {
+export function isRelationDesigner(value: unknown): value is RelationDesigner {
   return isLike<RelationDesigner>(value) && value[RelationDesigner];
 }
 
