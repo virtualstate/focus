@@ -99,8 +99,13 @@ export function design(options?: DesignOptions): RelationDesigner {
     }
 
     async function *watch() {
+      let { children } = context;
+      let lastChildren = [...children]
+
       let change = false;
       for (const snapshot of view()) {
+        ({ children } = context);
+        lastChildren = [...children]
         yield snapshot;
         change = true;
       }
@@ -108,9 +113,6 @@ export function design(options?: DesignOptions): RelationDesigner {
       if (!changes) {
         return;
       }
-
-      let { children } = context;
-      let lastChildren = children
 
       for await (const _ of changes) {
         ({ children } = context);

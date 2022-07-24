@@ -292,7 +292,7 @@ let h: unknown = f,
   async function watching() {
     console.log("watching");
     const seen = new Set();
-    for await (const snapshot of descendants(root)) {
+    for await (const snapshot of children(root)) {
       console.log({ snapshot });
       ok(Array.isArray(snapshot));
       for (const value of snapshot) {
