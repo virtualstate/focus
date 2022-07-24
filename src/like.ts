@@ -82,18 +82,30 @@ export function isKeyIn<U, K extends string | symbol | number>(
 }
 
 export function isKey(unknown: UnknownJSXNode, key: Key): key is Key;
-export function isKey<K extends Key>(unknown: unknown, key: Key): key is K;
-export function isKey(unknown: UnknownJSXNode, key: Key): key is Key {
+export function isKey<K extends Key>(unknown: unknown, key: K): key is K;
+export function isKey<K extends Key>(unknown: unknown, key: unknown): key is Key;
+export function isKey(unknown: UnknownJSXNode, key: unknown): key is Key {
   if (!unknown) return false;
+  if (!isKeyValue(key)) return false;
   const value = unknown[key];
   return typeof value !== "undefined" && value !== null;
+}
+
+function isKeyValue(key: unknown): key is Key {
+  return (
+      typeof key === "string" ||
+      typeof key === "symbol" ||
+      typeof key === "number"
+  );
 }
 
 export function isStaticChildNode(node: unknown): node is StaticChildNode {
   return (
     typeof node === "string" ||
     typeof node === "boolean" ||
-    typeof node === "number"
+    typeof node === "number" ||
+    typeof node === "symbol" ||
+    typeof node === "bigint"
   );
 }
 
@@ -137,4 +149,8 @@ export function isComponentNode(input: unknown): boolean {
 
 export function isPromise(input: unknown): input is Promise<unknown> {
   return isUnknownJSXNode(input) && typeof input.then === "function";
+}
+
+export function isSymbol(value: unknown): value is symbol {
+  return typeof value === "symbol";
 }

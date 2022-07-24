@@ -1,4 +1,4 @@
-import { UnknownJSXNode } from "./access";
+import {isFragmentResult, UnknownJSXNode} from "./access";
 import {
   getChildrenFromRawNode,
   isFragment,
@@ -9,9 +9,9 @@ import { union } from "@virtualstate/union";
 import { anAsyncThing, TheAsyncThing } from "@virtualstate/promise/the-thing";
 import { component, ComponentIterable } from "./component";
 import { ChildrenArray, ChildrenSettledArray } from "./children-output";
-import { all, Split, split } from "@virtualstate/promise";
+import {all, Split, split, SplitOptions} from "@virtualstate/promise";
 import {
-  isFulfilled,
+  isFulfilled, isKey,
   isRejected,
   isStaticChildNode,
   isUnknownJSXNode,
@@ -25,8 +25,32 @@ export interface ChildrenOptions {
   component?(node?: unknown, options?: object): ComponentIterable | undefined;
 }
 
+export function result<T>(input: AsyncIterable<T | T[]>): Split<T>
+export function result<T>(input: T | T[]): Split<T>
+export function result<T>(input: AsyncIterable<T | T[]> | T | T[]): Split<T> {
+  const fragment = Symbol.for(":jsx/fragment");
+  const result = Symbol.for(":jsx/result");
+  const options: SplitOptions & Record<symbol, symbol> = {
+    [fragment]: result
+  }
+  const value: Split<T> & { [fragment]?: unknown } = split<T>(
+      isAsyncIterable(input) ? input :
+      {
+        async *[Symbol.asyncIterator]() {
+          ok(!isAsyncIterable(input));
+          yield input;
+        }
+      },
+      options
+  );
+  console.log(value[fragment], Object.keys(Object.getPrototypeOf(value)));
+  ok(options[fragment] === result);
+  ok(value[fragment] === result);
+  return value;
+}
+
 export function children(node?: unknown, options?: ChildrenOptions) {
-  return split({
+  return result({
     async *[Symbol.asyncIterator]() {
       yield* childrenGenerator(node, options ?? {});
     },
@@ -67,7 +91,7 @@ export function childrenSettled(
   node: unknown,
   options?: ChildrenOptions
 ): Split<PromiseSettledResult<unknown>> {
-  return split({
+  return result({
     async *[Symbol.asyncIterator]() {
       yield* childrenSettledGenerator(node, options);
     },
@@ -79,6 +103,26 @@ export async function* childrenSettledGenerator(
   options?: ChildrenOptions
 ): AsyncIterable<PromiseSettledResult<unknown>[]> {
   if (!isUnknownJSXNode(node)) return;
+
+  if (isFragmentResult(node)) {
+    for await (const snapshot of childrenSettledGeneratorInner(getChildrenFromRawNode(node))) {
+      for await (const snapshots of union(
+          snapshot.map(
+              async function *(state) {
+                if (isFulfilled(state)) {
+                  yield * childrenSettledGenerator(state.value, options);
+                } else {
+                  yield [state]
+                }
+              }
+          )
+      )) {
+        yield snapshots.flat(1);
+      }
+    }
+    return;
+  }
+
   let knownLength = 0;
   try {
     const componentFn: typeof options.component =
@@ -196,7 +240,7 @@ export interface DescendantsOptions {
 }
 
 export function descendants(node: unknown, options?: DescendantsOptions) {
-  return split({
+  return result({
     async *[Symbol.asyncIterator]() {
       yield* descendantsGenerator(node, options);
     },
@@ -207,7 +251,7 @@ export function descendantsSettled(
   node: unknown,
   options?: DescendantsOptions
 ) {
-  return split({
+  return result({
     async *[Symbol.asyncIterator]() {
       yield* descendantsSettledGenerator(node, options);
     },

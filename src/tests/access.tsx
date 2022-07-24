@@ -4,9 +4,9 @@ import {
   children,
   childrenSettled,
   descendants,
-  descendantsSettled,
+  descendantsSettled, result,
 } from "../children";
-import { name, properties, proxy } from "../access";
+import {isFragment, isFragmentResult, name, properties, proxy} from "../access";
 import {all, split} from "@virtualstate/promise";
 import { anAsyncThing } from "@virtualstate/promise/the-thing";
 import { isNode, ok } from "../like";
@@ -147,17 +147,29 @@ export async function accessors(
   }
 
   {
-    const [main] = await children(multiTree);
+    const [main] = children(multiTree);
     const [a, b, c] = children(main);
-    log({
+
+    ok(isFragmentResult(main));
+    ok(isFragmentResult(a));
+    ok(isFragmentResult(b));
+    ok(isFragmentResult(c));
+
+    const result = {
       a: await a,
       b: await b,
       c: await c
-    });
+    };
+
+    log(result);
+
+    ok(result.a);
+    ok(result.b);
+    ok(result.c);
   }
 
   {
-    const [main] = await children(multiTree);
+    const [main] = children(multiTree);
     const {
       section: [section],
       footer: [footer],

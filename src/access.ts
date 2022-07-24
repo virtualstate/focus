@@ -10,12 +10,18 @@ import {
   isStaticChildNode,
   isUnknownJSXNode,
   ok,
+  isSymbol
 } from "./like";
 import { createFragment } from "./static-h";
 
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
 export type UnknownJSXNode = UnknownJSXNodeRecord;
+
+const possibleFragmentResultNames = [
+  Symbol.for(":jsx/fragment/result"),
+  Symbol.for(":jsx/result"),
+];
 
 export const possibleValueChildrenKeysStrings = [
   "textContent",
@@ -191,6 +197,30 @@ const allPossibleKeys = Object.keys(GenericNodeFunctions);
 
 export type StaticChildNode = string | number | boolean;
 
+export function isFragmentResult(node: unknown): boolean {
+  if (!isFragment(node)) return false;
+  if (!isUnknownJSXNode(node)) return false;
+  const symbol = getFragmentSymbolKey(node);
+  const value = node[symbol];
+  if (value === true) return false; // Regular fragment
+  const lookup: unknown[] = possibleFragmentResultNames;
+  return lookup.includes(value);
+}
+
+function getFragmentKeys(): Key[] {
+  return [
+    ...possibleFragmentNames,
+    ...possibleValueChildrenKeysStrings,
+  ];
+}
+
+function getFragmentSymbolKey(node: UnknownJSXNode, keys = getFragmentKeys()) {
+  const symbols = keys.filter<symbol>(isSymbol);
+  return symbols.find((value) => {
+    return !!node[value];
+  });
+}
+
 export function isFragment(node: unknown): boolean {
   if (!node) return false;
   if (!isUnknownJSXNode(node)) return false;
@@ -202,18 +232,18 @@ export function isFragment(node: unknown): boolean {
   if (isAsyncIterable(rawNode)) return true;
   if (isIterable(rawNode)) return true;
   if (isPromise(rawNode)) return true;
-  const unknown: ReadonlyArray<unknown> = [
-    ...possibleFragmentNames,
-    ...possibleValueChildrenKeysStrings,
-  ];
+  const keys = getFragmentKeys();
   const found = name(node);
-  const matchingName = unknown.find((value) => {
+  const matchingName = keys.find((value) => {
     if (found === value) return true;
     if (typeof value !== "string") return false;
     if (typeof found !== "string") return false;
     return found.startsWith("#") && found.endsWith(value);
   });
   if (matchingName) {
+    return true;
+  }
+  if (getFragmentSymbolKey(node, keys)) {
     return true;
   }
   return isFragmentValue(node);

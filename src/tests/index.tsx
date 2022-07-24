@@ -33,5 +33,6 @@ await import("./flat");
 await import("./class");
 await import("./raw-fragments");
 await import("./design");
+await import("./fragment-result");
 
 export default 1;
