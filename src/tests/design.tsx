@@ -415,7 +415,38 @@ let h: unknown = f,
   ok(names.includes("a"));
   ok(names[2] === "a");
 
+  const random = Math.random();
 
+  function asA() {
+    let { createFragment, h } = root.get(a);
+    <>
+      {1}
+    </>;
+    <>
+      {2}
+    </>;
+    <>
+      {3}
+      {4}
+    </>;
+    <>
+      {random}
+    </>
+  }
+
+  asA();
+
+  snapshot = await children(root);
+  names = snapshot.map(name);
+
+  console.log({ snapshot, names });
+
+  ok(root.get(a));
+  ok(snapshot.includes(1));
+  ok(snapshot.includes(2));
+  ok(snapshot.includes(3));
+  ok(snapshot.includes(4));
+  ok(snapshot.includes(random));
 
   h = f;
   createFragment = ff;

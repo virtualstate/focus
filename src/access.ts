@@ -388,6 +388,9 @@ export function name(node: UnknownJSXNode): string | symbol | undefined {
   if (typeof node === "string" || typeof node === "symbol") {
     return node;
   }
+  if (isStaticChildNode(node)) {
+    return String(node);
+  }
   const [maybeNode, nameKey] = getNameAndKeyFromRawNode(node);
   if (!nameKey) {
     const flatKey = getFlatNodeKey(node);

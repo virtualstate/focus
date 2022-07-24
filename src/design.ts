@@ -26,11 +26,12 @@ interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncIterable<unk
     ...children: unknown[]
   ): RelationDesigner;
   set(
-    nodeOrDesigner: unknown,
+    nodeOrDesigner?: unknown,
     node?: unknown,
     options?: unknown,
     ...children: unknown[]
   ): RelationDesigner;
+  get(nodeOrDesigner?: unknown): RelationDesigner;
   delete(nodeOrDesigner: unknown): void;
   clear(): void;
   has(nodeOrDesigner: unknown): boolean;
@@ -151,6 +152,13 @@ export function design(options?: DesignOptions): RelationDesigner {
       },
       createFragment(...args: unknown[]) {
         return designer.add(fragment, ...args);
+      },
+      get(nodeOrDesigner?: unknown) {
+        const index = findIndex(nodeOrDesigner);
+        if (index === -1) return undefined;
+        const found = context.children[index];
+        if (!isRelationDesigner(found)) return undefined;
+        return found;
       },
       set(
         nodeOrDesigner: unknown,
