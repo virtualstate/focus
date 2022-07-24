@@ -25,6 +25,12 @@ interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncIterable<unk
     options?: unknown,
     ...children: unknown[]
   ): RelationDesigner;
+  set(
+    nodeOrDesigner: unknown,
+    node?: unknown,
+    options?: unknown,
+    ...children: unknown[]
+  ): RelationDesigner;
   delete(nodeOrDesigner: unknown): void;
   clear(): void;
   has(nodeOrDesigner: unknown): boolean;
@@ -132,6 +138,8 @@ export function design(options?: DesignOptions): RelationDesigner {
       changes.push();
     }
 
+    const designers = new Set<RelationDesigner>();
+
     const designer: RelationDesigner = {
       [RelationDesigner]: true,
       [Symbol.for(":jsx/type")]: fragment,
@@ -143,6 +151,34 @@ export function design(options?: DesignOptions): RelationDesigner {
       },
       createFragment(...args: unknown[]) {
         return designer.add(fragment, ...args);
+      },
+      set(
+        nodeOrDesigner: unknown,
+        node?: unknown,
+        options?: Options,
+        ...children: unknown[]
+      ) {
+        if (node === designer.h || node === designer.createFragment) {
+          node = fragment;
+        }
+        const index = findIndex(nodeOrDesigner);
+        if (index === -1) {
+          return designer.add(node, options, ...children);
+        }
+        const existing = context.children[index];
+        if (isRelationDesigner(existing) && designOptions.async) {
+          designers.add(existing);
+        }
+        const relation = createRelation(
+            node,
+            options,
+            children,
+            context,
+            ...parents
+        );
+        context.children[index] = relation;
+        emit();
+        return relation;
       },
       add(
         node?: unknown,
@@ -184,6 +220,9 @@ export function design(options?: DesignOptions): RelationDesigner {
         for (const child of context.children) {
           if (!isRelationDesigner(child)) continue;
           child.close();
+        }
+        for (const designer of designers) {
+          designer.close();
         }
         changes.close();
       }

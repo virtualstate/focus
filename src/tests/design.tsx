@@ -333,3 +333,90 @@ let h: unknown = f,
   createFragment = ff;
 
 }
+
+
+{
+
+
+  const root = design();
+
+  ({ h, createFragment } = root);
+
+  const a = <a />;
+  const b = <b />;
+  const c = <c />;
+
+  const d = root.set(a, "d");
+
+  let snapshot = await children(root);
+  let names = snapshot.map(name);
+
+  console.log({ snapshot, names });
+
+  ok(names.includes("d"));
+  ok(names.includes("b"));
+  ok(names.includes("c"));
+
+  root.set(d, a);
+
+  snapshot = await children(root);
+  names = snapshot.map(name);
+
+  console.log({ snapshot, names });
+
+  ok(names.includes("a"));
+  ok(names.includes("b"));
+  ok(names.includes("c"));
+
+  h = f;
+  createFragment = ff;
+
+  const fragment = root.set(a,
+      <>
+        This is an independent fragment
+      </>
+  );
+
+  snapshot = await children(root);
+  names = snapshot.map(name);
+
+  console.log({ snapshot, names });
+
+  ok(snapshot.includes("This is an independent fragment"))
+  ok(names.includes("b"));
+  ok(names.includes("c"));
+
+  root.delete(fragment);
+
+  snapshot = await children(root);
+  names = snapshot.map(name);
+
+  console.log({ snapshot, names });
+
+  ok(snapshot.length === 2);
+  ok(names.length === 2);
+  ok(names.includes("b"));
+  ok(names.includes("c"));
+
+  // Can't set a from this point because it was deleted
+  // Must use add, which will add to the end of the list
+  // The reference was just lost
+
+  root.add(a);
+
+  snapshot = await children(root);
+  names = snapshot.map(name);
+
+  console.log({ snapshot, names });
+  ok(snapshot.length === 3);
+  ok(names.length === 3);
+  ok(names.includes("b"));
+  ok(names.includes("c"));
+  ok(names.includes("a"));
+  ok(names[2] === "a");
+
+
+
+  h = f;
+  createFragment = ff;
+}
