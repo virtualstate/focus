@@ -81,9 +81,7 @@ export function design(options?: DesignOptions): RelationDesigner {
     let changes: Push<void> | undefined = undefined;
 
     if (designOptions.async) {
-      changes = new Push({
-        keep: true
-      });
+      changes = new Push();
     }
 
     function *view() {
