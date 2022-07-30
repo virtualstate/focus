@@ -45,12 +45,12 @@ export const possibleNameKeysStrings = [
   "type",
   "$$type",
   "reference",
-  "name",
   "tagName",
   "nodeName",
   "url",
   "id",
   "node",
+  "name",
 ] as const;
 export const possibleNameKeys = [
   Symbol.for(":kdl/name"),
