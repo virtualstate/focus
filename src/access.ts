@@ -41,12 +41,12 @@ const possibleFragmentNames = [
 export type FragmentName = typeof possibleFragmentNames[number];
 
 export const possibleNameKeysStrings = [
+  "tagName",
+  "nodeName",
   "source",
   "type",
   "$$type",
   "reference",
-  "tagName",
-  "nodeName",
   "url",
   "id",
   "node",
