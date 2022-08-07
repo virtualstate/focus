@@ -14,6 +14,8 @@ import {
 } from "./like";
 import { createFragment } from "./static-h";
 
+const FunctionToString = Function.prototype.toString;
+
 export type Key = string | symbol;
 export type UnknownJSXNodeRecord = Record<Key, unknown>;
 export type UnknownJSXNode = UnknownJSXNodeRecord;
@@ -705,6 +707,8 @@ export function instance(
     }
     return undefined;
   }
+  const string = FunctionToString.call(MaybeClass);
+  if (!string.startsWith("class ")) return undefined;
   try {
     return new MaybeClass(buildProperties(), buildChildren());
   } catch {
