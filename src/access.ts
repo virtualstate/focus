@@ -48,6 +48,7 @@ export const possibleNameKeysStrings = [
   "source",
   "type",
   "$$type",
+  "role",
   "reference",
   "url",
   "id",
