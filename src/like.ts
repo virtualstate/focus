@@ -153,3 +153,11 @@ export function isPromise(input: unknown): input is Promise<unknown> {
 export function isSymbol(value: unknown): value is symbol {
   return typeof value === "symbol";
 }
+
+export function isNumber(value: unknown): value is number {
+  return typeof value === "number";
+}
+
+export function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
