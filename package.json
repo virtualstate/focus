@@ -74,6 +74,7 @@
     "@virtualstate/hooks": "^2.46.0",
     "@virtualstate/hooks-extended": "^2.46.0",
     "@virtualstate/kdl": "^1.0.1-alpha.29",
+    "@virtualstate/memo": "^1.8.0",
     "@virtualstate/promise": "^1.1.5-alpha.82",
     "@virtualstate/union": "^2.46.0",
     "@virtualstate/x": "^2.46.0",

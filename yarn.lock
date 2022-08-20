@@ -1448,6 +1448,11 @@
   dependencies:
     "@types/node" "*"
 
+"@virtualstate/composite-key@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@virtualstate/composite-key/-/composite-key-1.0.0.tgz#352b93df5b9199951cc370897bca8bb5b171a375"
+  integrity sha512-5G3RT87X1w39UQyBvqQpTfsxK9FjoKlXfonvIY9esAHe9d0vOWVGtbElJppwJKWzh508Ja6gWn7W7dWHwj50Jw==
+
 "@virtualstate/dom@^2.46.0":
   version "2.48.1"
   resolved "https://registry.npmjs.org/@virtualstate/dom/-/dom-2.48.1.tgz#16a704ac71115f59320a9fccbb16737968164b91"
@@ -1484,6 +1489,11 @@
     uuid "^8.3.2"
     whatwg-url "^9.1.0"
 
+"@virtualstate/focus@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@virtualstate/focus/-/focus-1.1.1.tgz#9f162d9a54d8431e692657c26f0da39748666593"
+  integrity sha512-GZhxaSTQv78Eq20HiSReML2sgeQFxUubitmiQlcW8z5V3IMkEQUUq12pe42UE6gF1ysI77llzTtPxOru2jwkew==
+
 "@virtualstate/fringe@^2.46.1", "@virtualstate/fringe@^2.48.1":
   version "2.48.1"
   resolved "https://registry.npmjs.org/@virtualstate/fringe/-/fringe-2.48.1.tgz#b6d4c3c841935f127c14e9b048037f18b446a22b"
@@ -1510,6 +1520,18 @@
     uuid "^8.3.2"
     whatwg-url "^9.1.0"
 
+"@virtualstate/memo@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@virtualstate/memo/-/memo-1.8.0.tgz#47cf5825e7624d531b615b391bd49d0d65637a65"
+  integrity sha512-gPfKzJS+/ZevHRpNNmTU1UvZXB7Wk2h8wG8aRnW/0+UA+aHb3jSPdcrNb+UHxM7vQ9XeBzML9ddHa6me4LJsyw==
+  dependencies:
+    "@virtualstate/composite-key" "^1.0.0"
+    "@virtualstate/focus" "^1.1.1"
+    "@virtualstate/promise" "^1.1.6"
+    abort-controller "^3.0.0"
+    uuid "^8.3.2"
+    whatwg-url "^9.1.0"
+
 "@virtualstate/promise@^1.0.1-alpha.11", "@virtualstate/promise@^1.1.2":
   version "1.1.4"
   resolved "https://registry.npmjs.org/@virtualstate/promise/-/promise-1.1.4.tgz#9513ab3dfe8a9e5d3ad674daaac9556893de6673"
@@ -1519,6 +1541,11 @@
   version "1.1.5-alpha.82"
   resolved "https://registry.yarnpkg.com/@virtualstate/promise/-/promise-1.1.5-alpha.82.tgz#effede98b181d07eaa338451035a48ac2db05d45"
   integrity sha512-IHxqpJiHd8U1t+S3/lQ8SxlsEd2QXta6X3m30tG3MNCiyPE7peTr+WxqDuqFZ/h1DheAHpwQJUf80P0LYXyryg==
+
+"@virtualstate/promise@^1.1.6":
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/@virtualstate/promise/-/promise-1.1.6.tgz#6db3b498b50bb9c0e0b3a0c875e614f61dfbb65f"
+  integrity sha512-VUHoq3pTT+xczVlBDhMqSp74UguETb+Qu2qBgDHWPLT49Bl4JhmPTLw/unaYaXb+4YaE5mEaxjmvAhY4C1oc9A==
 
 "@virtualstate/union@^2.46.0", "@virtualstate/union@^2.48.1":
   version "2.48.1"

@@ -1,5 +1,6 @@
 import { Push } from "@virtualstate/promise";
 import {children, h, ok, isNumber} from "@virtualstate/focus";
+import {memo} from "@virtualstate/memo";
 
 {
     const target = new Push();
@@ -36,22 +37,33 @@ import {children, h, ok, isNumber} from "@virtualstate/focus";
         }
     }
 
-    const target = new Push({ keep: true });
+    const target = new Push();
     target.push(1);
     target.push(2);
     target.close();
 
-    const node = <Component>{target}</Component>
+    const node = memo(<Component>{target}</Component>)
 
     const [result] = await children(node);
     console.log({ result });
     ok(result === 6); // 2 * 3
 
-    const next = <Component>{node}</Component>
+    const next = memo(<Component>{node}</Component>)
 
     const [nextResult] = await children(next);
     console.log({ nextResult });
     ok(nextResult === 18); // 6 * 3
 
+    async function *Another(options: unknown, input: unknown) {
+        for await (const [result] of children(input).filter<number>(isNumber)) {
+            yield result / 9;
+        }
+    }
+
+    const another = memo(<Another>{next}</Another>)
+
+    const [anotherResult] = await children(another);
+    console.log({ anotherResult });
+    ok(anotherResult === 2); // 18 / 9
 
 }
