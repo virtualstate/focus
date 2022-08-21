@@ -30,8 +30,9 @@ export function component(
     if (!isComponentFn(name)) return undefined;
     return name;
   }
-
+  if (isAsyncIterable(input)) return input;
   const node = raw(input);
+  if (isAsyncIterable(node)) return node;
   const name = getName(input);
   if (!name) return undefined;
   const nodeInstance = instance(name);

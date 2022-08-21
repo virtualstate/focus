@@ -10,6 +10,7 @@ import {
   StaticChildNode,
   UnknownJSXNode,
 } from "./access";
+import {isAsyncIterable} from "./is";
 
 export type GenericNode = unknown;
 
@@ -135,7 +136,7 @@ export interface ComponentFn {
 }
 
 export function isComponentFn(node: unknown): node is ComponentFn {
-  return isLike(node, typeof node === "function");
+  return isLike(node, typeof node === "function") && !isAsyncIterable(node);
 }
 
 export function isComponentNode(input: unknown): boolean {

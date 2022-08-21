@@ -36,5 +36,6 @@ await import("./design");
 await import("./fragment-result");
 
 await import("./push");
+await import("./fragment-function");
 
 export default 1;
