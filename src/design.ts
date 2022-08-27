@@ -101,7 +101,8 @@ export function design(options?: DesignOptions): RelationDesigner {
     const fragment = Symbol.for(":jsx/fragment");
 
     let changes: Push<void> | undefined = undefined,
-        changesThisTask = 0;
+        changesCurrentTask = 0,
+        emitTask: () => void | undefined = undefined;
 
     if (designOptions.async) {
       changes = new Push();
@@ -125,57 +126,51 @@ export function design(options?: DesignOptions): RelationDesigner {
     }
 
     async function *watch() {
-      let { children } = context;
+      if (!changes) return yield * view();
+
+      const { children } = context;
       let lastChildren = [...children]
 
-      let change = false;
       for (const snapshot of view()) {
-        ({ children } = context);
-        lastChildren = [...children]
+        lastChildren = [...children];
         yield snapshot;
-        change = true;
-      }
-
-      if (!changes) {
-        return;
       }
 
       for await (const _ of changes) {
-        ({ children } = context);
         const same = (
             lastChildren.length === children.length &&
             children.every(
                 (child, index) => child === children[index]
             )
         );
-        if (same) continue;
+        if (same) {
+          continue;
+        }
         for (const snapshot of view()) {
           yield snapshot;
-          change = true;
         }
         lastChildren = [...children];
-      }
-      if (!change) {
-        yield * view();
       }
     }
 
     function emit() {
       if (!changes) return;
       ok(changes.open, "No changes can be made");
-      const isFirstChange = changesThisTask > 0;
-      changesThisTask += 1;
+      const isFirstChange = changesCurrentTask > 0;
+      changesCurrentTask += 1;
       if (!isFirstChange) return;
       changes.push();
-      queueMicrotask(() => {
+      emitTask = () => {
         // If there has been more changes since the initial change at the start of this
         // task, then push out another change
         // Means we can reduce the amount of emitted to a maximum of two per task.
-        if (changesThisTask > 1 && changes.open) {
+        if (changesCurrentTask > 1 && changes.open) {
           changes.push();
         }
-        changesThisTask = 0;
-      })
+        changesCurrentTask = 0;
+        emitTask = undefined;
+      }
+      queueMicrotask(emitTask);
     }
 
     const designers = new Set<RelationDesigner>();
@@ -266,6 +261,8 @@ export function design(options?: DesignOptions): RelationDesigner {
       close() {
         ok(designOptions.async, "Requires async to be in use");
         ok(changes);
+        ok(changes.open, "Already closed");
+        emitTask?.(); // Clean up emit before closing
         for (const child of context.children) {
           if (!isRelationDesigner(child)) continue;
           child.close();
@@ -305,6 +302,7 @@ export function design(options?: DesignOptions): RelationDesigner {
               }
             }
           } else {
+            // This would only be true if it were from another design
             context.seen.add(child);
           }
         }
