@@ -79,7 +79,8 @@ export function design(options?: DesignOptions): RelationDesigner {
 
     const fragment = Symbol.for(":jsx/fragment");
 
-    let changes: Push<void> | undefined = undefined;
+    let changes: Push<void> | undefined = undefined,
+        changesThisTask = 0;
 
     if (designOptions.async) {
       changes = new Push();
@@ -136,7 +137,19 @@ export function design(options?: DesignOptions): RelationDesigner {
     function emit() {
       if (!changes) return;
       ok(changes.open, "No changes can be made");
+      const isFirstChange = changesThisTask > 0;
+      changesThisTask += 1;
+      if (!isFirstChange) return;
       changes.push();
+      queueMicrotask(() => {
+        // If there has been more changes since the initial change at the start of this
+        // task, then push out another change
+        // Means we can reduce the amount of emitted to a maximum of two per task.
+        if (changesThisTask > 1 && changes.open) {
+          changes.push();
+        }
+        changesThisTask = 0;
+      })
     }
 
     const designers = new Set<RelationDesigner>();
