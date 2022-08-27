@@ -2,10 +2,15 @@ import { h } from "./h";
 import {isLike, ok} from "./like";
 import {Push} from "@virtualstate/promise";
 
+/**
+ * @internal
+ */
 export interface RelationContext {
   node: unknown;
   options?: Record<string, unknown>;
   children: (RelationDesigner | unknown)[];
+  parents: RelationDesigner[];
+  seen: WeakSet<RelationDesigner>;
 }
 
 const RelationDesigner = Symbol.for("@virtualstate/focus/designer");
@@ -13,8 +18,14 @@ const RelationDesigner = Symbol.for("@virtualstate/focus/designer");
 type Options = Record<string | symbol, unknown>;
 
 export interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncIterable<unknown> {
+  /**
+   * @internal
+   */
   readonly [RelationDesigner]: true;
 
+  /**
+   * @internal
+   */
   readonly context: Readonly<RelationContext>;
 
   h(node?: unknown, options?: unknown, ...children: unknown[]): RelationDesigner;
@@ -53,18 +64,21 @@ export function design(options?: DesignOptions): RelationDesigner {
 
   function createContext(
     node?: unknown,
-    options?: Record<string, unknown>
+    options?: Record<string, unknown>,
+    parents?: RelationDesigner[]
   ): RelationContext {
     return {
       node,
       options,
       children: [],
+      parents,
+      seen: parents[0]?.context.seen ?? new WeakSet()
     };
   }
 
   function createDesigner(
     context: RelationContext,
-    ...parents: RelationContext[]
+    ...parents: RelationDesigner[]
   ): RelationDesigner {
     function findIndex(nodeOrDesigner: unknown) {
       return context.children.findIndex(
@@ -158,7 +172,7 @@ export function design(options?: DesignOptions): RelationDesigner {
       [RelationDesigner]: true,
       [Symbol.for(":jsx/type")]: fragment,
       get context() {
-        return Object.freeze(context);
+        return context;
       },
       h(...args: unknown[]) {
         return designer.add(...args);
@@ -187,16 +201,17 @@ export function design(options?: DesignOptions): RelationDesigner {
           return designer.add(node, options, ...children);
         }
         const existing = context.children[index];
-        if (isRelationDesigner(existing) && designOptions.async) {
+        if (isRelationDesigner(existing)) {
           designers.add(existing);
         }
         const relation = createRelation(
             node,
             options,
             children,
-            context,
+            this,
             ...parents
         );
+        context.seen.add(relation);
         context.children[index] = relation;
         emit();
         return relation;
@@ -213,9 +228,10 @@ export function design(options?: DesignOptions): RelationDesigner {
           node,
           options,
           children,
-          context,
+          this,
           ...parents
         );
+        context.seen.add(relation);
         context.children.push(relation);
         emit();
         return relation;
@@ -261,13 +277,28 @@ export function design(options?: DesignOptions): RelationDesigner {
     node: unknown = undefined,
     options: Record<string, unknown> = {},
     children: unknown[] = [],
-    ...parents: RelationContext[]
+    ...parents: RelationDesigner[]
   ): RelationDesigner {
-    const context = createContext(node, options);
+    const context = createContext(node, options, parents);
     const designer = createDesigner(context, ...parents);
 
     if (children.length) {
-      context.children.push(...children);
+      for (const child of children) {
+        if (isRelationDesigner(child)) {
+          if (context.seen.has(child)) {
+            for (const parent of parents) {
+              if (parent.has(child)) {
+                // Pull down same instance
+                parent.delete(child);
+              }
+            }
+          } else {
+            context.seen.add(child);
+          }
+        }
+        context.children.push(child);
+      }
+
     }
 
     return designer;

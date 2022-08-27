@@ -11,7 +11,7 @@ import {
   descendants,
   logDescendantsSettled,
   logDescendantsSettledFromPromise,
-  isUnknownJSXNode, isRelationDesigner,
+  isUnknownJSXNode, isRelationDesigner, isDescendantFulfilled, DescendantPromiseFulfilledResult,
 } from "@virtualstate/focus";
 
 let h: unknown = f,
@@ -461,4 +461,50 @@ let h: unknown = f,
 
   h = f;
   createFragment = ff;
+}
+
+{
+  const root = design();
+  ({ h, createFragment } = root);
+  const definedFirst = <d />;
+
+  (
+      <a>
+        <b>
+          <c />
+          {definedFirst}
+        </b>
+      </a>
+  );
+
+  const result = await children(root);
+  console.log(result);
+  ok(result.length === 1);
+
+  const all = await descendants(root);
+  console.log(all);
+  ok(all.length === 4);
+
+  const settled = await descendantsSettled(root)
+      .filter<DescendantPromiseFulfilledResult>(isDescendantFulfilled);
+  console.log(settled);
+  ok(settled.length === 4);
+  const [
+    { value: a },
+    { value: b, parent: bParent },
+    { value: c, parent: cParent },
+    { value: d, parent: dParent }
+  ] = settled;
+
+  ok(a);
+  ok(b);
+  ok(c);
+  ok(d);
+  ok(bParent === a);
+  ok(cParent === b);
+  ok(dParent === b);
+
+  h = f;
+  createFragment = ff;
+
 }
