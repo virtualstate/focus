@@ -11,7 +11,7 @@ import {
   descendants,
   logDescendantsSettled,
   logDescendantsSettledFromPromise,
-  isUnknownJSXNode, isRelationDesigner, isDescendantFulfilled, DescendantPromiseFulfilledResult,
+  isUnknownJSXNode, isRelationDesigner, isDescendantFulfilled, DescendantPromiseFulfilledResult, designer,
 } from "@virtualstate/focus";
 
 let h: unknown = f,
@@ -488,13 +488,14 @@ let h: unknown = f,
   const settled = await descendantsSettled(root)
       .filter<DescendantPromiseFulfilledResult>(isDescendantFulfilled);
   console.log(settled);
-  ok(settled.length === 4);
   const [
     { value: a },
     { value: b, parent: bParent },
     { value: c, parent: cParent },
-    { value: d, parent: dParent }
+    { value: d, parent: dParent },
+    ...rest
   ] = settled;
+  ok(rest.length === 0);
 
   ok(a);
   ok(b);
@@ -503,6 +504,105 @@ let h: unknown = f,
   ok(bParent === a);
   ok(cParent === b);
   ok(dParent === b);
+
+  ok(isRelationDesigner(designer(a)));
+  ok(isRelationDesigner(designer(b)));
+  ok(isRelationDesigner(designer(c)));
+
+  const dDesigner = designer(d);
+
+  ok(isRelationDesigner(dDesigner));
+  ok(dDesigner === definedFirst);
+
+  ({ h, createFragment } = dDesigner);
+
+  (
+      <>
+        <e />
+        <f>
+          <g />
+          <h />
+        </f>
+        <i>
+          <j />
+        </i>
+      </>
+  );
+
+  let dChildren = await children(d);
+
+  // The node "d" is not updated, read a new version of it from its parent... b or above
+  console.log(dChildren);
+  ok(dChildren.length === 0);
+
+  dChildren = await children(
+      descendants(root).filter(node => name(node) === "d")
+  );
+
+  console.log(dChildren);
+  ok(dChildren.length === 3);
+  ok(name(dChildren[0]) === "e");
+  ok(name(dChildren[1]) === "f");
+  ok(name(dChildren[2]) === "i");
+
+  dChildren = await children(children(b).filter(node => name(node) === "d"));
+
+  console.log(dChildren);
+  ok(dChildren.length === 3);
+  ok(name(dChildren[0]) === "e");
+  ok(name(dChildren[1]) === "f");
+  ok(name(dChildren[2]) === "i");
+
+  dChildren = await children(children(dDesigner));
+
+  console.log(dChildren);
+  ok(dChildren.length === 3);
+  ok(name(dChildren[0]) === "e");
+  ok(name(dChildren[1]) === "f");
+  ok(name(dChildren[2]) === "i");
+
+  {
+    const settled = await descendantsSettled(root)
+        .filter<DescendantPromiseFulfilledResult>(isDescendantFulfilled);
+    console.log(settled);
+    const [
+      { value: a },
+      { value: b, parent: bParent },
+      { value: c, parent: cParent },
+      { value: d, parent: dParent },
+      { value: e, parent: eParent },
+      { value: f, parent: fParent },
+      { value: g, parent: gParent },
+      { value: h, parent: hParent },
+      { value: i, parent: iParent },
+      { value: j, parent: jParent },
+      ...rest
+    ] = settled;
+    ok(rest.length === 0);
+
+    ok(a);
+    ok(b);
+    ok(c);
+    ok(d);
+    ok(e);
+    ok(f);
+    ok(g);
+    ok(h);
+    ok(i);
+    ok(j);
+    ok(bParent === a);
+    ok(cParent === b);
+    ok(dParent === b);
+    ok(eParent === d);
+    ok(fParent === d);
+    ok(gParent === f);
+    ok(hParent === f);
+    ok(iParent === d);
+    ok(jParent === i);
+
+  }
+
+
 
   h = f;
   createFragment = ff;

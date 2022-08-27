@@ -1,6 +1,6 @@
-import { h } from "./h";
-import {isLike, ok} from "./like";
-import {Push} from "@virtualstate/promise";
+import { h } from "./static-h";
+import { isLike, isUnknownJSXNode, ok } from "./like";
+import { Push } from "@virtualstate/promise";
 
 /**
  * @internal
@@ -50,8 +50,15 @@ export interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncItera
   close(): void;
 }
 
+export function designer(node?: unknown): RelationDesigner | undefined {
+  if (!isUnknownJSXNode(node)) return undefined;
+  const designer = node[RelationDesigner];
+  if (!isRelationDesigner(designer)) return undefined;
+  return designer;
+}
+
 export function isRelationDesigner(value: unknown): value is RelationDesigner {
-  return isLike<RelationDesigner>(value) && value[RelationDesigner];
+  return isLike<RelationDesigner>(value) && value[RelationDesigner] === true;
 }
 
 export interface DesignOptions extends Options {
@@ -102,14 +109,19 @@ export function design(options?: DesignOptions): RelationDesigner {
 
     function *view() {
       const { node, options, children } = context;
+      let result;
       if (typeof node === "undefined") {
         if (!children.length) {
           return;
         }
-        yield h(fragment, options, ...children);
+        result = h(fragment, options, ...children);
       } else {
-        yield h(node, options, ...children);
+        result = h(node, options, ...children);
       }
+      Object.defineProperty(result, RelationDesigner, {
+        value: designer
+      });
+      yield result;
     }
 
     async function *watch() {
