@@ -14,6 +14,7 @@ export interface RelationContext {
 }
 
 const RelationDesigner = Symbol.for("@virtualstate/focus/designer");
+const RelationDesignerContext = Symbol.for("@virtualstate/focus/designer/context");
 
 type Options = Record<string | symbol, unknown>;
 
@@ -26,7 +27,7 @@ export interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncItera
   /**
    * @internal
    */
-  readonly context: Readonly<RelationContext>;
+  readonly [RelationDesignerContext]: Readonly<RelationContext>;
 
   h(node?: unknown, options?: unknown, ...children: unknown[]): RelationDesigner;
   createFragment(options?: unknown, ...children: unknown[]): RelationDesigner;
@@ -58,7 +59,7 @@ export function designer(node?: unknown): RelationDesigner | undefined {
 }
 
 export function isRelationDesigner(value: unknown): value is RelationDesigner {
-  return isLike<RelationDesigner>(value) && value[RelationDesigner] === true;
+  return isLike<RelationDesigner>(value) && value[RelationDesigner] === true && !!value[RelationDesignerContext];
 }
 
 export interface DesignOptions extends Options {
@@ -79,7 +80,7 @@ export function design(options?: DesignOptions): RelationDesigner {
       options,
       children: [],
       parents,
-      seen: parents[0]?.context.seen ?? new WeakSet()
+      seen: parents[0]?.[RelationDesignerContext].seen ?? new WeakSet()
     };
   }
 
@@ -93,7 +94,7 @@ export function design(options?: DesignOptions): RelationDesigner {
           designer === nodeOrDesigner ||
           (
              isRelationDesigner(designer) &&
-             designer.context.node === nodeOrDesigner
+             designer[RelationDesignerContext].node === nodeOrDesigner
           )
       );
     }
@@ -177,10 +178,8 @@ export function design(options?: DesignOptions): RelationDesigner {
 
     const designer: RelationDesigner = {
       [RelationDesigner]: true,
+      [RelationDesignerContext]: context,
       [Symbol.for(":jsx/type")]: fragment,
-      get context() {
-        return context;
-      },
       h(...args: unknown[]) {
         return designer.add(...args);
       },
