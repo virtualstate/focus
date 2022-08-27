@@ -2,7 +2,7 @@ import { h } from "./h";
 import {isLike, ok} from "./like";
 import {Push} from "@virtualstate/promise";
 
-interface RelationContext {
+export interface RelationContext {
   node: unknown;
   options?: Record<string, unknown>;
   children: (RelationDesigner | unknown)[];
@@ -12,7 +12,7 @@ const RelationDesigner = Symbol.for("@virtualstate/focus/designer");
 
 type Options = Record<string | symbol, unknown>;
 
-interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncIterable<unknown> {
+export interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncIterable<unknown> {
   readonly [RelationDesigner]: true;
 
   readonly context: Readonly<RelationContext>;
