@@ -38,4 +38,6 @@ await import("./fragment-result");
 await import("./push");
 await import("./fragment-function");
 
+await import("./server");
+
 export default 1;

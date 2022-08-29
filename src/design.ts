@@ -120,9 +120,11 @@ export function design(options?: DesignOptions): RelationDesigner {
       } else {
         result = h(node, options, ...children);
       }
-      Object.defineProperty(result, RelationDesigner, {
-        value: designer
-      });
+      if (!result[RelationDesigner]) {
+        Object.defineProperty(result, RelationDesigner, {
+          value: designer
+        });
+      }
       yield result;
     }
 
