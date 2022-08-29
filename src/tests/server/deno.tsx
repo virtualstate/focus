@@ -1,8 +1,7 @@
 import {descendants, h, isString, ok} from "@virtualstate/focus";
-import {toJSON, toResponse, toStream} from "./app";
+import {toResponse} from "./app";
 import {memo} from "@virtualstate/memo";
 import {Fetch} from "./fetch";
-import {reader} from "./async-reader";
 
 export default 1;
 
@@ -39,24 +38,24 @@ console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
 const onComplete = (async function watch() {
     for await (const connection of server) {
-        await blockAndHandleConnection(connection);
+        void handleConnection(connection);
     }
 
-    async function blockAndHandleConnection(connection: DenoConnection) {
+    async function handleConnection(connection: DenoConnection) {
         const http = Deno.serveHttp(connection);
-        const event = await http.nextRequest();
-        event.respondWith(
-            toResponse()
-        )
+        for await (const event of http) {
+            event.respondWith(
+                toResponse()
+            )
+        }
     }
 })();
 
+onComplete.catch(console.error);
+//
 {
     const response = await fetch(new URL("/test", hostname).toString(), {
-        method: "POST",
-        body: JSON.stringify({
-            value: 1
-        })
+        method: "GET"
     });
     console.log("Response received");
 
@@ -67,22 +66,8 @@ const onComplete = (async function watch() {
     console.log(await descendants(json));
 }
 
-
 {
-    const response = await fetch(new URL("/test", hostname).toString(), {
-        method: "POST",
-        body: JSON.stringify({
-            value: 1
-        })
-    });
-
-    for await (const string of reader(response)) {
-        console.log(string);
-    }
-
-}
-
-{
+    console.log("Next request");
     const url = new URL("/test", hostname);
 
     const root = memo(<Fetch url={url} method="GET" />);
@@ -97,6 +82,8 @@ const onComplete = (async function watch() {
     }
 
 }
+
+console.log("done");
 
 server.close();
 

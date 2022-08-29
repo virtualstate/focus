@@ -24,7 +24,6 @@ export function toStream() {
             try {
                 const encoder = new TextEncoder();
                 for await (const string of toJSON()) {
-                    // console.log(string);
                     controller.enqueue(
                         encoder.encode(string)
                     );

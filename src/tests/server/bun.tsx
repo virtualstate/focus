@@ -43,6 +43,8 @@ console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
     ok(response.ok);
 
+    console.log(response.body);
+
     const json = await response.json();
 
     console.log(await descendants(json));

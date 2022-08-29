@@ -10,6 +10,7 @@ export async function *Fetch(options: FetchOptions) {
     const response = await fetch(options.url.toString(), options);
 
     for await (const string of reader(response)) {
+        // console.log(string);
         yield * parsePart(string);
     }
 
