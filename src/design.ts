@@ -80,7 +80,7 @@ export function design(options?: DesignOptions): RelationDesigner {
       options,
       children: [],
       parents,
-      seen: parents[0]?.[RelationDesignerContext].seen ?? new WeakSet()
+      seen: parents?.[0]?.[RelationDesignerContext]?.seen ?? new WeakSet()
     };
   }
 

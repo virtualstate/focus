@@ -55,11 +55,11 @@ const { port } = addressInfo;
 
 ok(port);
 
-const host = `http://0.0.0.0:${port}`;
-console.log(`HTTP webserver running. Access it at: ${host}`);
+const hostname = `http://0.0.0.0:${port}`;
+console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
 {
-    const response = await fetch(new URL("/test", host).toString(), {
+    const response = await fetch(new URL("/test", hostname).toString(), {
         method: "POST",
         body: JSON.stringify({
             value: 1
@@ -75,7 +75,7 @@ console.log(`HTTP webserver running. Access it at: ${host}`);
 }
 
 {
-    const response = await fetch(new URL("/test", host).toString(), {
+    const response = await fetch(new URL("/test", hostname).toString(), {
         method: "POST",
         body: JSON.stringify({
             value: 1
@@ -89,7 +89,7 @@ console.log(`HTTP webserver running. Access it at: ${host}`);
 }
 
 {
-    const url = new URL("/test", host);
+    const url = new URL("/test", hostname);
 
     const root = memo(<Fetch url={url} method="GET" />);
 

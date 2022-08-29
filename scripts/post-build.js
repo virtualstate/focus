@@ -1,9 +1,5 @@
 import "./correct-import-extensions.js";
 import { promises as fs } from "fs";
-import { rollup } from "rollup";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import ignore from "rollup-plugin-ignore";
-import babel from "rollup-plugin-babel";
 import { dirname, resolve } from "path";
 
 await import("../esnext/trying-to-write-documentation/readme-generator.js");
@@ -23,44 +19,44 @@ const cwd = resolve(dirname(pathname), "..");
     p: `${cwd}/esnext/tests/app-history.playwright.wpt.js`,
   });
 
-  const bundle = await rollup({
-    input: "./esnext/tests/index.js",
-    plugins: [
-      ignore([
-        "playwright",
-        "fs",
-        "path",
-        "uuid",
-        "cheerio",
-        "@virtualstate/app-history",
-        "@virtualstate/app-history-imported",
-        `${cwd}/esnext/tests/app-history.playwright.js`,
-        `${cwd}/esnext/tests/app-history.playwright.wpt.js`,
-        `${cwd}/esnext/tests/dependencies-input.js`,
-        `${cwd}/esnext/tests/dependencies.js`,
-        "./app-history.playwright.js",
-        "./app-history.playwright.wpt.js",
-      ]),
-      nodeResolve(),
-    ],
-    inlineDynamicImports: true,
-    treeshake: {
-      preset: "smallest",
-      moduleSideEffects: "no-external",
-    },
-  });
-  await bundle.write({
-    sourcemap: true,
-    output: {
-      file: "./esnext/tests/rollup.js",
-    },
-    inlineDynamicImports: true,
-    format: "cjs",
-    interop: "auto",
-    globals: {
-      "esnext/tests/app-history.playwright.js": "globalThis",
-    },
-  });
+  // const bundle = await rollup({
+  //   input: "./esnext/tests/index.js",
+  //   plugins: [
+  //     ignore([
+  //       "playwright",
+  //       "fs",
+  //       "path",
+  //       "uuid",
+  //       "cheerio",
+  //       "@virtualstate/app-history",
+  //       "@virtualstate/app-history-imported",
+  //       `${cwd}/esnext/tests/app-history.playwright.js`,
+  //       `${cwd}/esnext/tests/app-history.playwright.wpt.js`,
+  //       `${cwd}/esnext/tests/dependencies-input.js`,
+  //       `${cwd}/esnext/tests/dependencies.js`,
+  //       "./app-history.playwright.js",
+  //       "./app-history.playwright.wpt.js",
+  //     ]),
+  //     nodeResolve(),
+  //   ],
+  //   inlineDynamicImports: true,
+  //   treeshake: {
+  //     preset: "smallest",
+  //     moduleSideEffects: "no-external",
+  //   },
+  // });
+  // await bundle.write({
+  //   sourcemap: true,
+  //   output: {
+  //     file: "./esnext/tests/rollup.js",
+  //   },
+  //   inlineDynamicImports: true,
+  //   format: "cjs",
+  //   interop: "auto",
+  //   globals: {
+  //     "esnext/tests/app-history.playwright.js": "globalThis",
+  //   },
+  // });
 }
 
 if (!process.env.NO_COVERAGE_BADGE_UPDATE) {

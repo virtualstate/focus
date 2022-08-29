@@ -16,3 +16,35 @@ export async function *toJSON() {
     }
     yield "]";
 }
+
+export function toStream() {
+    return new ReadableStream({
+        async start(controller) {
+            try {
+                const encoder = new TextEncoder();
+                for await (const string of toJSON()) {
+                    controller.enqueue(
+                        encoder.encode(string)
+                    );
+                }
+            } catch (error) {
+                controller.error(error);
+            } finally {
+                controller.close();
+            }
+
+        }
+    })
+}
+
+export function toResponse() {
+    return new Response(
+        toStream(),
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "X-Content-Type-Options": "nosniff"
+            }
+        }
+    )
+}

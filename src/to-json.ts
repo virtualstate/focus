@@ -50,7 +50,7 @@ export async function* toJSONValueGenerator(
   let last;
   for await (const snapshot of children(node)) {
     for await (const values of union(
-      snapshot.map(async function* (node) {
+      snapshot.map(async function* (node): AsyncIterable<unknown> {
         if (!isUnknownJSXNode(node)) return yield node;
         const existing = cache.get(node);
         if (existing) {
