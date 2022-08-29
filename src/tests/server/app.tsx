@@ -18,11 +18,13 @@ export async function *toJSON() {
 }
 
 export function toStream() {
+    // console.log("toStream");
     return new ReadableStream({
         async start(controller) {
             try {
                 const encoder = new TextEncoder();
                 for await (const string of toJSON()) {
+                    // console.log(string);
                     controller.enqueue(
                         encoder.encode(string)
                     );
@@ -32,7 +34,6 @@ export function toStream() {
             } finally {
                 controller.close();
             }
-
         }
     })
 }

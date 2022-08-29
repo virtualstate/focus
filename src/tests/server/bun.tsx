@@ -2,6 +2,7 @@ import {toResponse} from "./app";
 import {memo} from "@virtualstate/memo";
 import {Fetch} from "./fetch";
 import {descendants, h, isString, ok} from "@virtualstate/focus";
+import {reader} from "./async-reader";
 
 export default 1;
 
@@ -46,6 +47,22 @@ console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
     console.log(await descendants(json));
 }
+
+
+{
+    const response = await fetch(new URL("/test", hostname).toString(), {
+        method: "POST",
+        body: JSON.stringify({
+            value: 1
+        })
+    });
+
+    for await (const string of reader(response)) {
+        console.log(string);
+    }
+
+}
+
 
 {
     const url = new URL("/test", hostname);

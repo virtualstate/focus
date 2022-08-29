@@ -2,6 +2,7 @@ import {descendants, h, isString, ok} from "@virtualstate/focus";
 import {toJSON, toResponse, toStream} from "./app";
 import {memo} from "@virtualstate/memo";
 import {Fetch} from "./fetch";
+import {reader} from "./async-reader";
 
 export default 1;
 
@@ -49,6 +50,37 @@ const onComplete = (async function watch() {
         )
     }
 })();
+
+{
+    const response = await fetch(new URL("/test", hostname).toString(), {
+        method: "POST",
+        body: JSON.stringify({
+            value: 1
+        })
+    });
+    console.log("Response received");
+
+    ok(response.ok);
+
+    const json = await response.json();
+
+    console.log(await descendants(json));
+}
+
+
+{
+    const response = await fetch(new URL("/test", hostname).toString(), {
+        method: "POST",
+        body: JSON.stringify({
+            value: 1
+        })
+    });
+
+    for await (const string of reader(response)) {
+        console.log(string);
+    }
+
+}
 
 {
     const url = new URL("/test", hostname);
