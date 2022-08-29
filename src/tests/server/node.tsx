@@ -1,15 +1,9 @@
 import { createServer } from "http";
-import {children, descendants, h, isString, ok, toJSON} from "@virtualstate/focus";
+import { descendants, h, isString, ok} from "@virtualstate/focus";
 import {reader} from "./async-reader";
-import {isArray} from "../../is";
 import {Fetch} from "./fetch";
 import {memo} from "@virtualstate/memo";
-
-async function *App() {
-    yield <p>Loading!</p>
-    await new Promise(resolve => setTimeout(resolve, 500));
-    yield <p>Loaded</p>
-}
+import {toJSON} from "./app";
 
 console.log("Starting server");
 const server = createServer((request, response) => {
@@ -31,32 +25,18 @@ const server = createServer((request, response) => {
         });
 
 
-    function header() {
-
+    async function run() {
+        console.log("Request started");
         response.writeHead(200, {
             "Content-Type": "application/json"
         });
-        response.write("[");
-    }
 
-    async function run() {
-        console.log("Request started");
-        header();
-
-        let first = true;
-        for await (const snapshot of toJSON(<App />)) {
-            if (!first) response.write(",");
-            first = false;
-            response.write(snapshot);
+        for await (const part of toJSON()) {
+            response.write(part);
         }
 
-        footer();
-        console.log("Request ended");
-    }
-
-    function footer() {
-        response.write("]");
         response.end();
+        console.log("Request ended");
     }
 
 
@@ -76,6 +56,7 @@ const { port } = addressInfo;
 ok(port);
 
 const host = `http://0.0.0.0:${port}`;
+console.log(`HTTP webserver running. Access it at: ${host}`);
 
 {
     const response = await fetch(new URL("/test", host).toString(), {
