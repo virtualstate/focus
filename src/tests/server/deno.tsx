@@ -1,7 +1,5 @@
-import {descendants, h, isString, ok} from "@virtualstate/focus";
 import {toResponse} from "./app";
-import {memo} from "@virtualstate/memo";
-import {Fetch} from "./fetch";
+import {testJSXServer} from "./test-server";
 
 export default 1;
 
@@ -52,38 +50,8 @@ const onComplete = (async function watch() {
 })();
 
 onComplete.catch(console.error);
-//
-{
-    const response = await fetch(new URL("/test", hostname).toString(), {
-        method: "GET"
-    });
-    console.log("Response received");
 
-    ok(response.ok);
-
-    const json = await response.json();
-
-    console.log(await descendants(json));
-}
-
-{
-    console.log("Next request");
-    const url = new URL("/test", hostname);
-
-    const root = memo(<Fetch url={url} method="GET" />);
-
-    for await (const snapshot of descendants(root)) {
-        console.log(snapshot);
-    }
-
-    // Will not hit service again as node is memo'd
-    for await (const snapshot of descendants(root).filter(isString)) {
-        console.log(snapshot);
-    }
-
-}
-
-console.log("done");
+await testJSXServer(hostname);
 
 server.close();
 

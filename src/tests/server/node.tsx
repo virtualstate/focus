@@ -4,6 +4,7 @@ import {reader} from "./async-reader";
 import {Fetch} from "./fetch";
 import {memo} from "@virtualstate/memo";
 import {toJSON} from "./app";
+import {testJSXServer} from "./test-server";
 
 console.log("Starting server");
 const server = createServer((request, response) => {
@@ -58,51 +59,7 @@ ok(port);
 const hostname = `http://0.0.0.0:${port}`;
 console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
-{
-    const response = await fetch(new URL("/test", hostname).toString(), {
-        method: "POST",
-        body: JSON.stringify({
-            value: 1
-        })
-    });
-    console.log("Response received");
-
-    ok(response.ok);
-
-    const json = await response.json();
-
-    console.log(await descendants(json));
-}
-
-{
-    const response = await fetch(new URL("/test", hostname).toString(), {
-        method: "POST",
-        body: JSON.stringify({
-            value: 1
-        })
-    });
-
-    for await (const string of reader(response)) {
-        console.log(string);
-    }
-
-}
-
-{
-    const url = new URL("/test", hostname);
-
-    const root = memo(<Fetch url={url} method="GET" />);
-
-    for await (const snapshot of descendants(root)) {
-        console.log(snapshot);
-    }
-
-    // Will not hit service again as node is memo'd
-    for await (const snapshot of descendants(root).filter(isString)) {
-        console.log(snapshot);
-    }
-
-}
+await testJSXServer(hostname);
 
 console.log("Closing server");
 

@@ -1,8 +1,13 @@
 export function reader(response: Response) {
-    // console.log("reader", response.body);
+    if (!response.body) {
+        return {
+            async *[Symbol.asyncIterator]() {
+                yield response.text();
+            }
+        }
+    }
     const stream = response.body.pipeThrough(new TextDecoderStream());
     const reader = stream.getReader();
-    // console.log({ reader, stream });
     return {
         [Symbol.asyncIterator]() {
             return {
