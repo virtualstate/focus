@@ -1,19 +1,25 @@
-export function reader(response: Response) {
-    if (!response.body) {
+export function reader(response: Response): AsyncIterable<string> {
+    if (!response.body?.pipeThrough) {
         return {
             async *[Symbol.asyncIterator]() {
                 yield response.text();
             }
         }
     }
-    const stream = response.body.pipeThrough(new TextDecoderStream());
-    const reader = stream.getReader();
     return {
-        [Symbol.asyncIterator]() {
-            return {
-                next() {
-                    return reader.read();
-                }
+        async *[Symbol.asyncIterator]() {
+            const stream = response.body.pipeThrough(new TextDecoderStream());
+            const reader = stream.getReader();
+            let result;
+            try {
+                do {
+                    result = await reader.read();
+                    if (result.value) {
+                        yield result.value
+                    }
+                } while (!result.done);
+            } finally {
+                reader.releaseLock()
             }
         }
     }

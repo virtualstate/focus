@@ -96,12 +96,12 @@
     "whatwg-url": "^9.1.0"
   },
   "scripts": {
+    "test:all": "yarn test:node && yarn test:deno && yarn test:bun",
     "build": "rm -rf esnext && tsc",
     "postbuild": "mkdir -p coverage && node scripts/post-build.js",
     "generate": "yarn build && node esnext/generate.js",
     "prepublishOnly": "npm run build",
     "test": "yarn build && yarn test:all",
-    "test:all": "yarn test:node && yarn test:deno && yarn test:bun",
     "test:node": "export $(cat .env | xargs) && node --enable-source-maps esnext/tests/index.js",
     "test:deno": "export $(cat .env | xargs) && deno run --allow-write --allow-env --allow-read --allow-net --import-map=import-map-deno.json esnext/tests/index.js",
     "test:bun": "export $(cat .env | xargs) && bun esnext/tests/index.js",

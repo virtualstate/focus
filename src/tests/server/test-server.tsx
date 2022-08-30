@@ -30,6 +30,24 @@ export async function testJSXServer(hostname: string) {
     }
 
     {
+        const response = await fetch(url);
+
+        const cached = memo(reader(response));
+
+        ok(!response.bodyUsed);
+        const parts: string[] = [];
+        for await (const string of cached) {
+            parts.push(string);
+        }
+        ok(response.bodyUsed);
+        let index = -1;
+        for await (const string of cached) {
+            index += 1;
+            ok(parts[index] === string);
+        }
+    }
+
+    {
         const root = memo(<Fetch url={url} />);
 
         for await (const snapshot of descendants(root)) {
