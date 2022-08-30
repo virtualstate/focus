@@ -4,7 +4,7 @@ import {testJSXServer} from "./test-server";
 export default 1;
 
 interface DenoConnection {
-
+    close?(): void;
 }
 
 interface DenoServer extends AsyncIterable<DenoConnection>{
@@ -34,6 +34,8 @@ const hostname = `http://0.0.0.0:${server.addr.port}`
 
 console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
+const abortController = new AbortController();
+
 const onComplete = (async function watch() {
     for await (const connection of server) {
         void handleConnection(connection);
@@ -41,6 +43,11 @@ const onComplete = (async function watch() {
 
     async function handleConnection(connection: DenoConnection) {
         const http = Deno.serveHttp(connection);
+        abortController.signal.addEventListener("abort", () => {
+            try {
+                http.close();
+            } catch { }
+        })
         for await (const event of http) {
             event.respondWith(
                 toResponse()
@@ -54,5 +61,6 @@ onComplete.catch(console.error);
 await testJSXServer(hostname);
 
 server.close();
+abortController.abort();
 
 await onComplete;

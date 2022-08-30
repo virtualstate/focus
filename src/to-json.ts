@@ -23,13 +23,60 @@ export function toJSONValue(
   return anAsyncThing(toJSONValueGenerator(node, options));
 }
 
+async function* toJSONChildrenValueGenerator(
+    node: unknown,
+    options?: JSONOptions
+) {
+  if (!isUnknownJSXNode(node)) return;
+  const cache = new WeakMap<object, unknown>();
+  let last: unknown[];
+  for await (const snapshot of children(node)) {
+    for await (const values of union(
+        snapshot.map(async function* (node): AsyncIterable<unknown> {
+          if (!isUnknownJSXNode(node)) return yield node;
+          const existing = cache.get(node);
+          if (existing) {
+            return yield existing;
+          }
+          for await (const value of toJSONValueGenerator(node, options)) {
+            cache.set(node, value);
+            yield value;
+          }
+        })
+    )) {
+      const current = values.filter(
+          (value) => isStaticChildNode(value) || isUnknownJSXNode(value)
+      );
+      if (
+          last &&
+          last.length === current.length &&
+          last.every((value, index) => current[index] === value)
+      ) {
+        continue;
+      }
+      if (
+          options?.flat &&
+          Array.isArray(current) &&
+          current.length === 1 &&
+          isStaticChildNode(current[0])
+      ) {
+        yield current[0];
+      } else {
+        yield current;
+      }
+      last = current;
+    }
+  }
+}
+
 export async function* toJSONValueGenerator(
   node: unknown,
   options?: JSONOptions
 ): AsyncIterable<unknown> {
   if (!isUnknownJSXNode(node)) return yield node;
   const object: UnknownJSXNode = {};
-  let name = jsx.isFragment(node) ? undefined : jsx.name(node);
+  const isFragment = jsx.isFragment(node);
+  let name = isFragment ? "#fragment" : jsx.name(node);
   if (typeof name === "string" && options?.toLowerCase) {
     name = name.toLowerCase();
   }
@@ -41,55 +88,19 @@ export async function* toJSONValueGenerator(
       object[options?.type ?? "type"] = name;
     }
   }
-  if (Object.keys(props).length) {
+  if (!isFragment && Object.keys(props).length) {
     object[options?.props ?? "props"] = props;
   }
   const childrenKey = options?.flat ? name : options?.children ?? "children";
   let yielded = false;
-  const cache = new Map<object, unknown>();
-  let last;
-  for await (const snapshot of children(node)) {
-    for await (const values of union(
-      snapshot.map(async function* (node): AsyncIterable<unknown> {
-        if (!isUnknownJSXNode(node)) return yield node;
-        const existing = cache.get(node);
-        if (existing) {
-          return yield existing;
-        }
-        for await (const value of toJSONValueGenerator(node, options)) {
-          cache.set(node, value);
-          yield value;
-        }
-      })
-    )) {
-      const current = values.filter(
-        (value) => isStaticChildNode(value) || isUnknownJSXNode(value)
-      );
-      if (
-        last &&
-        last.length === current.length &&
-        last.every((value, index) => current[index] === value)
-      ) {
-        continue;
-      }
-      let yielding: unknown = current;
-      if (
-        options?.flat &&
-        Array.isArray(yielding) &&
-        yielding.length === 1 &&
-        isStaticChildNode(yielding[0])
-      ) {
-        yielding = yielding[0];
-      }
-      yield {
-        ...object,
-        [childrenKey]: yielding,
-      };
-      last = current;
-      yielded = true;
-    }
+  for await (const snapshot of toJSONChildrenValueGenerator(node, options)) {
+    yield {
+      ...object,
+      [childrenKey]: snapshot,
+    };
+    yielded = true;
   }
-  if (!yielded && name) {
+  if (!yielded && name && !isFragment) {
     yield object;
   }
 }

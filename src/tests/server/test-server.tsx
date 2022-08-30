@@ -11,6 +11,7 @@ export async function testJSXServer(hostname: string) {
     const url = new URL("/test", hostname).toString();
 
 
+    debugger;
     const response = await fetch(url);
     const json = await response.json()
     ok(isArray(json));
@@ -46,7 +47,7 @@ export async function testJSXServer(hostname: string) {
 
         {
             let index = -1;
-            for await (const part of toJSON(children(<Fetch url={url} />))) {
+            for await (const part of toJSON(<Fetch url={url} />)) {
                 index += 1;
                 const string: string = JSON.stringify(json.at(index), undefined, "  ");
                 console.log(part, string);
@@ -55,17 +56,17 @@ export async function testJSXServer(hostname: string) {
         }
 
         {
-            const last = await toJSON(children(<Fetch url={url} />));
-            const string: string = JSON.stringify(json.at(-1), undefined, "  ");
-            console.log(last, string);
-            ok(last === string);
+            const left = await toJSON(<App />);
+            const right = await toJSON(<Fetch url={url} />)
+            console.log(left, right);
+            ok(left === right);
         }
 
         {
 
             {
                 const left = toJSON(<App />)[Symbol.asyncIterator]();
-                const right = toJSON(children(<Fetch url={url} />))[Symbol.asyncIterator]();
+                const right = toJSON(<Fetch url={url} />)[Symbol.asyncIterator]();
 
                 let leftResult,
                     rightResult;
@@ -93,14 +94,14 @@ export async function testJSXServer(hostname: string) {
                 for await (
                     const entries of union([
                     indexed(toJSON(<App />)),
-                    indexed(toJSON(children(<Fetch url={url} />)))
+                    indexed(toJSON(<Fetch url={url} />))
                 ])
                     ) {
                     if (entries.length < 2) continue;
                     if (!entries.every((entry) => entry && entries[0][0] === entry[0])) continue;
 
                     const values = entries.map(([,value]) => value);
-                    console.log(...values);
+                    console.log(...entries);
                     ok(values.every(value => value === values[0]));
 
                 }
@@ -118,4 +119,6 @@ export async function testJSXServer(hostname: string) {
 
         }
     }
+
+    console.log("Finished JSX server tests");
 }
