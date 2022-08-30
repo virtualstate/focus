@@ -1,34 +1,27 @@
 import { createServer } from "http";
 import { ok } from "@virtualstate/focus";
-import { toStream } from "./app";
+import { toResponse } from "./app";
 import { testJSXServer } from "./test-server";
 
 console.log("Starting server");
 const server = createServer((request, response) => {
-    void toStream().pipeTo(new WritableStream({
-        start() {
-            response.writeHead(200, {
-                "Content-Type": "application/json"
-            });
-        },
+    const { body, headers } = toResponse();
+    headers.forEach((value, key) => {
+        response.setHeader(key, value);
+    });
+    response.writeHead(response.statusCode, response.statusMessage);
+    void body.pipeTo(new WritableStream({
         write(chunk) {
             response.write(chunk);
         },
-        close() {
-            try {
-                response.end()
-            } catch {
-
-            }
-        },
-        abort() {
-            try {
-                response.end()
-            } catch {
-
-            }
-        }
+        close: end,
+        abort: end
     }));
+    function end() {
+        try {
+            response.end()
+        } catch {}
+    }
 })
 
 await new Promise<void>(resolve => server.listen(0, resolve));
