@@ -7,11 +7,7 @@ import {union} from "@virtualstate/union";
 import {App} from "./app";
 
 export async function testJSXServer(hostname: string) {
-
     const url = new URL("/test", hostname).toString();
-
-
-    debugger;
     const response = await fetch(url);
     const json = await response.json()
     ok(isArray(json));
