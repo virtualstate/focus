@@ -34,6 +34,7 @@ export function ok(
 export async function testJSXServer(hostname: string) {
     const url = new URL("/test", hostname).toString();
     const response = await fetch(url);
+    console.log({ ok: response.ok });
     // console.log(await response.text())
     const json = await response.json()
     console.log(json);
