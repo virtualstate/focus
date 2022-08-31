@@ -31,8 +31,7 @@ console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
 await testJSXServer(hostname).catch(error => {
     console.error(error);
-    console.log({ Bun });
-    Bun.exit?.(1);
+    process?.exit?.(1);
 })
 
 server.stop();
