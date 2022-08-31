@@ -9,6 +9,7 @@ import {App} from "./app";
 export async function testJSXServer(hostname: string) {
     const url = new URL("/test", hostname).toString();
     const response = await fetch(url);
+    // console.log(await response.text())
     const json = await response.json()
     ok(isArray(json));
 

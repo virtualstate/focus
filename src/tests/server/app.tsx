@@ -17,9 +17,22 @@ export async function *toJSON() {
     yield "]";
 }
 
-export function toStream() {
-    // console.log("toStream");
-    return new ReadableStream({
+function toPullUnderlyingSource(): UnderlyingSource {
+    const iterator = toJSON()[Symbol.asyncIterator]();
+    return {
+        async pull(controller) {
+            const { value, done } = await iterator.next();
+            if (done) {
+                controller.close();
+            } else {
+                controller.enqueue(value);
+            }
+        }
+    }
+}
+
+function toPushUnderlyingSource(): UnderlyingSource {
+    return {
         async start(controller) {
             try {
                 const encoder = new TextEncoder();
@@ -34,7 +47,19 @@ export function toStream() {
                 controller.close();
             }
         }
-    })
+    }
+}
+
+declare var Deno: unknown;
+function isPullSourceSupported() {
+    return typeof Deno === "undefined";
+}
+
+export function toStream() {
+    const source = isPullSourceSupported() ?
+        toPullUnderlyingSource() :
+        toPushUnderlyingSource();
+    return new ReadableStream(source);
 }
 
 export function toResponse() {
