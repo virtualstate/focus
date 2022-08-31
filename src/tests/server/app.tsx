@@ -1,9 +1,13 @@
 import { h, toJSON as toJSONPart } from "@virtualstate/focus";
 
 export async function *App() {
+    console.log("Starting App");
     yield <p>Loading!</p>
+    console.log("Doing thing 1");
     await new Promise(resolve => setTimeout(resolve, 500));
+    console.log("Finished thing 1");
     yield <p>Loaded</p>
+    console.log("Finishing App");
 }
 
 export async function *toJSON() {
@@ -38,34 +42,8 @@ function toPullUnderlyingSource(): UnderlyingSource {
     }
 }
 
-function toPushUnderlyingSource(): UnderlyingSource {
-    return {
-        async start(controller) {
-            try {
-                const encoder = new TextEncoder();
-                for await (const string of toJSON()) {
-                    controller.enqueue(
-                        encoder.encode(string)
-                    );
-                }
-            } catch (error) {
-                controller.error(error);
-            } finally {
-                controller.close();
-            }
-        }
-    }
-}
-
-declare var Deno: unknown;
-function isPullSourceSupported() {
-    return typeof Deno === "undefined";
-}
-
 export function toStream() {
-    const source = isPullSourceSupported() ?
-        toPullUnderlyingSource() :
-        toPushUnderlyingSource();
+    const source = toPullUnderlyingSource();
     return new ReadableStream(source);
 }
 
