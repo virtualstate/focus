@@ -1,4 +1,4 @@
-import {h, descendants, isString, ok, toJSON, children} from "@virtualstate/focus";
+import {h, descendants, isString, toJSON, children} from "@virtualstate/focus";
 import {reader} from "./async-reader";
 import {memo} from "@virtualstate/memo";
 import {Fetch} from "./fetch";
@@ -6,16 +6,41 @@ import {isArray} from "../../is";
 import {union} from "@virtualstate/union";
 import {App} from "./app";
 
+export function ok(
+    value: unknown,
+    message?: string,
+    ...conditions: unknown[]
+): asserts value;
+export function ok<T>(
+    value: unknown,
+    message?: string,
+    ...conditions: unknown[]
+): asserts value is T;
+export function ok(
+    value: unknown,
+    message?: string,
+    ...conditions: unknown[]
+): asserts value {
+    if (conditions.length ? !conditions.every((value) => value) : !value) {
+        console.log({
+            value,
+            conditions,
+            message
+        });
+        throw new Error(message ?? "Expected value");
+    }
+}
+
 export async function testJSXServer(hostname: string) {
     const url = new URL("/test", hostname).toString();
     const response = await fetch(url);
     // console.log(await response.text())
     const json = await response.json()
+    console.log(json);
     ok(isArray(json));
 
     {
         console.log(await descendants(json));
-        ok(isArray(json));
     }
 
     {
@@ -31,11 +56,13 @@ export async function testJSXServer(hostname: string) {
 
         const cached = memo(reader(response));
 
+        console.log({ bodyUsed: response.bodyUsed });
         ok(!response.bodyUsed);
         const parts: string[] = [];
         for await (const string of cached) {
             parts.push(string);
         }
+        console.log({ bodyUsed: response.bodyUsed });
         ok(response.bodyUsed);
         let index = -1;
         for await (const string of cached) {
