@@ -15,6 +15,7 @@ interface BunFetchOptions {
 }
 
 declare var Bun: {
+    exit?(code: number): void;
     serve(options: BunFetchOptions): BunServer
 }
 
@@ -28,6 +29,10 @@ const { hostname } = server;
 
 console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
-await testJSXServer(hostname);
+await testJSXServer(hostname).catch(error => {
+    console.error(error);
+    console.log({ exit: Bun.exit });
+    Bun.exit?.(1);
+})
 
 server.stop();
