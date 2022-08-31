@@ -9,6 +9,8 @@ export interface FetchOptions extends RequestInit {
 export async function *Fetch(options: FetchOptions) {
     const response = await fetch(options.url.toString(), options);
 
+    ok(response.ok, "Response not ok");
+
     for await (const string of reader(response)) {
         // console.log(string);
         yield * parsePart(string);
