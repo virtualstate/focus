@@ -18,15 +18,22 @@ export async function *toJSON() {
 }
 
 function toPullUnderlyingSource(): UnderlyingSource {
-    const iterator = toJSON()[Symbol.asyncIterator]();
+    const encoder = new TextEncoder();
+    let iterator: AsyncIterator<string>;
     return {
+        start() {
+          iterator = toJSON()[Symbol.asyncIterator]();
+        },
         async pull(controller) {
             const { value, done } = await iterator.next();
             if (done) {
                 controller.close();
             } else {
-                controller.enqueue(value);
+                controller.enqueue(encoder.encode(value));
             }
+        },
+        async cancel() {
+            await iterator.return();
         }
     }
 }
