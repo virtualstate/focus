@@ -126,6 +126,11 @@ export async function testJSXServer(hostname: string) {
                         right.next()
                     ]));
 
+                    console.log({
+                        leftResult,
+                        rightResult
+                    });
+
                     if (leftResult.value && rightResult.value) {
                         ok(leftResult.value === rightResult.value)
                     } else {
