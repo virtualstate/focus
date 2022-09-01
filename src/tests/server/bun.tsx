@@ -34,4 +34,4 @@ await testJSXServer(hostname).catch(error => {
     process?.exit?.(1);
 })
 
-server.stop();
+await server.stop();
