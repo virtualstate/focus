@@ -1,18 +1,46 @@
 import {reader} from "./async-reader";
-import {ok} from "@virtualstate/focus";
+import {h, ok} from "@virtualstate/focus";
 import {isArray} from "../../is";
+
+const DEFAULT_RETRIES = 3;
 
 export interface FetchOptions extends RequestInit {
     url: URL | string
+    retries?: number;
+    isRetry?: boolean;
 }
 
-export async function *Fetch(options: FetchOptions) {
-    const response = await fetch(options.url.toString(), options);
+class FetchResponseError extends Error {
 
-    ok(response.ok, "Response not ok");
+    response: Response;
+    status: number;
+
+    constructor(response: Response, message = "Failed to fetch") {
+        super(message);
+        this.response = response;
+        this.status = response.status;
+    }
+}
+
+export async function *Fetch(options: FetchOptions): AsyncIterable<unknown> {
+    const { isRetry, retries, url } = options;
+    if (isRetry) {
+        console.log("Retrying fetch");
+    }
+
+    const response = await fetch(url.toString(), options);
+
+    if (!response.ok) {
+        if (typeof retries !== "number") {
+            return yield <Fetch {...options} retries={DEFAULT_RETRIES} isRetry />;
+        } else if (retries > 0) {
+            return yield <Fetch {...options} retries={retries - 1} isRetry />;
+        } else {
+            throw new FetchResponseError(response);
+        }
+    }
 
     for await (const string of reader(response)) {
-        // console.log(string);
         yield * parsePart(string);
     }
 

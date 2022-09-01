@@ -1,4 +1,4 @@
-import { h, toJSON as toJSONPart } from "@virtualstate/focus";
+import { h, toJSON } from "@virtualstate/focus";
 
 export async function *App() {
     console.log("Starting App");
@@ -10,10 +10,10 @@ export async function *App() {
     console.log("Finishing App");
 }
 
-export async function *toJSON() {
+export async function *toJSONArray(parts: AsyncIterable<string>) {
     yield "[";
     let first = true;
-    for await (const part of toJSONPart(<App />)) {
+    for await (const part of parts) {
         if (!first) yield ",";
         first = false;
         yield part;
@@ -21,12 +21,12 @@ export async function *toJSON() {
     yield "]";
 }
 
-function toPullUnderlyingSource(): UnderlyingSource {
+function toPullUnderlyingSource(iterable: AsyncIterable<string>): UnderlyingSource {
     const encoder = new TextEncoder();
     let iterator: AsyncIterator<string>;
     return {
         start() {
-          iterator = toJSON()[Symbol.asyncIterator]();
+          iterator = iterable[Symbol.asyncIterator]();
         },
         async pull(controller) {
             const { value, done } = await iterator.next();
@@ -42,14 +42,18 @@ function toPullUnderlyingSource(): UnderlyingSource {
     }
 }
 
-export function toStream() {
-    const source = toPullUnderlyingSource();
+export function toStream(node: unknown) {
+    const source = toPullUnderlyingSource(
+        toJSONArray(
+            toJSON(node)
+        )
+    );
     return new ReadableStream(source);
 }
 
-export function toResponse() {
+export function toResponse(node: unknown = <App />) {
     return new Response(
-        toStream(),
+        toStream(node),
         {
             headers: {
                 "Content-Type": "application/json",
