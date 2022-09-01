@@ -14,6 +14,7 @@ jobs:
       PROMPT_NAME: test name
       PROMPT_EMAIL: test+email@example.com
     steps:
+      - run: uname -a
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
