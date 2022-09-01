@@ -16,6 +16,8 @@ declare var Bun: {
     serve(options: BunFetchOptions): BunServer
 }
 
+let timeout = 0;
+
 async function *generate() {
     yield "[";
     yield JSON.stringify({ a: "b" });
@@ -36,12 +38,10 @@ function toPullUnderlyingSource(iterable: AsyncIterable<string>): UnderlyingSour
         async pull(controller) {
             const { value, done } = await iterator.next();
             if (done) {
-                if (typeof Bun === "undefined") {
-                    controller.close();
-                } else {
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    controller.close();
+                if (timeout) {
+                    await new Promise(resolve => setTimeout(resolve, timeout));
                 }
+                controller.close();
             } else {
                 controller.enqueue(encoder.encode(value));
             }
@@ -83,16 +83,66 @@ const { hostname } = server;
 
 console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
-const response = await fetch(hostname);
-
-if (!response.ok) {
-    console.error("Response not ok");
-    console.error(response);
-    process.exit(1);
-} else {
-    console.log("Response ok");
-    console.log(response);
+async function run() {
+    let ok = 0,
+        notOk = 0,
+        exitCode = 0;
+    for (let i = 0; i < 10; i += 1) {
+        const response = await fetch(hostname);
+        if (!response.ok) {
+            console.error("Response not ok");
+            console.error(response);
+            notOk += 1;
+            exitCode = 1;
+        } else {
+            console.log("Response ok");
+            console.log(response);
+            ok += 1;
+        }
+    }
+    return {
+        ok,
+        notOk,
+        exitCode
+    }
 }
 
+const timeouts = [
+    0,
+    100,
+    500,
+    1500,
+    3000,
+    10000
+];
+
+let allNotOk = 0,
+    allOk = 0,
+    exitCode = 0,
+    maxTimeout = 0;
+
+for (const currentTimeout of timeouts) {
+    timeout = currentTimeout;
+    maxTimeout = currentTimeout;
+
+    const result = await run();
+
+    console.log(result);
+    allNotOk += result.notOk;
+    allOk += result.ok;
+    exitCode = exitCode || result.exitCode;
+
+    if (!result.notOk) {
+        // We didn't run into the problem on this platform with this timeout
+        break;
+    }
+}
+
+console.log({ allNotOk, allOk, maxTimeout });
+
 await server.stop();
+
+if (exitCode) {
+    process.exit(exitCode);
+}
 
