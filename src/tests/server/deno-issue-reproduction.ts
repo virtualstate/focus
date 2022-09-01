@@ -14,7 +14,7 @@ interface DenoServer extends AsyncIterable<DenoConnection>{
 
 interface DenoHTTPEvent {
     request: Request;
-    respondWith(response: Response): void;
+    respondWith(response: Response): Promise<void>;
 }
 
 interface DenoHttpConnection extends AsyncIterable<DenoHTTPEvent> {
@@ -89,7 +89,7 @@ export function toResponse(iterable: AsyncIterable<string>) {
 
 const onComplete = (async function watch() {
     for await (const connection of server) {
-        void handleConnection(connection);
+        void handleConnection(connection).catch(error => void error);
     }
 
     async function handleConnection(connection: DenoConnection) {
@@ -102,7 +102,7 @@ const onComplete = (async function watch() {
         for await (const event of http) {
             event.respondWith(
                 toResponse(generate())
-            )
+            )?.catch?.(error => void error)
         }
     }
 })();
