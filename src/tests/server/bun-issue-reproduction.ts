@@ -83,11 +83,11 @@ const { hostname } = server;
 
 console.log(`HTTP webserver running. Access it at: ${hostname}`);
 
-async function run() {
+async function run(loops = 10) {
     let ok = 0,
         notOk = 0,
         exitCode = 0;
-    for (let i = 0; i < 10; i += 1) {
+    for (let i = 0; i < loops; i += 1) {
         const response = await fetch(hostname);
         if (!response.ok) {
             console.error("Response not ok");
@@ -109,11 +109,11 @@ async function run() {
 
 const timeouts = [
     0,
-    100,
-    500,
-    1500,
-    3000,
-    10000
+    // 100,
+    // 500,
+    // 1500,
+    // 3000,
+    // 10000
 ];
 
 let allNotOk = 0,
@@ -125,7 +125,7 @@ for (const currentTimeout of timeouts) {
     timeout = currentTimeout;
     maxTimeout = currentTimeout;
 
-    const result = await run();
+    const result = await run(500);
 
     console.log(result);
     allNotOk += result.notOk;
