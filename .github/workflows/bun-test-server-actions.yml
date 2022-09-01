@@ -13,6 +13,8 @@ jobs:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
       - uses: antongolub/action-setup-bun@v1
-      - run: bun install
+      - run: |
+          yarn install
+          bun install
       - run: yarn build
       - run: bun esnext/tests/server/bun-issue-reproduction.js

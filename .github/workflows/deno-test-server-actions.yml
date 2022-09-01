@@ -15,6 +15,6 @@ jobs:
       - uses: denoland/setup-deno@v1
         with:
           deno-version: "v1.x"
-      - run: bun install
+      - run: yarn install
       - run: yarn build
       - run: deno run --allow-net esnext/tests/server/deno-issue-reproduction.js
