@@ -26,7 +26,7 @@ function toPullUnderlyingSource(iterable: AsyncIterable<string>): UnderlyingSour
                 if (typeof Bun === "undefined") {
                     controller.close();
                 } else {
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await new Promise(resolve => setTimeout(resolve, 1500));
                     controller.close();
                 }
             } else {
