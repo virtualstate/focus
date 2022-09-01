@@ -1,4 +1,4 @@
-name: bun-test-server-actions
+name: deno-test-server-actions
 on: [push, pull_request]
 
 jobs:
