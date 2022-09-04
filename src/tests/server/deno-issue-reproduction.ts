@@ -122,6 +122,7 @@ async function run(loops = 10) {
             console.log("Response ok");
             console.log(response);
             ok += 1;
+            await response.json();
         }
     }
     return {
