@@ -1,7 +1,7 @@
 import type {IncomingMessage} from "http";
 import {toStream} from "../stream";
-import {isArray} from "../../../is";
-import {dispatchEvent, FetchListenerFn} from "./fetch-listener";
+import {isArray} from "../../../../is";
+import {dispatchEvent, FetchListenerFn} from "../fetch-listener";
 import {createServer, Server, ServerResponse} from "http";
 import {ok} from "@virtualstate/focus";
 

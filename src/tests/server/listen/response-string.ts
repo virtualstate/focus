@@ -1,4 +1,4 @@
-export function reader(response: Response): AsyncIterable<string> {
+export function toAsyncString(response: Response): AsyncIterable<string> {
     if (!response.body?.pipeThrough) {
         return {
             async *[Symbol.asyncIterator]() {

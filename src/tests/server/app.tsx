@@ -1,5 +1,5 @@
 import { h } from "@virtualstate/focus";
-import {toResponse as toResponseBase} from "./response";
+import { toResponse as toResponseBase } from "./listen";
 
 export interface AppOptions {
     request: Request

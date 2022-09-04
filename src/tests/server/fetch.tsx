@@ -1,4 +1,4 @@
-import {reader} from "./async-reader";
+import {toAsyncString} from "./listen";
 import {h, ok} from "@virtualstate/focus";
 import {isArray} from "../../is";
 
@@ -40,7 +40,7 @@ export async function *Fetch(options: FetchOptions): AsyncIterable<unknown> {
         }
     }
 
-    for await (const string of reader(response)) {
+    for await (const string of toAsyncString(response)) {
         yield * parsePart(string);
     }
 

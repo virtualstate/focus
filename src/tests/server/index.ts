@@ -1,12 +1,17 @@
-declare var Deno: unknown;
-declare var Bun: unknown;
+import { toResponse } from "./app";
+import { testJSXServer } from "./test-server";
+import { listen } from "./listen";
 
-if (typeof Deno !== "undefined") {
-    await import("./deno");
-} else if (typeof Bun !== "undefined") {
-    await import("./bun");
-} else if (typeof process !== "undefined") {
-    await import("./node");
-}
+console.log("Starting server");
+
+const { url, close } = await listen(event => {
+    event.respondWith(toResponse(event.request))
+});
+
+await testJSXServer(url);
+
+console.log("Closing server");
+await close();
+console.log("Closed server");
 
 export default 1;

@@ -1,5 +1,4 @@
-import {dispatchEvent, FetchEvent, FetchListenerFn} from "./fetch-listener";
-import {toResponse} from "../app";
+import {dispatchEvent, FetchListenerFn} from "../fetch-listener";
 
 interface BunServer {
     stop(): void;
@@ -29,6 +28,7 @@ export async function listen(fn: FetchListenerFn) {
         }
     });
     const { hostname } = server;
+    console.log({ hostname });
     return {
         url: hostname,
         close

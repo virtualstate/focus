@@ -1,10 +1,10 @@
 import {h, descendants, isString, toJSON, children} from "@virtualstate/focus";
-import {reader} from "./async-reader";
 import {memo} from "@virtualstate/memo";
 import {Fetch} from "./fetch";
 import {isArray} from "../../is";
 import {union} from "@virtualstate/union";
 import {App} from "./app";
+import {toAsyncString} from "./listen";
 
 export function ok(
     value: unknown,
@@ -50,7 +50,7 @@ export async function testJSXServer(hostname: string) {
     {
         const response = await fetch(url);
 
-        for await (const string of reader(response)) {
+        for await (const string of toAsyncString(response)) {
             console.log(string);
         }
     }
@@ -58,7 +58,7 @@ export async function testJSXServer(hostname: string) {
     {
         const response = await fetch(url);
 
-        const cached = memo(reader(response));
+        const cached = memo(toAsyncString(response));
 
         console.log({ bodyUsed: response.bodyUsed });
         ok(!response.bodyUsed);

@@ -4,7 +4,7 @@ import {isPromise, ok} from "@virtualstate/focus";
 export interface FetchEvent {
     request: Request;
     respondWith(response: Promise<Response> | Response): void
-    waitUntil(promise: Promise<unknown>): void;
+    waitUntil?(promise: Promise<unknown>): void;
 }
 
 export interface FetchListenerFn {
