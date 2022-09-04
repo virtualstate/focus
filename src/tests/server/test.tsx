@@ -1,4 +1,4 @@
-import {h, descendants, isString, toJSON, children} from "@virtualstate/focus";
+import {h, descendants, isString, toJSON, children, name, properties} from "@virtualstate/focus";
 import {memo} from "@virtualstate/memo";
 import {isArray} from "../../is";
 import {union} from "@virtualstate/union";
@@ -104,6 +104,7 @@ export async function test(App: typeof AppType, hostname: string) {
                     console.log({
                         leftResult,
                         rightResult
+
                     });
 
                     if (leftResult.value && rightResult.value) {
@@ -144,6 +145,22 @@ export async function test(App: typeof AppType, hostname: string) {
             }
 
         }
+    }
+
+    {
+        const [body] = await descendants(
+            <Fetch
+                url={new URL("/example/post", hostname)}
+                method="POST"
+                body={JSON.stringify({
+                    a: "1"
+                })}
+            />
+        ).filter(node => name(node) === "echo-body")
+        console.log({ body });
+        ok(body);
+        const { a } = properties(body);
+        ok(a === "1");
     }
 
     console.log("Finished JSX server tests");

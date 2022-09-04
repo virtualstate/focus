@@ -1,4 +1,4 @@
-import {toAsyncString} from "./response-string";
+import {toAsyncString} from "./body-string";
 import {h, ok} from "@virtualstate/focus";
 import {isArray} from "../../../is";
 
