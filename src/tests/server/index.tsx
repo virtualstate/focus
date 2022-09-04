@@ -1,4 +1,4 @@
-import { testJSXServer } from "./test-server";
+import { test } from "./test";
 import { listen, toResponse } from "./listen";
 import { h } from "@virtualstate/focus";
 
@@ -24,7 +24,7 @@ const { url, close } = await listen(event => {
     )
 });
 
-await testJSXServer(url);
+await test(App, url);
 
 console.log("Closing server");
 await close();

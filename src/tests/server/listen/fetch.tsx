@@ -1,6 +1,6 @@
-import {toAsyncString} from "./listen";
+import {toAsyncString} from "./response-string";
 import {h, ok} from "@virtualstate/focus";
-import {isArray} from "../../is";
+import {isArray} from "../../../is";
 
 const DEFAULT_RETRIES = 3;
 

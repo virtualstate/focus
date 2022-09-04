@@ -1,37 +1,12 @@
 import {h, descendants, isString, toJSON, children} from "@virtualstate/focus";
 import {memo} from "@virtualstate/memo";
-import {Fetch} from "./fetch";
 import {isArray} from "../../is";
 import {union} from "@virtualstate/union";
-import {App} from "./app";
-import {toAsyncString} from "./listen";
+import {Fetch, toAsyncString} from "./listen";
+import type { App as AppType } from "./index";
 
-export function ok(
-    value: unknown,
-    message?: string,
-    ...conditions: unknown[]
-): asserts value;
-export function ok<T>(
-    value: unknown,
-    message?: string,
-    ...conditions: unknown[]
-): asserts value is T;
-export function ok(
-    value: unknown,
-    message?: string,
-    ...conditions: unknown[]
-): asserts value {
-    if (conditions.length ? !conditions.every((value) => value) : !value) {
-        console.log({
-            value,
-            conditions,
-            message
-        });
-        throw new Error(message ?? "Expected value");
-    }
-}
 
-export async function testJSXServer(hostname: string) {
+export async function test(App: typeof AppType, hostname: string) {
     const url = new URL("/test", hostname).toString();
     const response = await fetch(url);
     console.log({ status: response.status, ok: response.ok }, response);
@@ -172,4 +147,30 @@ export async function testJSXServer(hostname: string) {
     }
 
     console.log("Finished JSX server tests");
+}
+
+
+export function ok(
+    value: unknown,
+    message?: string,
+    ...conditions: unknown[]
+): asserts value;
+export function ok<T>(
+    value: unknown,
+    message?: string,
+    ...conditions: unknown[]
+): asserts value is T;
+export function ok(
+    value: unknown,
+    message?: string,
+    ...conditions: unknown[]
+): asserts value {
+    if (conditions.length ? !conditions.every((value) => value) : !value) {
+        console.log({
+            value,
+            conditions,
+            message
+        });
+        throw new Error(message ?? "Expected value");
+    }
 }
