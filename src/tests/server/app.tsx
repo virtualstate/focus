@@ -1,15 +1,21 @@
 import { h } from "@virtualstate/focus";
 import {toResponse as toResponseBase} from "./response";
+import { Request as RequestLike } from "@opennetwork/http-representation";
 
-export async function *App() {
-    console.log("Starting App");
-    yield <p>Loading!</p>
-    console.log("Doing thing 1");
-    await new Promise(resolve => setTimeout(resolve, 500));
-    console.log("Finished thing 1");
-    yield <p>Loaded</p>
+export type AnyRequest = Request | RequestLike;
+
+export interface AppOptions {
+    request: Partial<AnyRequest>
 }
 
-export function toResponse() {
-    return toResponseBase(<App />);
+export async function *App({ request }: AppOptions) {
+    console.log("Starting App", request.url);
+    yield <p>Loading {request.url.toString()}!</p>
+    await new Promise(resolve => setTimeout(resolve, 500));
+    yield <p>Loaded</p>
+    console.log("Finished App", request.url);
+}
+
+export function toResponse(request: AnyRequest) {
+    return toResponseBase(<App request={request} />);
 }

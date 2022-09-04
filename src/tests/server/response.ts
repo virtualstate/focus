@@ -39,18 +39,18 @@ function toPullUnderlyingSource(iterable: AsyncIterable<string>): UnderlyingSour
     }
 }
 
-export function toStream(node: unknown) {
-    const source = toPullUnderlyingSource(
-        toJSONArray(
-            toJSON(node)
-        )
-    );
+export function toStream(iterable: AsyncIterable<string>) {
+    const source = toPullUnderlyingSource(iterable);
     return new ReadableStream(source);
 }
 
 export function toResponse(node: unknown) {
     return new Response(
-        toStream(node),
+        toStream(
+            toJSONArray(
+                toJSON(node)
+            )
+        ),
         {
             headers: {
                 "Content-Type": "application/json",

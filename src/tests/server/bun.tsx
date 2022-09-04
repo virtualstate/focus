@@ -20,8 +20,8 @@ declare var Bun: {
 }
 
 const server = Bun.serve({
-    fetch(): Response {
-        return toResponse()
+    fetch(request): Response {
+        return toResponse(request)
     }
 });
 

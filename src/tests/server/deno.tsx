@@ -50,7 +50,7 @@ const onComplete = (async function watch() {
         })
         for await (const event of http) {
             event.respondWith(
-                toResponse()
+                toResponse(event.request)
             ).catch(error => void error)
         }
     }

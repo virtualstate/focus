@@ -102,7 +102,7 @@ export async function testJSXServer(hostname: string) {
         }
 
         {
-            const left = await toJSON(<App />);
+            const left = await toJSON(<App request={{ url }} />);
             const right = await toJSON(<Fetch url={url} />)
             console.log(left, right);
             ok(left === right);
@@ -111,7 +111,7 @@ export async function testJSXServer(hostname: string) {
         {
 
             {
-                const left = toJSON(<App />)[Symbol.asyncIterator]();
+                const left = toJSON(<App request={{ url }} />)[Symbol.asyncIterator]();
                 const right = toJSON(<Fetch url={url} />)[Symbol.asyncIterator]();
 
                 let leftResult,
@@ -144,7 +144,7 @@ export async function testJSXServer(hostname: string) {
             {
                 for await (
                     const entries of union([
-                    indexed(toJSON(<App />)),
+                    indexed(toJSON(<App request={{ url }} />)),
                     indexed(toJSON(<Fetch url={url} />))
                 ])
                     ) {
