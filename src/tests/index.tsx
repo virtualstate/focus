@@ -5,10 +5,12 @@ let timeout;
 
 if (typeof Bun !== "undefined") {
   const timeoutMinutes = 2.5;
+  const timeoutMs = Math.round(timeoutMinutes * 60000);
+  const start = Date.now()
   timeout = setTimeout(() => {
-    console.error(`Tests took longer than ${timeoutMinutes} minutes`)
+    console.error(`Tests took longer than ${timeoutMinutes} minutes`, { start, now: Date.now(), timeoutMs })
     process.exit(1);
-  }, timeoutMinutes * 60000);
+  }, timeoutMs);
 }
 
 await import("./access");
