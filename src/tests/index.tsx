@@ -1,6 +1,16 @@
 declare var Deno: unknown;
 declare var Bun: unknown;
 
+let timeout;
+
+if (typeof Bun !== "undefined") {
+  const timeoutMinutes = 2.5;
+  timeout = setTimeout(() => {
+    console.error(`Tests took longer than ${timeoutMinutes} minutes`)
+    process.exit(1);
+  }, timeoutMinutes * 60000);
+}
+
 await import("./access");
 await import("./preact-jsx");
 await import("./react-jsx");
@@ -43,5 +53,9 @@ await import("./push");
 await import("./fragment-function");
 
 await import("./server");
+
+if (typeof timeout !== "undefined") {
+  clearTimeout(timeout);
+}
 
 export default 1;

@@ -1,5 +1,5 @@
 import { test } from "./test";
-import {listen, toAsyncString, toResponse} from "./listen";
+import {listen, toResponse} from "@virtualstate/listen";
 import { h } from "@virtualstate/focus";
 
 export interface AppOptions {
@@ -13,7 +13,7 @@ export async function *App({ request }: AppOptions) {
     yield <p>Loaded</p>
 
     if (request.method === "POST") {
-        const body = JSON.parse(await toAsyncString(request));
+        const body = await request.json();
         yield <echo-body {...body} />
     }
 

@@ -2,7 +2,7 @@ import {h, descendants, isString, toJSON, children, name, properties} from "@vir
 import {memo} from "@virtualstate/memo";
 import {isArray} from "../../is";
 import {union} from "@virtualstate/union";
-import {Fetch, toAsyncString} from "./listen";
+import {Fetch, toAsyncString} from "@virtualstate/listen";
 import type { App as AppType } from "./index";
 
 

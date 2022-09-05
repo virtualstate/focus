@@ -4,6 +4,7 @@
     "@virtualstate/astro-renderer": "https://cdn.skypack.dev/@virtualstate/astro-renderer",
     "@virtualstate/dom": "https://cdn.skypack.dev/@virtualstate/dom",
     "@virtualstate/examples": "https://cdn.skypack.dev/@virtualstate/examples",
+    "@virtualstate/listen": "https://cdn.skypack.dev/@virtualstate/listen",
     "@virtualstate/fringe": "https://cdn.skypack.dev/@virtualstate/fringe",
     "@virtualstate/hooks": "https://cdn.skypack.dev/@virtualstate/hooks",
     "@virtualstate/memo": "https://cdn.skypack.dev/@virtualstate/memo",
