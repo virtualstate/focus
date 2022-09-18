@@ -15,6 +15,12 @@
       "tests/dom-h": [
         "./esnext/tests/dom-h.d.ts"
       ],
+      "tests/navigation": [
+        "./esnext/tests/navigation/index.d.ts"
+      ],
+      "tests/navigation/pages": [
+        "./esnext/tests/navigation/pages/index.d.ts"
+      ],
       "proxy-h": [
         "./esnext/proxy-h.d.ts"
       ],
@@ -33,6 +39,8 @@
     ".": "./esnext/index.js",
     "./tests": "./esnext/tests/index.js",
     "./tests/dom-h": "./esnext/tests/dom-h.js",
+    "./tests/navigation": "./esnext/tests/navigation/index.js",
+    "./tests/navigation/pages": "./esnext/tests/navigation/pages/index.js",
     "./static-h": "./esnext/static-h.js",
     "./proxy-h": "./esnext/proxy-h.js",
     "./h": "./esnext/h.js"
