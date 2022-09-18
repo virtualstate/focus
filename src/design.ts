@@ -15,6 +15,7 @@ export interface RelationContext {
 
 const RelationDesigner = Symbol.for("@virtualstate/focus/designer");
 const RelationDesignerContext = Symbol.for("@virtualstate/focus/designer/context");
+const RelationDesignerEmit = Symbol.for("@virtualstate/focus/designer/emit");
 
 type Options = Record<string | symbol, unknown>;
 
@@ -28,6 +29,11 @@ export interface RelationDesigner extends Partial<Iterable<unknown>>, AsyncItera
    * @internal
    */
   readonly [RelationDesignerContext]: Readonly<RelationContext>;
+
+  /**
+   * @internal
+   */
+  readonly [RelationDesignerEmit]: () => void;
 
   h(node?: unknown, options?: unknown, ...children: unknown[]): RelationDesigner;
   createFragment(options?: unknown, ...children: unknown[]): RelationDesigner;
@@ -181,6 +187,7 @@ export function design(options?: DesignOptions): RelationDesigner {
     const designer: RelationDesigner = {
       [RelationDesigner]: true,
       [RelationDesignerContext]: context,
+      [RelationDesignerEmit]: emit,
       [Symbol.for(":jsx/type")]: fragment,
       h(...args: unknown[]) {
         return designer.add(...args);
