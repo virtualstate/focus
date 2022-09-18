@@ -50,6 +50,9 @@ await transition(navigation);
 
 console.log("Navigated");
 
+// Allow navigation to be used again without these routes
+router.detach();
+
 async function transition(navigation: Navigation) {
     let transition: NavigationTransition | undefined = undefined;
     while (navigation.transition && transition !== navigation.transition) {

@@ -79,7 +79,7 @@
     "@virtualstate/hooks": "^2.46.0",
     "@virtualstate/hooks-extended": "^2.46.0",
     "@virtualstate/kdl": "^1.0.1-alpha.29",
-    "@virtualstate/listen": "^1.0.0-alpha.2",
+    "@virtualstate/listen": "^1.0.0-alpha.5",
     "@virtualstate/memo": "^1.8.0",
     "@virtualstate/navigation": "^1.0.1-alpha.135",
     "@virtualstate/promise": "^1.1.5-alpha.82",

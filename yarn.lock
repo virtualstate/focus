@@ -836,10 +836,10 @@
     uuid "^8.3.2"
     whatwg-url "^9.1.0"
 
-"@virtualstate/listen@^1.0.0-alpha.2":
-  version "1.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@virtualstate/listen/-/listen-1.0.0-alpha.2.tgz#287b6c928d8f84a449160b8ed5f3dfbf03f63e83"
-  integrity sha512-4RBLYDsxKf+0gHdpPpA+eAzhz9rllOktdtH1Cs/Y5Fm5/2wyZNouHJKxjBjUnzEJEjGiAzcnwsZAnUsFb6frAA==
+"@virtualstate/listen@^1.0.0-alpha.5":
+  version "1.0.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@virtualstate/listen/-/listen-1.0.0-alpha.5.tgz#45a6192236713b3ba0f1bc7a20c714f631d7d9cb"
+  integrity sha512-G9GrXSdoHcGMYd694JWRdYm9d2E/K7sZ/X5pI7GNtmXkYn3VqxyU0+kTNMONbs2XfCektMODknF/VGeAD3mgeA==
 
 "@virtualstate/memo@^1.8.0":
   version "1.8.0"

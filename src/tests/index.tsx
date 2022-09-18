@@ -54,12 +54,22 @@ await import("./fragment-result");
 await import("./push");
 await import("./fragment-function");
 
-await import("./server");
-
-await import("./navigation");
+try {
+  await import("./server");
+  await import("./navigation");
+} catch (error) {
+  console.error(error);
+  if (typeof process !== "undefined" && process.exit) {
+    process.exit(1)
+  }
+}
 
 if (typeof timeout !== "undefined") {
   clearTimeout(timeout);
 }
 
 export default 1;
+
+if (typeof process !== "undefined" && process.exit) {
+  process.exit(0)
+}
