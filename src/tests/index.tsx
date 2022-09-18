@@ -56,6 +56,8 @@ await import("./fragment-function");
 
 await import("./server");
 
+await import("./navigation");
+
 if (typeof timeout !== "undefined") {
   clearTimeout(timeout);
 }

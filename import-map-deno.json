@@ -5,6 +5,8 @@
     "@virtualstate/dom": "https://cdn.skypack.dev/@virtualstate/dom",
     "@virtualstate/examples": "https://cdn.skypack.dev/@virtualstate/examples",
     "@virtualstate/listen": "https://cdn.skypack.dev/@virtualstate/listen",
+    "@virtualstate/navigation": "https://cdn.skypack.dev/@virtualstate/navigation",
+    "@virtualstate/navigation/routes": "https://cdn.skypack.dev/@virtualstate/navigation/routes",
     "@virtualstate/fringe": "https://cdn.skypack.dev/@virtualstate/fringe",
     "@virtualstate/hooks": "https://cdn.skypack.dev/@virtualstate/hooks",
     "@virtualstate/memo": "https://cdn.skypack.dev/@virtualstate/memo",
