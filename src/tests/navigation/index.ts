@@ -1,31 +1,34 @@
-import { getRouter, Router } from "@virtualstate/navigation/routes";
+import {getRouter, Router} from "@virtualstate/navigation/routes";
 import {children, descendants, name, properties} from "@virtualstate/focus";
 import "./pages";
-import {Navigation, NavigationTransition} from "@virtualstate/navigation";
+import {Navigation, transition} from "@virtualstate/navigation";
 
 // route(console.log);
 
 interface State {
-    seen: string[]
+    root?: boolean
+    url?: string;
+    from?: string;
+    navigated: string[]
 }
 
-const navigation = new Navigation();
+const navigation = new Navigation<State>();
 const router = new Router<State>(navigation);
 
-const { routes, then } = router;
+const { routes, then, route } = router;
 
-routes(getRouter());
-
-const navigated = new Set();
+const navigated = new Set<string>();
 const known: string[] = []
 
-then(async (node, { destination }) => {
+route(console.log);
+routes(getRouter());
 
-    const { pathname } = new URL(destination.url)
-    navigated.add(pathname);
+then(async (node, { destination }) => {
+    if (!node) return; // Empty routes
+
     navigated.add(destination.url);
 
-    console.log(properties(node));
+    console.log(destination.url, properties(node));
 
     const {
         a
@@ -33,30 +36,38 @@ then(async (node, { destination }) => {
 
     for (const { href } of await a.map(properties)) {
         if (typeof href !== "string") continue;
-        if (known.includes(href)) continue;
-        if (navigated.has(href)) continue;
-        known.push(href);
+        const url = new URL(href, destination.url).toString();
+        if (known.includes(url)) continue;
+        if (navigated.has(url)) continue;
+        known.push(url);
     }
 
     const next = known.shift();
     if (next) {
-        navigation.navigate(next);
+        navigation.navigate(next, {
+            state: {
+                url: next,
+                from: destination.url,
+                navigated: [...navigated]
+            }
+        });
     }
 });
 
-navigation.navigate("/");
+navigation.navigate("/", {
+    state: {
+        root: true,
+        navigated: []
+    }
+});
 
 await transition(navigation);
 
 console.log("Navigated");
 
+for (const entry of navigation.entries()) {
+    console.log(entry.getState());
+}
+
 // Allow navigation to be used again without these routes
 router.detach();
-
-async function transition(navigation: Navigation) {
-    let transition: NavigationTransition | undefined = undefined;
-    while (navigation.transition && transition !== navigation.transition) {
-        transition = navigation.transition;
-        await transition.finished.catch(error => void error);
-    }
-}
