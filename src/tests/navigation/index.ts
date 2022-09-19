@@ -12,7 +12,9 @@ interface State {
     navigated: string[]
 }
 
-const navigation = new Navigation<State>();
+const navigation = new Navigation<State>({
+    baseURL: "https://example.com"
+});
 const router = new Router<State>(navigation);
 
 const { routes, then, route } = router;
