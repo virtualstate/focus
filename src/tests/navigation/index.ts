@@ -1,7 +1,7 @@
 import {getRouter, Router} from "@virtualstate/navigation/routes";
 import {children, descendants, name, properties} from "@virtualstate/focus";
 import "./pages";
-import {Navigation, transition} from "@virtualstate/navigation";
+import {NavigateEvent, Navigation, transition} from "@virtualstate/navigation";
 
 // route(console.log);
 
@@ -15,7 +15,7 @@ interface State {
 const navigation = new Navigation<State>({
     baseURL: "https://example.com"
 });
-const router = new Router<State>(navigation);
+const router = new Router<NavigateEvent<State>>(navigation);
 
 const { routes, then, route } = router;
 
