@@ -1,6 +1,6 @@
 {
   "name": "@virtualstate/focus",
-  "version": "1.4.10-alpha.2",
+  "version": "1.4.10-alpha.3",
   "main": "./esnext/index.js",
   "module": "./esnext/index.js",
   "types": "./esnext/index.d.ts",
