@@ -89,6 +89,9 @@ export async function* toStringGenerator(
   let propsString = "";
   if (Object.keys(props).length) {
     function toPropString([key, value]: [string, unknown]) {
+      if (typeof value === "undefined" || typeof value === "symbol") {
+        return undefined;
+      }
       if (value === false) {
         return undefined;
       }
@@ -100,7 +103,9 @@ export async function* toStringGenerator(
     const replacer = isReplacerFn(options?.replacer) ? options.replacer : undefined;
     function toReplacerString([key, value]: [string, unknown]) {
       const replaced = replacer.call(node, key, value);
-      if (typeof replaced === "undefined") return undefined;
+      if (typeof replaced === "undefined" || typeof replaced === "symbol") {
+        return undefined;
+      }
       if (replaced === true) return key;
       return `${key}="${String(replaced)}"`;
     }
@@ -170,6 +175,9 @@ async function toStringPromise(
   let propsString = "";
   if (Object.keys(props).length) {
     function toPropString([key, value]: [string, unknown]) {
+      if (typeof value === "undefined" || typeof value === "symbol") {
+        return undefined;
+      }
       if (value === false) {
         return undefined;
       }
@@ -181,7 +189,7 @@ async function toStringPromise(
     const replacer = isReplacerFn(options?.replacer) ? options.replacer : undefined;
     function toReplacerString([key, value]: [string, unknown]) {
       const replaced = replacer.call(node, key, value);
-      if (typeof replaced === "undefined") return undefined;
+      if (typeof replaced === "undefined" || typeof replaced === "symbol") return undefined;
       if (replaced === true) return key;
       return `${key}="${String(replaced)}"`;
     }
