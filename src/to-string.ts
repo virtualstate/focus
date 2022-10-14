@@ -14,7 +14,14 @@ export function toString(
     node: unknown,
     options?: JSONOptions
 ): TheAsyncThing<string> {
-  return anAsyncThing(toStringGenerator(node, options))
+  return anAsyncThing<string>({
+    [Symbol.asyncIterator]() {
+      return toStringGenerator(node, options)[Symbol.asyncIterator]()
+    },
+    then(resolve, reject) {
+      return toStringPromise(node, options).then(resolve, reject)
+    }
+  })
 }
 
 async function* toStringChildrenGenerator(
@@ -125,5 +132,79 @@ export async function* toStringGenerator(
   }
 }
 
+
+async function toStringChildrenPromise(
+    node: unknown,
+    options?: StringOptions
+): Promise<string> {
+  if (!isUnknownJSXNode(node)) return undefined;
+  const snapshot = await children(node);
+  const values = await Promise.all(
+      snapshot.map(node => toStringPromise(node, options))
+  )
+  return values
+      .filter(isStaticChildNode)
+      .join("\n");
+}
+
+async function toStringPromise(
+    node: unknown,
+    options?: StringOptions
+): Promise<string> {
+  if (!isUnknownJSXNode(node)) {
+    if (isStaticChildNode(node)) return String(node);
+    return undefined;
+  }
+  if (jsx.isFragment(node)) {
+    return toStringChildrenPromise(node, options);
+  }
+  let name = jsx.name(node);
+  if (typeof name !== "string") {
+    // Any symbol nodes are dropped
+    return undefined;
+  }
+  if (options?.toLowerCase) {
+    name = name.toLowerCase();
+  }
+  const props = jsx.properties(node);
+  let propsString = "";
+  if (Object.keys(props).length) {
+    function toPropString([key, value]: [string, unknown]) {
+      if (value === false) {
+        return undefined;
+      }
+      if (value === true) {
+        return key;
+      }
+      return `${key}="${String(value)}"`;
+    }
+    const replacer = isReplacerFn(options?.replacer) ? options.replacer : undefined;
+    function toReplacerString([key, value]: [string, unknown]) {
+      const replaced = replacer.call(node, key, value);
+      if (typeof replaced === "undefined") return undefined;
+      if (replaced === true) return key;
+      return `${key}="${String(replaced)}"`;
+    }
+    const propsEntries = Object.entries(props)
+        .map(replacer ? toReplacerString : toPropString)
+        .filter(Boolean)
+        .join(" ");
+    if (propsEntries.length) {
+      propsString = ` ${propsEntries}`
+    }
+  }
+  let snapshot = await toStringChildrenPromise(node, options);
+  if (snapshot) {
+    if (typeof options?.space === "string") {
+      snapshot = snapshot
+          .split("\n")
+          .map(value => `${options.space}${String(value)}`)
+          .join("\n")
+    }
+    return `<${name}${propsString}>\n${snapshot}\n</${name}>`
+  } else {
+    return `<${name}${propsString} />`;
+  }
+}
 
 
