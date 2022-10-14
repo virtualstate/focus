@@ -34,15 +34,10 @@ export async function test(App: typeof AppType, hostname: string) {
         const response = await fetch(url);
 
         const cached = memo(toAsyncString(response));
-
-        console.log({ bodyUsed: response.bodyUsed });
-        ok(!response.bodyUsed);
         const parts: string[] = [];
         for await (const string of cached) {
             parts.push(string);
         }
-        console.log({ bodyUsed: response.bodyUsed });
-        ok(response.bodyUsed);
         let index = -1;
         for await (const string of cached) {
             index += 1;

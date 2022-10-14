@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@!-!/-@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@!-!/-/-/--1.0.1.tgz#e44928a363134c0859b4522535d9642a6e97569a"
+  integrity sha512-IcDseBbLbQLClv7FCdZJKe6FTH6G0B3XKchBuhtYsUCaojZNiD5Frcm01TOpiwf5l6lIoIO2LQMwn/iyqQnqaQ==
+
 "@ampproject/remapping@^2.1.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@ampproject/remapping/-/remapping-2.2.0.tgz#56c133824780de3174aed5ab6834f3026790154d"
@@ -836,10 +841,10 @@
     uuid "^8.3.2"
     whatwg-url "^9.1.0"
 
-"@virtualstate/listen@^1.0.0-alpha.7":
-  version "1.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@virtualstate/listen/-/listen-1.0.0-alpha.7.tgz#a9b31647d6b009f389a4d344e377855b824b53af"
-  integrity sha512-qRhsoduYXi7EekZ/PPkqyYTQX+yaeIiu0R//i3irBD1xWKjD43kgbVz+X4K4ZOLnpMYOiYXqpKHexUdKORVn1Q==
+"@virtualstate/listen@^1.0.0-alpha.13":
+  version "1.0.0-alpha.13"
+  resolved "https://registry.yarnpkg.com/@virtualstate/listen/-/listen-1.0.0-alpha.13.tgz#1aa69811340ab92634e5a7e88abf0983fb96b323"
+  integrity sha512-HeAiBi+F/bQLRvapPGuVR79nhP/wVUclaYKO2xbIV+nch0XQRzoBB59V/onnl78lLFVqpxNk3uER5/LhnKKT9w==
   dependencies:
     "@virtualstate/focus" "^1.4.9"
     "@virtualstate/promise" "^1.2.1"

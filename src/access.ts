@@ -13,6 +13,7 @@ import {
   isSymbol
 } from "./like";
 import { createFragment } from "./static-h";
+import {read} from "fs";
 
 const FunctionToString = Function.prototype.toString;
 
@@ -751,7 +752,13 @@ function getFlatNodeKey(node: UnknownJSXNode): Key {
   if (!node) return undefined;
   const keys = Object.keys(node);
   if (!keys.length) return undefined;
-  if (keys.length === 1) return keys[0];
+  if (keys.length === 1) {
+    const possible: readonly Key[] = possibleNameKeys;
+    if (possible.includes(keys[0])) {
+      return undefined;
+    }
+    return keys[0];
+  }
   const possible = keys.filter((key) => !isPossibleKey(key, possibleNameKeys));
   return possible.length === 1 ? possible[0] : undefined;
 

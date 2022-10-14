@@ -6,12 +6,16 @@ import { union } from "@virtualstate/union";
 import * as jsx from "./access";
 import flat from "./tests/flat";
 
+export interface JSONReplacerFn {
+  (this: any, key: string, value: unknown): any
+}
+
 export interface JSONOptions {
   type?: string;
   props?: string;
   children?: string;
-  replacer?: Parameters<typeof JSON.stringify>[1];
-  space?: Parameters<typeof JSON.stringify>[2];
+  replacer?: JSONReplacerFn | (string | number)[];
+  space?: string | number;
   toLowerCase?: boolean;
   flat?: boolean;
 }
@@ -112,16 +116,20 @@ export function toJSON(
   return anAsyncThing(toJSONGenerator(node, options));
 }
 
+function isJSONReplacer(value: unknown): value is Parameters<typeof JSON.stringify>[1] {
+  return true;
+}
+
 export async function* toJSONGenerator(
   node: unknown,
   options?: JSONOptions
 ): AsyncIterable<string> {
   // let last = undefined;
   for await (const object of toJSONValueGenerator(node, options)) {
-    // set space to "" if you want to remove tabbing
     const current = JSON.stringify(
       object,
-      options?.replacer,
+    isJSONReplacer(options?.replacer) ? options?.replacer : undefined,
+        // set space to "" if you want to remove tabbing
       options?.space ?? "  "
     );
     // We achieve the same instead in toJSONValueGenerator using direct comparison

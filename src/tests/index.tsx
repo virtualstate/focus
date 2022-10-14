@@ -64,6 +64,9 @@ try {
   }
 }
 
+
+await import("./to-string");
+
 if (typeof timeout !== "undefined") {
   clearTimeout(timeout);
 }
